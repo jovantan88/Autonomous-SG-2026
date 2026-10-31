@@ -1,6 +1,8 @@
 # Datasets (too large for GitHub; download from the challenge Drive into data/)
+*.csv
 !tests/fixtures/*.csv
 !outputs/*.csv
+node_modules/*/data/
 !data/.gitkeep
 
 # Python
@@ -12,11 +14,11 @@ venv/
 .pytest_cache/
 
 # Generated artifacts
+models/*.txt
+models/*.pkl
+models/*.joblib
 cache/
-# live_cache/ is committed as a data snapshot so the dashboard runs offline;
-# never commit the public server's admin token or logs
-live_cache/admin_token.txt
-live_cache/*.tmp
+live_cache/
 *.log
 
 # Editors / OS
