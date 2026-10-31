@@ -4,7 +4,7 @@ Autonomous SG 2026, Airbus Challenge #1: *"How could we leverage AI-driven techn
 collision avoidance?"*
 
 **User.** The conjunction-assessment analyst on shift at a satellite operator. Every close approach produces a
-stream of conjunction data messages (CDMs) over about a week. Today the analyst reads each one and, when a
+stream of conjunction data messages (CDMs) over about a week. Today the analyst reads each one and, when a 
 manoeuvre has to be planned (about 2 days out), goes by the latest message.
 
 **What TIP Watcher does.** From the messages issued 2 or more days before closest approach it forecasts each
