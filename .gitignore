@@ -14,7 +14,10 @@ venv/
 # Generated artifacts
 models/*.txt
 cache/
-live_cache/
+# live_cache/ is committed as a data snapshot so the dashboard runs offline;
+# never commit the public server's admin token or logs
+live_cache/admin_token.txt
+live_cache/*.tmp
 *.log
 
 # Editors / OS

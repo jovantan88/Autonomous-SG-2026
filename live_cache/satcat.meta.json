@@ -1,0 +1,10 @@
+{
+ "url": "https://celestrak.org/pub/satcat.csv",
+ "fetched_at": "2026-10-31T03:25:15Z",
+ "downloaded_at": "2026-10-31T03:25:15Z",
+ "last_attempt": "2026-10-31T03:25:15Z",
+ "last_error": null,
+ "last_modified_raw": "Fri, 30 Oct 2026 22:01:33 GMT",
+ "last_modified": "2026-10-30T22:01:33Z",
+ "sha_len": 6789435
+}

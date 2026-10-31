@@ -1,0 +1,10 @@
+{
+ "url": "https://services.swpc.noaa.gov/products/10cm-flux-30-day.json",
+ "fetched_at": "2026-10-31T07:27:16Z",
+ "downloaded_at": "2026-10-31T07:27:16Z",
+ "last_attempt": "2026-10-31T07:27:16Z",
+ "last_error": null,
+ "last_modified_raw": "Sat, 31 Oct 2026 07:26:24 GMT",
+ "last_modified": "2026-10-31T07:26:24Z",
+ "sha_len": 1370
+}
