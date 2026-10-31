@@ -1,8 +1,6 @@
 # Datasets (too large for GitHub; download from the challenge Drive into data/)
-
 !tests/fixtures/*.csv
 !outputs/*.csv
-node_modules/*
 !data/.gitkeep
 
 # Python
@@ -15,8 +13,6 @@ venv/
 
 # Generated artifacts
 models/*.txt
-models/*.pkl
-models/*.joblib
 cache/
 live_cache/
 *.log
