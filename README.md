@@ -101,6 +101,10 @@ python -m uvicorn src.server:app --port 8000
 python -m pytest tests/          # 90+ tests
 ```
 
+On Vercel, live feeds and derived assessments are cached in temporary storage because the application
+directory is read-only. This cache is local to each instance and may be cleared on a cold start. Local
+runs use `live_cache/`; set `CARA_CACHE_DIR` to override either default with a writable directory.
+
 ## Trust and traceability
 
 * Every forecast lists its reasons: the latest message's tier, how Pc and miss distance moved, the probability

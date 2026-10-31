@@ -30,6 +30,7 @@ import logging
 import math
 import os
 import re
+import tempfile
 import threading
 import time
 from collections import OrderedDict, deque
@@ -44,7 +45,19 @@ import pandas as pd
 log = logging.getLogger("cara.live")
 
 ROOT = Path(__file__).resolve().parents[1]
-CACHE_DIR = Path(os.environ.get("CARA_CACHE_DIR", ROOT / "live_cache"))
+
+
+def _cache_dir() -> Path:
+    if override := os.environ.get("CARA_CACHE_DIR"):
+        return Path(override)
+    # Vercel's application bundle is read-only; only temporary storage is writable.
+    # Keep the persistent project-local cache for ordinary server/local runs.
+    if os.environ.get("VERCEL") == "1":
+        return Path(tempfile.gettempdir()) / "cara-live-cache"
+    return ROOT / "live_cache"
+
+
+CACHE_DIR = _cache_dir()
 
 USER_AGENT = ("CARA-collision-risk-dashboard/0.2 (Autonomous SG 2026 hackathon, Airbus track; "
               "non-commercial research demo; disk-cached, polls SOCRATES at most every 2 h)")
