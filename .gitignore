@@ -1,8 +1,8 @@
 # Datasets (too large for GitHub; download from the challenge Drive into data/)
-*.csv
+
 !tests/fixtures/*.csv
 !outputs/*.csv
-data/
+node_modules/*
 !data/.gitkeep
 
 # Python
