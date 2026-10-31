@@ -13,7 +13,7 @@ explains each forecast in plain language, and shows the analyst what needs atten
 its own: the analyst acknowledges, escalates or dismisses, and every decision is logged.
 
 | Tier | Rule (Pc = 10^risk, miss distance in metres) |
-|---|---|
+|---|---| 
 | Critical (manoeuvre required) | Pc ≥ 1e-4 **or** miss distance < 1,000 m |
 | Elevated | not Critical, and 1e-6 ≤ Pc < 1e-4 **or** miss distance 1,000–5,000 m |
 | Safe | Pc < 1e-6 **and** miss distance > 5,000 m |
