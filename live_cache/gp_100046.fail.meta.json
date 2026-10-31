@@ -1,7 +1,0 @@
-{
- "url": "https://celestrak.org/NORAD/elements/gp.php?CATNR=100046&FORMAT=CSV",
- "last_attempt": "2026-10-31T04:04:48Z",
- "last_error": "ReadTimeout: HTTPSConnectionPool(host='celestrak.org', port=443): Read timed out. (read timeout=10)",
- "backoff_s": 600,
- "n_fail": 2
-}

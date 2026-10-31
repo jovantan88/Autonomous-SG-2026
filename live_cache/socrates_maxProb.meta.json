@@ -1,10 +1,11 @@
 {
  "url": "https://celestrak.org/SOCRATES/sort-maxProb.csv",
- "fetched_at": "2026-10-31T03:24:54Z",
+ "fetched_at": "2026-10-31T08:34:15Z",
  "downloaded_at": "2026-10-31T03:24:54Z",
- "last_attempt": "2026-10-31T03:24:54Z",
+ "last_attempt": "2026-10-31T08:34:15Z",
  "last_error": null,
  "last_modified_raw": "Sat, 31 Oct 2026 02:42:28 GMT",
  "last_modified": "2026-10-31T02:42:28Z",
- "sha_len": 22347617
+ "sha_len": 22347617,
+ "n_fail": 0
 }

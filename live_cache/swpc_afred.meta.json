@@ -1,10 +1,10 @@
 {
  "url": "https://services.swpc.noaa.gov/json/predicted_fredericksburg_a_index.json",
- "fetched_at": "2026-10-31T07:27:19Z",
- "downloaded_at": "2026-10-31T07:27:19Z",
- "last_attempt": "2026-10-31T07:27:19Z",
+ "fetched_at": "2026-10-31T08:27:31Z",
+ "downloaded_at": "2026-10-31T08:27:31Z",
+ "last_attempt": "2026-10-31T08:27:31Z",
  "last_error": null,
- "last_modified_raw": "Sat, 31 Oct 2026 07:24:57 GMT",
- "last_modified": "2026-10-31T07:24:57Z",
+ "last_modified_raw": "Sat, 31 Oct 2026 08:24:13 GMT",
+ "last_modified": "2026-10-31T08:24:13Z",
  "sha_len": 2222
 }

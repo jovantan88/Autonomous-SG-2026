@@ -1,10 +1,10 @@
 {
  "url": "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json",
- "fetched_at": "2026-10-31T07:27:18Z",
- "downloaded_at": "2026-10-31T07:27:18Z",
- "last_attempt": "2026-10-31T07:27:18Z",
+ "fetched_at": "2026-10-31T08:27:30Z",
+ "downloaded_at": "2026-10-31T08:27:30Z",
+ "last_attempt": "2026-10-31T08:27:30Z",
  "last_error": null,
- "last_modified_raw": "Sat, 31 Oct 2026 07:27:00 GMT",
- "last_modified": "2026-10-31T07:27:00Z",
+ "last_modified_raw": "Sat, 31 Oct 2026 08:26:57 GMT",
+ "last_modified": "2026-10-31T08:26:57Z",
  "sha_len": 4471
 }
