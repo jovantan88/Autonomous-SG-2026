@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Conjunction Watch</title>
+  <title>TIP Watcher</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231F2A36'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23FF5C5C'/%3E%3C/svg%3E">
   <meta name="description" content="Satellite conjunction screening: warnings for the next 24 hours, collision points, flight paths, risk scores and an analyst decision log.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,11 +17,11 @@
   <script defer src="app.js"></script>
 </head>
 <body>
-<div id="app" class="app" data-view="live">
+<div id="app" class="app" data-view="events">
 
   <!-- ======================================================= HEADER (one row) -->
   <header class="hdr">
-    <a class="brand" href="#live">Conjunction Watch</a>
+    <a class="brand" href="#events" title="TIP: Tier and Impact Probability">TIP Watcher</a>
 
     <label class="search" for="q">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.6 10.6L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -50,8 +50,8 @@
     <span class="hdr-spacer"></span>
 
     <nav class="nav" aria-label="Views">
-      <a href="#live" data-view="live" aria-current="page">Map</a>
-      <a href="#evaluator" data-view="evaluator">Evaluator</a>
+      <a href="#events" data-view="events" aria-current="page">Events</a>
+      <a href="#live" data-view="live">Live sky</a>
       <a href="#model" data-view="model">Model</a>
       <a href="#assess" data-view="assess">Assess</a>
     </nav>
@@ -71,7 +71,7 @@
     <!-- ======================================================= SIDEBAR -->
     <aside id="sidebar" class="sidebar" aria-label="Warnings and conjunctions">
 
-      <div id="side-live" class="side-pane">
+      <div id="side-live" class="side-pane" hidden>
         <div id="live-err" class="live-err" role="alert" hidden></div>
 
         <!-- 1. Warning: the selected window -->
@@ -107,35 +107,54 @@
             <button type="button" data-f="review">Needs review</button>
             <button type="button" data-f="all">All</button>
           </div>
+          <div class="chk-row">
+            <label class="chk" title="Hide conjunctions where orbit data for one object has not been fetched yet, so no flight path can be drawn"><input type="checkbox" id="only-paths" checked> Only events with flight paths</label>
+            <span id="path-hidden" class="muted small"></span>
+          </div>
           <div id="feed-meta" class="risk-meta"></div>
           <ol id="feed" class="feed" aria-label="Conjunctions"></ol>
         </section>
       </div>
 
-      <!-- evaluator: test-set queue -->
-      <div id="side-test" class="side-pane" hidden>
+      <!-- events: test-set warnings, insights and forecast list -->
+      <div id="side-test" class="side-pane">
+        <section class="sec warn" aria-labelledby="ew-head">
+          <div class="ew-top"><span class="muted">Closest approach within</span>
+            <div class="seg" id="ew-win" role="group" aria-label="Warning window in days">
+              <button type="button" data-d="3" class="on" aria-pressed="true">3 d</button>
+              <button type="button" data-d="4">4 d</button>
+              <button type="button" data-d="5">5 d</button>
+              <button type="button" data-d="7">7 d</button>
+            </div></div>
+          <p id="ew-head" class="warn-head">Loading warnings&hellip;</p>
+          <dl id="ew-stats" class="stats ew-stats"></dl>
+          <div class="hours-head"><span>Events per half day, forecast Critical in red</span></div>
+          <div id="ew-bins" class="hbins" aria-label="Events per half day to closest approach"></div>
+          <div id="ew-axis" class="hours-axis" aria-hidden="true"></div>
+          <p class="ew-note">Every test message is 2 to 7 days before closest approach, so shorter windows are empty.</p>
+        </section>
+        <section class="sec" aria-labelledby="ev-ins-head">
+          <h2 id="ev-ins-head">Insights</h2>
+          <ul id="ev-insights" class="insights"></ul>
+        </section>
         <section class="sec risk" aria-labelledby="tq-head">
           <div class="risk-head">
-            <h2 id="tq-head">Test events <span id="tq-count" class="count-txt"></span></h2>
+            <h2 id="tq-head">Events <span id="tq-count" class="count-txt"></span></h2>
             <label class="sort">Sort
-              <select id="tq-sort" aria-label="Sort test events">
-                <option value="risk">Risk</option>
-                <option value="error">Errors first</option>
-                <option value="ttca">Time to TCA</option>
-                <option value="id">Event id</option>
+              <select id="tq-sort" aria-label="Sort events">
+                <option value="risk">Final Critical chance</option>
+                <option value="ttca">Time to closest approach</option>
+                <option value="md">Miss distance</option>
               </select>
             </label>
           </div>
-          <div class="seg seg-full" id="tq-pred" role="group" aria-label="Filter by predicted tier">
+          <div class="seg seg-full" id="tq-fc" role="group" aria-label="Filter by forecast tier">
+            <button type="button" data-t="critical">Forecast Critical</button>
+            <button type="button" data-t="elevated">Elevated</button>
             <button type="button" data-t="all" class="on" aria-pressed="true">All</button>
-            <button type="button" data-t="2">Critical</button>
-            <button type="button" data-t="1">Elevated</button>
-            <button type="button" data-t="0">Safe</button>
           </div>
           <div class="chk-row">
-            <label class="chk"><input type="checkbox" id="tq-review"> Needs review</label>
-            <label class="chk"><input type="checkbox" id="tq-dis"> Wrong tier</label>
-            <label class="chk"><input type="checkbox" id="tq-under"> Under-called</label>
+            <label class="chk" title="The latest message is a lower tier than the forecast for closest approach"><input type="checkbox" id="tq-esc"> Forecast above latest</label>
           </div>
           <p id="tq-foot" class="risk-meta"></p>
           <ol id="tq" class="feed" aria-label="Test-set events"></ol>
@@ -147,7 +166,7 @@
     <section id="stage" class="stage">
 
       <!-- MAP -->
-      <div id="view-live" class="view view-map" data-view="live">
+      <div id="view-live" class="view view-map" data-view="live" hidden>
         <div id="globe" class="globe" aria-label="Globe with collision points"></div>
         <div id="globe-fallback" class="globe-fallback" hidden></div>
         <div id="map-tip" class="map-tip" role="tooltip" hidden></div>
@@ -184,9 +203,9 @@
         <aside id="detail" class="detail" aria-hidden="true" aria-label="Conjunction detail" tabindex="-1"></aside>
       </div>
 
-      <!-- EVALUATOR -->
-      <div id="view-evaluator" class="view view-scroll" data-view="evaluator" hidden>
-        <div id="ev-main" class="page"><div class="state">Loading test events&hellip;</div></div>
+      <!-- EVENTS -->
+      <div id="view-events" class="view view-scroll" data-view="events">
+        <div id="ev-main" class="page"><div class="state">Loading events&hellip;</div></div>
       </div>
 
       <!-- MODEL -->
@@ -236,8 +255,8 @@
     <div class="ld-tools">
       <select id="ld-filter" aria-label="Filter log">
         <option value="all">All views</option>
-        <option value="live">Map</option>
-        <option value="evaluator">Evaluator</option>
+        <option value="events">Events</option>
+        <option value="live">Live sky</option>
         <option value="assess">Assess</option>
       </select>
       <button type="button" class="btn sm" id="ld-export">Export CSV</button>

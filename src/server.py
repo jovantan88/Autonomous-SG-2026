@@ -318,16 +318,41 @@ def assessment_records(df: pd.DataFrame) -> list[dict]:
     return out
 
 
-FORECAST_DESC = "Event-level forecast: P(tier at the final CDM before TCA) from this CDM's point of view"
+FORECAST_DESC = ("Forecast of the event's final tier (last message before closest approach), made from the "
+                 "messages up to this one (all >= 2 days out). src/event_model.py")
+EVENT_PRED = ROOT / "outputs" / "test_event_predictions.csv"
+CDM_FORECASTS = ROOT / "outputs" / "test_cdm_forecasts.csv"
+_FINAL = {"key": None, "events": None, "cdms": None}
+
+
+def final_forecasts():
+    """(per-event DataFrame indexed by event_id, per-CDM dict keyed by (event_id, rounded time_to_tca))."""
+    key = (_file_key(EVENT_PRED), _file_key(CDM_FORECASTS))
+    if _FINAL["key"] != key:
+        ev, cd = None, {}
+        try:
+            ev = pd.read_csv(EVENT_PRED).set_index("event_id")
+            c = pd.read_csv(CDM_FORECASTS)
+            cd = {(int(e), round(float(t), 5)): (float(pe), float(pc), int(ft)) for e, t, pe, pc, ft in zip(
+                c.event_id, c.time_to_tca, c.p_final_elevated_or_worse, c.p_final_critical, c.forecast_final_tier)}
+        except (OSError, ValueError, KeyError) as exc:
+            log.warning("final-tier forecasts unavailable: %s", exc)
+        _FINAL.update(key=key, events=ev, cdms=cd)
+    return _FINAL["events"], _FINAL["cdms"]
 
 
 def forecast_records(df: pd.DataFrame) -> list:
-    if "forecast_tier" not in df.columns:
-        return [None] * len(df)
-    ps, pe, pc = (df[k].to_numpy() for k in ["forecast_p_safe", "forecast_p_elevated", "forecast_p_critical"])
-    t = df["forecast_tier"].to_numpy()
-    return [{"description": FORECAST_DESC, "tier": int(t[i]),
-             "p_tier": [fnum(ps[i], 6), fnum(pe[i], 6), fnum(pc[i], 6)]} for i in range(len(df))]
+    _, cd = final_forecasts()
+    out = []
+    for e, t in zip(df["event_id"].to_numpy(), df["time_to_tca"].to_numpy()):
+        v = cd.get((int(e), round(float(t), 5))) if cd else None
+        if v is None:
+            out.append(None)
+            continue
+        pe, pc, ft = v
+        out.append({"description": FORECAST_DESC, "tier": ft,
+                    "p_tier": [fnum(1 - pe, 6), fnum(pe - pc, 6), fnum(pc, 6)]})
+    return out
 
 
 # ---------------------------------------------------------------------------------------------
@@ -404,10 +429,18 @@ def _build_test_set(df: pd.DataFrame, key, computed_at, seconds, from_cache) -> 
     bounds = {int(ev[s]): (int(s), int(e)) for s, e in zip(starts, stops)}
     last = df.iloc[stops - 1].copy()                    # smallest time_to_tca of each event
     last["n_cdms"] = stops - starts
-    order = np.lexsort((-last["log_pc"].to_numpy(), -last["p_pc_critical"].to_numpy(),
-                        -last["tier"].to_numpy(), -last["p_critical"].to_numpy()))
+    ev_fc, _ = final_forecasts()
+    p_final = (last["event_id"].map(ev_fc["p_final_critical"]).fillna(-1).to_numpy()
+               if ev_fc is not None else np.zeros(len(last)))
+    order = np.lexsort((-last["log_pc"].to_numpy(), -last["p_critical"].to_numpy(), -p_final))
     last = last.iloc[order]
     ass, fc = assessment_records(last), forecast_records(last)
+    for i, eid in enumerate(last["event_id"].to_numpy()):
+        if fc[i] is not None and ev_fc is not None and int(eid) in ev_fc.index:
+            row = ev_fc.loc[int(eid)]
+            fc[i]["tier_now"] = F.TIERS.index(row["tier_now"])
+            fc[i]["p_critical_calibrated"] = fnum(row["p_final_critical_calibrated"], 6)
+            fc[i]["reasons"] = str(row["reasons"]).split(" | ")
     events = []
     for i, (_, r) in enumerate(last.iterrows()):
         events.append({"event_id": int(r["event_id"]), "n_cdms": int(r["n_cdms"]),
@@ -805,6 +838,18 @@ def metrics():
         raise HTTPException(503, f"{p.name} is being rewritten or invalid: {exc}")
 
 
+@app.get("/api/event-metrics")
+def event_metrics():
+    """Hold-out evaluation of the official task (final tier from messages >= 2 days out)."""
+    p = ROOT / "outputs" / "event_metrics.json"
+    if not p.exists():
+        raise HTTPException(503, "event_metrics.json not generated yet (run python src/event_model.py)")
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except ValueError as exc:
+        raise HTTPException(503, f"event_metrics.json is being rewritten or invalid: {exc}")
+
+
 @app.get("/api/test/events")
 def test_events():
     t = ensure_test_set(wait_s=120)
@@ -838,6 +883,82 @@ def test_event(event_id: int):
         cdms.append(d)
     return {"event_id": event_id, "n_cdms": len(cdms), "cdms": cdms,
             "display_only": DISPLAY_COLS + ["true_log_pc", "true_tier"]}
+
+
+@app.get("/api/test/warnings")
+def test_warnings(window_days: float = Query(3.0, gt=0, le=7.0)):
+    """Brief: no clock times in the data, so warnings use time_to_tca windows: events whose closest
+    approach is within `window_days` of their latest message."""
+    t = ensure_test_set(wait_s=120)
+    evs = [e for e in t.events if e["time_to_tca"] is not None and e["time_to_tca"] <= window_days]
+    fc = [e.get("forecast") or {} for e in evs]
+    md = np.array([e["miss_distance"] or np.inf for e in evs], float)
+    ft = np.array([f.get("tier", -1) for f in fc])
+    now = np.array([f.get("tier_now", e["assessment"]["md_tier"] if e.get("assessment") else -1)
+                    for f, e in zip(fc, evs)])
+    by_day = []
+    for d0 in np.arange(2.0, max(window_days, 2.0), 0.5):
+        sel = [i for i, e in enumerate(evs) if d0 <= e["time_to_tca"] < d0 + 0.5]
+        by_day.append({"from_days": float(d0), "to_days": float(d0 + 0.5), "total": len(sel),
+                       "forecast_critical": int(sum(ft[i] == 2 for i in sel)),
+                       "forecast_elevated": int(sum(ft[i] == 1 for i in sel))})
+    top = sorted(range(len(evs)), key=lambda i: -(fc[i].get("p_tier") or [0, 0, 0])[2])[:10]
+    n_esc = int(((ft > now) & (now >= 0)).sum())
+    insights = []
+    if len(evs):
+        insights.append(f"{int((md < 1000).sum())} of {len(evs)} events with closest approach within "
+                        f"{window_days:g} days are already within 1 km; {int((md <= 5000).sum())} are within 5 km.")
+        insights.append(f"The model forecasts {int((ft == 2).sum())} final Critical and {int((ft == 1).sum())} "
+                        f"final Elevated events in this window.")
+        if n_esc:
+            insights.append(f"{n_esc} events look safer now than the forecast for closest approach; "
+                            "check these first.")
+        if top:
+            e0, f0 = evs[top[0]], fc[top[0]]
+            insights.append(f"Highest risk: event {e0['event_id']}, {(f0.get('p_tier') or [0, 0, 0])[2]:.0%} "
+                            f"chance of a final Critical tier, closest approach in {e0['time_to_tca']:.1f} days.")
+    return {"window_days": window_days, "n_events": len(evs), "n_test_events": len(t.events),
+            "n_within_1km": int((md < 1000).sum()), "n_within_5km": int((md <= 5000).sum()),
+            "n_forecast_critical": int((ft == 2).sum()), "n_forecast_elevated": int((ft == 1).sum()),
+            "n_escalated": n_esc, "by_half_day": by_day, "top_event_ids": [evs[i]["event_id"] for i in top],
+            "insights": insights,
+            "note": "Every test message is 2-7 days before closest approach, so windows under 2 days are empty."}
+
+
+_PHYS = {"df": None}
+
+
+@app.get("/api/test/events/{event_id}/physics")
+def test_event_physics(event_id: int, target_log_pc: float = Query(-5.0, ge=-8, le=-3)):
+    """Full-covariance 2D Pc for each message (src/physics.py, reproduces ESA risk to ~0.002 decades)
+    and avoidance-burn options for the latest message. Uses CDM columns beyond the 13 suggested ones."""
+    import physics
+    if _PHYS["df"] is None:
+        df = pd.read_csv(SETTINGS.test_data)
+        _PHYS["df"] = df.sort_values(["event_id", "time_to_tca"], ascending=[True, False], kind="mergesort")
+    sub = _PHYS["df"][_PHYS["df"].event_id == event_id]
+    if not len(sub):
+        raise HTTPException(404, f"event {event_id} not in the test set")
+    pc = physics.full_pc(sub)
+    cdms = [{"time_to_tca": fnum(t, 6), "log_pc_phys": fnum(lp, 4), "esa_log_pc": fnum(r, 4),
+             "pc_valid": bool(v), "hbr_m": fnum(h, 2), "sigma_major_m": fnum(a, 1), "sigma_minor_m": fnum(b, 1)}
+            for t, lp, r, v, h, a, b in zip(sub.time_to_tca, pc.log_pc_phys, sub.risk, pc.pc_valid, pc.hbr_m,
+                                            pc.sigma_major, pc.sigma_minor)]
+    latest = sub.iloc[-1]
+    options = []
+    if bool(pc.pc_valid.iloc[-1]) and float(pc.log_pc_phys.iloc[-1]) > target_log_pc:
+        try:
+            options = physics.manoeuvre_options(latest.to_dict(), target_log_pc=target_log_pc)
+        except Exception as exc:  # noqa: BLE001
+            log.warning("manoeuvre options failed for event %s: %s", event_id, exc)
+    keep = ("lead_orbits", "lead_time_h", "feasible", "reason", "direction", "abs_dv_mps", "log_pc_before",
+            "log_pc_after", "log_pc_worst", "miss_distance_before_m", "miss_distance_after_m", "effect",
+            "eccentricity_sensitive")
+    return {"event_id": event_id, "cdms": cdms, "target_log_pc": target_log_pc,
+            "manoeuvre_options": [{k: o.get(k) for k in keep} for o in options],
+            "assumptions": getattr(physics, "MANOEUVRE_ASSUMPTIONS", None),
+            "note": "Physics uses the full covariance (sigmas and correlations of both objects), object sizes "
+                    "and orbit sizes from the CDM. Burns are suggestions for flight dynamics to verify."}
 
 
 @app.get("/api/live/conjunctions")

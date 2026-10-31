@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-31T06:34:22+00:00",
+  "generated_at": "2026-10-31T06:49:26+00:00",
   "task": "Predict each event's final tier (last CDM before TCA) from CDMs with time_to_tca >= 2 days.",
   "split": {
     "usable_events": 11942,
@@ -14,11 +14,11 @@
     "unusable_events": 1212,
     "file": "outputs/event_split.csv"
   },
-  "chosen": "all",
+  "chosen": "suggested_13",
   "decision_rule": "hybrid",
   "decision_thresholds": {
-    "p_critical": 0.375,
-    "p_elevated": 0.25
+    "p_critical": 0.2,
+    "p_elevated": 0.225
   },
   "models": {
     "all": {
@@ -1150,63 +1150,63 @@
   "feature_importance_critical": [
     {
       "feature": "md_margin_1km",
-      "gain_pct": 35.12
+      "gain_pct": 50.91
     },
     {
       "feature": "log_md",
-      "gain_pct": 30.56
+      "gain_pct": 20.33
     },
     {
       "feature": "md_margin_5km",
-      "gain_pct": 10.09
-    },
-    {
-      "feature": "log_md_min",
-      "gain_pct": 2.31
+      "gain_pct": 10.43
     },
     {
       "feature": "relative_speed",
-      "gain_pct": 1.84
-    },
-    {
-      "feature": "log_md_max",
-      "gain_pct": 1.56
+      "gain_pct": 2.28
     },
     {
       "feature": "abs_pos_r",
-      "gain_pct": 1.48
-    },
-    {
-      "feature": "c_rcs_estimate",
-      "gain_pct": 1.17
-    },
-    {
-      "feature": "log_c_sigma_t",
-      "gain_pct": 1.15
-    },
-    {
-      "feature": "log_md_mean",
-      "gain_pct": 1.14
-    },
-    {
-      "feature": "log_mahal",
-      "gain_pct": 1.06
-    },
-    {
-      "feature": "t_span",
-      "gain_pct": 0.91
-    },
-    {
-      "feature": "c_actual_od_span",
-      "gain_pct": 0.85
+      "gain_pct": 2.02
     },
     {
       "feature": "log_c_sigma_r",
-      "gain_pct": 0.8
+      "gain_pct": 1.98
     },
     {
-      "feature": "risk_max",
-      "gain_pct": 0.69
+      "feature": "log_md_min",
+      "gain_pct": 1.93
+    },
+    {
+      "feature": "log_md_max",
+      "gain_pct": 1.93
+    },
+    {
+      "feature": "log_md_mean",
+      "gain_pct": 1.42
+    },
+    {
+      "feature": "F10",
+      "gain_pct": 1.08
+    },
+    {
+      "feature": "time_to_tca",
+      "gain_pct": 0.89
+    },
+    {
+      "feature": "max_risk_estimate",
+      "gain_pct": 0.73
+    },
+    {
+      "feature": "AP",
+      "gain_pct": 0.68
+    },
+    {
+      "feature": "log_md_proj_tca",
+      "gain_pct": 0.51
+    },
+    {
+      "feature": "log_t_sigma_r",
+      "gain_pct": 0.5
     }
   ],
   "column_notes": {
@@ -1220,9 +1220,9 @@
   "test_predictions": {
     "events": 2167,
     "forecast_tier_counts": {
-      "Safe": 1452,
-      "Elevated": 516,
-      "Critical": 199
+      "Safe": 1446,
+      "Elevated": 491,
+      "Critical": 230
     },
     "tier_now_counts": {
       "Safe": 1481,
@@ -1231,5 +1231,5 @@
     },
     "file": "outputs/test_event_predictions.csv"
   },
-  "runtime_s": 225.2
+  "runtime_s": 170.8
 }

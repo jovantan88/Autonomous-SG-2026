@@ -1,47 +1,43 @@
-# 3-minute pitch — Conjunction Watch
+# 3-minute pitch: TIP Watcher
 
-Timings are cumulative. Every number below is in `outputs/eval_report.md` and reproduces with
-`python src/train.py`.
+TIP = Tier and Impact Probability. Every number below is in `outputs/event_metrics.json` and reproduces with
+`python src/event_model.py`.
 
-## 0:00 – 0:30 · The user and the pain (problem realism)
+## 0:00 – 0:30 · The user and the problem
 
-* Our user is the **conjunction-assessment analyst on shift** at a satellite operator, the role ESA's Space
-  Debris Office plays for its own fleet.
-* They receive CDMs from CSpOC about three times a day for every close approach in a 7-day window. Each one is
-  read by hand: Pc, miss distance, uncertainty. Then they decide whether to wake flight dynamics.
-* **Status quo shortcut:** triage on miss distance. On the 24k-CDM test set that misses **91 Critical CDMs**,
-  because the risk sits in Pc, not distance.
+* Our user is the conjunction-assessment analyst on shift. Every close approach brings about a week of warning
+  messages, and the manoeuvre decision has to be made about 2 days before closest approach.
+* Today the analyst reads the messages one by one and goes by the latest. The question that matters is
+  different: how will this event look at closest approach?
 
-## 0:30 – 1:30 · Live demo (technical soundness)
+## 0:30 – 1:30 · Demo
 
-1. **Live map:** today's SOCRATES screening (CelesTrak) for the next 24 h. Point at the header KPIs: how many
-   conjunctions are within 1 km and 5 km in the window, which is the brief's 24-hour warning.
-2. Click the top card in the **Critical events** sidebar. The globe flies to the **collision point** and draws
-   both objects' **flight paths** from SGP4 around TCA.
-3. Detail drawer: tier, P(Critical), Pc with an 80 % interval, and the **exact rules that fired**, read out loud.
-   Press **Escalate**, which shows that the analyst decides and the decision log records it.
-4. **CDM evaluator:** one test event's timeline (estimated Pc and band vs the real Pc as TCA approaches).
+1. **Events view:** the warnings panel shows how many events reach closest approach within 3 days, how many
+   are already within 1 km, and how many we forecast to end Critical.
+2. Open the top event: risk, miss distance and relative position (r, t, n) plotted as closest approach gets
+   nearer, with the forecast probability of a final Critical tier.
+3. Read the reasons out loud, then show the avoidance options: burn size and the resulting collision
+   probability, from a physics model that reproduces ESA's own Pc.
+4. Press **Escalate**: the analyst decides, and the log records it.
+5. **Live sky:** today's real conjunctions from CelesTrak, with both satellites' flight paths and the
+   collision point on the globe.
 
-## 1:30 – 2:20 · Evidence (honest evaluation)
+## 1:30 – 2:20 · Evidence
 
-* Held-out test with thresholds tuned only on grouped CV, following the method of the ESA competition paper
-  (Uriot et al. 2022).
-* **Missed Critical: 91 → 8** vs distance triage; false alarms 76, against 173 for the worst-case Pc bound.
-* **0 silent misses:** all 8 misses are in the review queue (4.1 % of CDMs, about 10x the error rate of
-  auto-decided CDMs), so the analyst's attention goes where the model is unsure.
-* **Unseen satellites** (leave-mission-out): 16 missed vs 304 for distance triage.
-* **Where it fails:** all 8 misses are borderline (true Pc 1.0–1.2e-4). False alarms come from covariance
-  terms outside the allowed 13 columns. Forecasting the tier at TCA does **not** beat the naive latest-risk
-  baseline, the same finding as the paper. We show this rather than hide it.
+* Fixed 80/20 split of train events; thresholds chosen on cross-validation only; hold-out scored once.
+* **Critical events caught: 94 % vs 89 %** for "go with the latest message", so 10 missed instead of 18.
+  On events whose outcome is genuinely in the future: 91 % vs 85 %.
+* **Where it falls short:** 60 false alarms instead of 25, and at equal false alarms the model does not beat
+  the latest message. That matches the ESA competition paper. So we use the model to escalate on top of the
+  latest message, not to replace it.
 
 ## 2:20 – 2:50 · Trust and impact
 
-* The model never sees `risk`. The tier is a published rule (NASA CA Handbook / ESA). The ML only estimates Pc,
-  with an interval that covers 81.8 % of cases for a nominal 80 %.
-* Live tiers are labelled **screening-grade** (TLE, no covariance): confirm with CSpOC CDMs before any manoeuvre.
-* Impact: the analyst reads about 4 % of CDMs closely instead of all of them, and critical risk hidden behind
-  "safe-looking" distances drops by roughly 10x (91 → 8, all of those 8 still reviewed).
+* Every flag comes with plain-language reasons; thresholds are published; the analyst makes the call.
+* Physics check: our full-covariance Pc matches ESA's to 0.004 decades on average.
+* Impact on the hold-out: about 8 fewer Critical events slip through per 2,400 events, for about 35 extra
+  alerts to review.
 
 ## 2:50 – 3:00 · Close
 
-"Conjunction Watch reads the CDMs, explains every flag, and leaves the call to the analyst."
+"TIP Watcher tells the analyst, two days ahead, which close approaches will end up dangerous, and why."

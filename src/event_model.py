@@ -236,8 +236,17 @@ def explain(row, pe, pc, thr, tier):
          f"Latest message is {row.time_to_tca:.1f} days before closest approach; its tier is "
          f"{TIERS[int(row.tier_now)]} (Pc ~0, miss distance {10 ** row.log_md:,.0f} m)."]
     if row.n_cdms >= 2:
-        r.append(f"Over the last {row.days_observed:.1f} days the probability moved {row.risk_d_first:+.1f} decades and "
-                 f"the miss distance {100 * (10 ** row.log_md_d_first - 1):+.0f}%.")
+        first = row.risk - row.risk_d_first
+        if row.risk <= -29.9 and first <= -29.9:
+            prob = "the probability stayed ~0"
+        elif row.risk <= -29.9:
+            prob = f"the probability fell from {10 ** first:.1e} to ~0"
+        elif first <= -29.9:
+            prob = f"the probability rose from ~0 to {10 ** row.risk:.1e}"
+        else:
+            prob = f"the probability changed by {row.risk_d_first:+.1f} orders of magnitude"
+        r.append(f"Over the last {row.days_observed:.1f} days {prob} and the miss distance changed "
+                 f"{100 * (10 ** row.log_md_d_first - 1):+.0f}%.")
     r.append(f"Chance the final tier is Critical: {pc:.0%} (escalate at {thr['p_critical']:.0%}). "
              f"At least Elevated: {pe:.0%} (threshold {thr['p_elevated']:.0%}).")
     if tier != int(row.tier_now):
@@ -269,7 +278,7 @@ def run():
     final_ttca = labels.final_time_to_tca_days
     late = (D20.event_id.map(final_ttca) < CUTOFF_DAYS).to_numpy()  # final CDM really is in the future
 
-    results, chosen = {}, None
+    results = {}
     feature_sets = {"all": full_feats, "suggested_13": SUGGESTED_FEATURES}
     for name, feats in feature_sets.items():
         log(f"CV ({name}, {len(feats)} features)")
@@ -312,8 +321,6 @@ def run():
                          "holdout_brier_critical": round(brier_score_loss(y20 == 2, c20), 5),
                          "holdout_brier_critical_calibrated": round(brier_score_loss(y20 == 2, iso.predict(c20)), 5),
                          "_iso": iso, "_pe20": e20, "_pc20": c20}
-        if chosen is None:  # 'all' is the pre-registered primary model; 'suggested_13' is the ablation
-            chosen = name
 
     # baselines on the same hold-out decision rows
     lrp = D20.tier_now.to_numpy().astype(int)
@@ -329,10 +336,12 @@ def run():
                 for k, v in baselines.items()}
 
     # final model on all usable train events -> test predictions (per CDM and per event)
+    # selection uses CV only (never the hold-out): best CV F2 on Critical over feature set x decision rule
+    cands = [(v["hybrid"]["cv"]["f2_critical"], k, "hybrid") for k, v in results.items()] +             [(v["cv"]["f2_critical"], k, "model") for k, v in results.items()]
+    _, chosen, mode = max(cands)
+    log(f"CV selection: {sorted(cands, reverse=True)}")
     r = results[chosen]
     feats = r["features"]
-    # pre-registered rule: report whichever decision rule scores the higher CV F2 on Critical
-    mode = "hybrid" if r["hybrid"]["cv"]["f2_critical"] > r["cv"]["f2_critical"] else "model"
     thr = r["hybrid"]["thresholds"] if mode == "hybrid" else r["thresholds"]
     log(f"decision rule: {mode} {thr}")
 
