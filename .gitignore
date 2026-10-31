@@ -12,7 +12,6 @@ venv/
 .pytest_cache/
 
 # Generated artifacts
-models/*.txt
 cache/
 # live_cache/ is committed as a data snapshot so the dashboard runs offline;
 # never commit the public server's admin token or logs
