@@ -40,7 +40,7 @@ if str(SRC) not in sys.path:
 
 import features as F  # noqa: E402
 import live  # noqa: E402
-from predict import SCREENING_COLUMNS, RiskModel  # noqa: E402
+from predict import DISAGREE_PREFIX, SCREENING_COLUMNS, RiskModel, _fmt_pc  # noqa: E402
 
 from fastapi import Body, Depends, FastAPI, HTTPException, Query, Request  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
@@ -470,7 +470,8 @@ def flag_head_disagreement(a: pd.DataFrame, model: RiskModel) -> pd.DataFrame:
     secondaries, every row <= 5 km), and there the screening model's classifier and quantile heads can
     contradict each other. When the Pc part of the decision (not the distance rule) raised the tier on
     the classifier alone while the 90th-percentile Pc is below that tier's threshold, the row goes to
-    an analyst instead of being auto-decided. (predict.combine does not check this; see report.)"""
+    an analyst instead of being auto-decided. predict.combine flags the same contradiction; this adds
+    the live-data context to the reason."""
     a = a.copy()
     thr = model.thresholds.get("screen", model.thresholds) if model.trained else {}
     if not thr or not len(a):
@@ -485,11 +486,11 @@ def flag_head_disagreement(a: pd.DataFrame, model: RiskModel) -> pd.DataFrame:
     reasons = a["reasons"].to_numpy(object).copy()
     for i in np.nonzero(bad)[0]:
         p, lim = (pc[i], "1e-4") if crit[i] else (pe[i], "1e-6")
-        msg = (f"Model components disagree: classifier P(Pc >= {lim}) = {p:.0%}, but the 90th-percentile Pc "
-               f"estimate is {10 ** hi[i]:.1e} (< {lim}); live screening inputs are outside the training "
-               "distribution -> analyst review required")
-        r = [x for x in reasons[i] if not x.startswith("Model components disagree")]
-        r.insert(len(r) - 1 if r and r[-1].startswith("Decision:") else len(r), msg)
+        msg = (f"{DISAGREE_PREFIX}: the classifier gives a {p:.0%} chance of {lim}, but even the high end of "
+               f"the estimate is {_fmt_pc(hi[i])}. Live screening inputs are outside the training data. "
+               "Review needed.")
+        r = [x for x in reasons[i] if not x.startswith(DISAGREE_PREFIX)]
+        r.insert(len(r) - 1 if r and r[-1].startswith("Result:") else len(r), msg)
         reasons[i] = r
     a["reasons"] = reasons
     prior = a["heads_disagree"].to_numpy(bool) if "heads_disagree" in a.columns else np.zeros(len(a), bool)

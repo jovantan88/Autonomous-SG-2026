@@ -630,7 +630,7 @@ def test_api_assess_and_validation(client):
     assert client.post("/api/assess", content="{not json", headers={"content-type": "application/json"}).status_code == 422
     crit = client.post("/api/assess", json=dict(GOOD_CDM, miss_distance=400.0, relative_position_t=-300.0,
                                                relative_position_n=200.0)).json()
-    assert crit["tier"] == 2 and "hard rule" in crit["reasons"][0]
+    assert crit["tier"] == 2 and "under 1 km" in crit["reasons"][0]
     assert a["input_warnings"] == []
     odd = client.post("/api/assess", json=dict(GOOD_CDM, miss_distance=10000.0)).json()
     assert any("differs from miss_distance" in w for w in odd["input_warnings"])

@@ -1,7 +1,8 @@
 /* Conjunction Watch - operator dashboard (vanilla JS, no build step).
  * Contract: docs/api_contract.md. All distances in metres, speeds in m/s, log_pc = log10(Pc),
  * tiers 0 Safe / 1 Elevated / 2 Critical. ?mock=1 reads dashboard/mock/*.json instead of /api.
- * Decision support only: every recommendation is shown with its evidence and the analyst decides.
+ * Tier rule: Critical = Pc >= 1e-4 or miss < 1 km; Elevated = 1e-6 <= Pc < 1e-4 or miss 1-5 km.
+ * The tool recommends; the analyst decides and every decision is logged.
  */
 (function () {
   'use strict';
@@ -13,17 +14,21 @@
   const POLL_LIVE_MS = 60000;
   const LIVE_LIMIT = 500;     // highest-risk conjunctions per poll
   const EXTRA_LIMIT = 150;    // plus the top Elevated and the top needs-review ones
+  const CLOSEST_LIMIT = 10;   // plus the closest approaches (for the insights)
   const POLL_SW_MS = 10 * 60000;
   const POLL_HEALTH_MS = 60000;
   const TIERS = ['Safe', 'Elevated', 'Critical'];
   const TIER_CSS = ['t0', 't1', 't2'];
+  // mirrors the :root tokens in styles.css
   const COLORS = {
-    crit: '#FF5D6C', elev: '#F6B23C', safe: '#3ED598', review: '#B78BFF',
-    a: '#00BCD4', b: '#E67E22', text: '#F8FBFF', text2: '#C3D2E2', muted: '#94A6B9',
-    grid: 'rgba(82,100,119,.35)', line: 'rgba(82,100,119,.7)', panel: '#222D39', bg: '#18212B',
-    primary: '#1A73E8', primaryText: '#8AB4F8', live: '#49EFA4',
+    crit: '#FF5C5C', elev: '#F2B33D', safe: '#4CC38A', review: '#A98BFF',
+    a: '#3DD6F5', b: '#F2913D', text: '#E8EEF4', muted: '#8FA1B3', focus: '#7CC4FF',
+    grid: 'rgba(51,65,79,.75)', line: '#3B4A59', panel: '#1F2A36', bg: '#18212B', outline: '#0E141A',
   };
+  const FONT = '"IBM Plex Sans", system-ui, sans-serif';
   const TIER_COLOR = [COLORS.safe, COLORS.elev, COLORS.crit];
+  const REDUCED_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   // Keyless dark basemaps. CARTO dark_all now answers every tile with an "API KEY REQUIRED"
   // image (HTTP 200), so Esri's World Dark Gray canvas is the default; ?basemap=carto|natural overrides.
   const ESRI = 'https://services.arcgisonline.com/arcgis/rest/services/Canvas';
@@ -47,14 +52,13 @@
   const S = {
     view: 'live',
     windowH: 24,
-    live: null, liveErr: null, liveExtraErr: [], liveLoading: false, liveFetchedAt: null, liveSeq: 0, onlyPoints: false,
+    live: null, liveErr: null, liveExtraErr: [], liveLoading: false, liveFetchedAt: null, liveSeq: 0,
     sw: null, swErr: null,
     health: null, healthErr: null,
     feedFilter: 'critical', feedSort: 'risk', hourFilter: null,
     search: '',
     selectedId: null, selectedRow: null, track: null, trackErr: null, trackLoading: false, trackSeq: 0,
-    layers: { crit: true, elev: true, safe: true, review: true, points: true, paths: true, labels: true },
-    minSev: 0,
+    layers: { elev: true, labels: true },
     test: { events: null, err: null, loading: false, pred: 'all', review: false, dis: false, under: false, sort: 'risk',
       selected: null, detail: null, detailErr: null, detailLoading: false, cdmIdx: null, seq: 0 },
     metrics: null, metricsErr: null, metricsLoading: false,
@@ -94,12 +98,12 @@
   function fmtDist(m) {
     m = num(m);
     if (m == null) return '–';
-    if (Math.abs(m) < 1000) return `${Math.round(m)} m`;
-    if (Math.abs(m) < 10000) return `${(m / 1000).toFixed(2)} km`;
-    if (Math.abs(m) < 1e6) return `${(m / 1000).toFixed(1)} km`;
-    return `${Math.round(m / 1000).toLocaleString('en-US')} km`;
+    if (Math.abs(m) < 1000) return `${Math.round(m)}\u00a0m`;
+    if (Math.abs(m) < 10000) return `${(m / 1000).toFixed(2)}\u00a0km`;
+    if (Math.abs(m) < 1e6) return `${(m / 1000).toFixed(1)}\u00a0km`;
+    return `${Math.round(m / 1000).toLocaleString('en-US')}\u00a0km`;
   }
-  function fmtSpeed(ms) { ms = num(ms); return ms == null ? '–' : `${(ms / 1000).toFixed(2)} km/s`; }
+  function fmtSpeed(ms) { ms = num(ms); return ms == null ? '–' : `${(ms / 1000).toFixed(2)}\u00a0km/s`; }
   function pcText(lp) {
     lp = num(lp);
     if (lp == null) return '–';
@@ -110,7 +114,7 @@
   }
   function pcHtml(lp, extra) {
     const t = num(lp) == null ? 'not available' : `log10 Pc = ${num(lp).toFixed(2)}${lp <= -29.9 ? ' (dataset floor: Pc effectively 0)' : ''}`;
-    return `<span title="${esc(t + (extra ? ' · ' + extra : ''))}">${esc(pcText(lp))}</span>`;
+    return `<span title="${esc(t + (extra ? '; ' + extra : ''))}">${esc(pcText(lp))}</span>`;
   }
   function pct(p, digits) {
     p = num(p);
@@ -132,32 +136,39 @@
     return Number.isFinite(t) ? t : null;
   }
   const pad = (n) => String(n).padStart(2, '0');
+  // "10:53:32 UTC" (withDate false), "31 Oct 10:53:32 UTC" (default), "10:53 UTC" (withDate 'hm')
   function fmtUTC(iso, withDate) {
     const t = parseT(iso);
     if (t == null) return '–';
     const d = new Date(t);
-    const hms = `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}Z`;
+    const hm = `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+    if (withDate === 'hm') return `${hm} UTC`;
+    const hms = `${hm}:${pad(d.getUTCSeconds())} UTC`;
     if (withDate === false) return hms;
-    return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${hms}`;
+    return `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${hms}`;
   }
-  function fmtDur(ms, long) {
-    const neg = ms < 0;
+  const sameUtcDay = (a, b) => new Date(a).toISOString().slice(0, 10) === new Date(b).toISOString().slice(0, 10);
+  // time of day, with the date only when it is not today (UTC)
+  function fmtWhen(iso) {
+    const t = parseT(iso);
+    if (t == null) return '–';
+    return sameUtcDay(t, Date.now()) ? fmtUTC(iso, false) : fmtUTC(iso);
+  }
+  function fmtDur(ms) {
     let s = Math.abs(ms) / 1000;
     const d = Math.floor(s / 86400); s -= d * 86400;
     const h = Math.floor(s / 3600); s -= h * 3600;
-    const m = Math.floor(s / 60); s -= m * 60;
-    let out;
-    if (d > 0) out = `${d}d ${pad(h)}h`;
-    else if (h > 0) out = `${h}h ${pad(m)}m`;
-    else if (m > 0 || !long) out = `${m}m ${pad(Math.floor(s))}s`;
-    else out = `${Math.floor(s)}s`;
-    return neg ? `-${out}` : out;
+    const m = Math.floor(s / 60);
+    if (d > 0) return `${d} d ${h} h`;
+    if (h > 0) return `${h} h ${m} m`;
+    if (m > 0) return `${m} m`;
+    return 'under 1 m';
   }
   function countdown(iso) {
     const t = parseT(iso);
     if (t == null) return '–';
     const dt = t - Date.now();
-    return dt >= 0 ? `TCA in ${fmtDur(dt)}` : `TCA ${fmtDur(-dt)} ago`;
+    return dt >= 0 ? `in ${fmtDur(dt)}` : `${fmtDur(-dt)} ago`;
   }
   function ago(iso) {
     const t = parseT(iso);
@@ -167,14 +178,18 @@
     if (dt < 60000) return 'just now';
     return `${fmtDur(dt)} ago`;
   }
-  function tierPill(t, prefix) {
-    if (!isNum(t) || t < 0 || t > 2) return '<span class="pill nt">No tier</span>';
-    return `<span class="pill ${TIER_CSS[t]}">${prefix ? `<span class="pfx">${esc(prefix)}</span> ` : ''}${TIERS[t]}</span>`;
+  // tier pill: coloured dot + the word (colour always paired with text)
+  function tierPill(t) {
+    if (!isNum(t) || t < 0 || t > 2) return '<span class="tier nt"><i class="dot"></i>No tier</span>';
+    return `<span class="tier ${TIER_CSS[t]}"><i class="dot ${TIER_CSS[t]}"></i>${TIERS[t]}</span>`;
   }
-  const reviewPill = () => '<span class="pill rv" title="Uncertainty interval straddles a tier boundary, or the worst-case Pc bound reaches 1e-4: analyst review required">Review</span>';
+  const REVIEW_TIP = 'Needs review: the uncertainty spans a tier boundary, or the worst-case Pc reaches 1e-4.';
+  const reviewPill = () => `<span class="tag review" title="${esc(REVIEW_TIP)}">Review</span>`;
+  const lv = (label, html) => `<span class="lv"><span class="l">${esc(label)}</span>${html}</span>`;
   function pairHtml(a, b) {
-    return `${esc(a || '?')}<span class="x">×</span>${esc(b || '?')}`;
+    return `${esc(a || '?')} <span class="x">×</span> ${esc(b || '?')}`;
   }
+  const pairText = (r) => `${get(r, 'sat1.name', '?')} × ${get(r, 'sat2.name', '?')}`;
   const tierOf = (row) => num(get(row, 'assessment.tier'));
   const ptier = (row, i) => num(get(row, `assessment.p_tier.${i}`));
 
@@ -253,7 +268,7 @@
       d.warnings = computeWarnings(rows, w);
       if (params.tier != null) { const want = String(params.tier).split(',').map(Number); rows = rows.filter((r) => want.includes(tierOf(r))); }
       if (params.needs_review != null) rows = rows.filter((r) => !!get(r, 'assessment.needs_review') === (String(params.needs_review) === '1'));
-      rows = sortRows(rows, 'risk').slice(0, num(params.limit) || 500);
+      rows = sortRows(rows, ({ range: 'md', tca: 'tca' })[params.sort] || 'risk').slice(0, num(params.limit) || 500);
       if (String(params.points) !== '1') rows.forEach((r) => { delete r.tca_point; delete r.tle_status; });
       d.conjunctions = rows;
       return d;
@@ -360,9 +375,9 @@
     const miss = num(r.miss_distance);
     if (sgp == null || miss == null) return { known: false };
     const agrees = chk && typeof chk.agrees === 'boolean' ? chk.agrees : (mdTier(sgp) === mdTier(miss) && Math.abs(sgp - miss) <= 1000);
-    return { known: true, agrees, sgp, miss, chk, text: `SGP4 with our element sets ${fmtDist(sgp)} vs SOCRATES ${fmtDist(miss)}` };
+    return { known: true, agrees, sgp, miss, chk, text: `Our orbit data puts them ${fmtDist(sgp)} apart; the screening says ${fmtDist(miss)}` };
   }
-  const SGP4_DISAGREE_TIP = 'Our SGP4 propagation with the current CelesTrak element sets does not reproduce the SOCRATES screening (different distance-rule tier or more than 1 km apart). The element sets differ (newer TLE, or a manoeuvre since screening): re-screen before acting.';
+  const MISMATCH_TIP = 'Orbit mismatch: propagating our newest element sets does not reproduce the screening (different distance tier, or more than 1 km apart). One object may have manoeuvred or have a newer element set. Re-screen before acting.';
   // Live rows: the screening model's Pc estimate on SOCRATES inputs (out of distribution) is only
   // informative when its 80% interval is narrow and the classifier and quantile heads agree.
   function pcInfo(r) {
@@ -372,10 +387,10 @@
     const width = lo != null && hi != null ? hi - lo : null;
     const disagree = a.heads_disagree === true || (hi != null && pcc != null && thr != null && hi < -4 && pcc >= thr);
     const wide = width != null && width > 6;
-    const why = [wide ? `the 80% interval spans ${width.toFixed(0)} decades` : null,
+    const why = [wide ? `its 80% interval spans ${width.toFixed(0)} orders of magnitude` : null,
       disagree ? `the classifier gives P(Pc ≥ 1e-4) = ${pct(pcc)} while the 90th-percentile Pc is ${pcText(hi)}` : null].filter(Boolean).join('; ');
     return { informative: !(wide || disagree), wide, disagree, width,
-      tip: why ? `Uninformative (out of distribution): ${why}. Live SOCRATES inputs have no covariance, so use SOCRATES' max Pc as the screening reference.` : '' };
+      tip: why ? `The model estimate is hidden because ${why}. Live screening data has no covariance, so the screening maximum Pc is the reference.` : '' };
   }
   const maxPcText = (r) => (num(r.max_risk_estimate) != null ? pcText(r.max_risk_estimate) : (isNum(r.max_prob) ? (r.max_prob > 0 ? r.max_prob.toExponential(1) : '0') : '–'));
   function cmpKeys(a, b) { for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) return b[i] - a[i]; } return 0; }
@@ -417,7 +432,7 @@
     return r.id || `${get(r, 'sat1.norad')}-${get(r, 'sat2.norad')}-${r.tca}`;
   }
 
-  // ================================================================ header: clock, pills, ticker, space weather
+  // ================================================================ header: clock, data status
   function tickClock() {
     const d = new Date();
     const el = $('#clock-t');
@@ -427,103 +442,69 @@
     $$('[data-tca]').forEach((el) => {
       const t = parseT(el.getAttribute('data-tca'));
       el.textContent = countdown(el.getAttribute('data-tca'));
-      if (el.classList.contains('cd')) el.classList.toggle('soon', t != null && t - Date.now() < 6 * 3.6e6);
+      if (el.classList.contains('it-time')) el.classList.toggle('soon', t != null && t - Date.now() < 6 * 3.6e6);
     });
   }
 
-  function renderLivePill() {
-    const el = $('#live-pill');
+  // One header item: Live / Stale / Offline plus the data time. Source details, space weather and
+  // input problems go in its popover.
+  function renderStatus() {
+    const el = $('#status');
     if (!el) return;
-    const txt = $('.lp-text', el);
-    el.className = 'live-pill';
     const d = S.live;
-    const lines = [];
+    const rows = [];
+    const warn = [];
+    const bad = [];
     if (d) {
-      lines.push(`Source: ${d.source || 'unknown'}`);
-      lines.push(`Data as of: ${fmtUTC(d.data_as_of)} (${ago(d.data_as_of)})`);
-      lines.push(`Fetched by server: ${fmtUTC(d.fetched_at)} (${ago(d.fetched_at)})`);
-      if (isNum(d.n_total)) lines.push(`Rows in feed: ${d.n_total.toLocaleString('en-US')}`);
+      rows.push(['Source', d.source || 'unknown']);
+      rows.push(['Data from', `${fmtUTC(d.data_as_of)} (${ago(d.data_as_of)})`]);
+      rows.push(['Fetched', `${fmtUTC(d.fetched_at)} (${ago(d.fetched_at)})`]);
+      if (isNum(d.n_total)) rows.push(['Rows in feed', d.n_total.toLocaleString('en-US')]);
     }
-    if (S.liveFetchedAt) lines.push(`Last dashboard poll: ${fmtUTC(new Date(S.liveFetchedAt).toISOString())}`);
+    if (S.liveFetchedAt) rows.push(['Last update', fmtUTC(new Date(S.liveFetchedAt).toISOString())]);
+    const sw = S.sw;
+    if (sw) {
+      rows.push(['Space weather', `F10.7 ${fmtNum(get(sw, 'f107.latest'), 0)} sfu, Ap ${fmtNum(get(sw, 'ap.latest'), 0)}, Kp ${fixed(get(sw, 'kp.latest'), 1)}${sw.stale ? ' (cached copy)' : ''}`]);
+    } else if (S.swErr) rows.push(['Space weather', 'Unavailable']);
     const ml = get(S.health, 'model_loaded');
-    if (ml != null) lines.push(`Model: ${ml ? 'trained models loaded' : 'NOT loaded - physics / max-Pc fallback estimates'}`);
-    if (get(S.health, 'model.error')) lines.push(`Model reload problem (previous model kept): ${String(S.health.model.error).slice(0, 180)}`);
-    if (S.liveErr) lines.push(`Last error: ${S.liveErr}`);
-    if (d && d.refresh_error) lines.push(`Server refresh error: ${d.refresh_error}`);
-    if (d && d.parse_error) lines.push(`Newest SOCRATES file unreadable (previous one served): ${String(d.parse_error).slice(0, 180)}`);
+    if (ml != null) rows.push(['Model', ml ? 'Trained model loaded' : 'Not loaded: fallback estimates']);
+    if (get(S.health, 'model.error')) bad.push(`Model reload failed, previous model kept: ${String(S.health.model.error).slice(0, 160)}`);
+    if (S.liveErr) bad.push(`Last error: ${S.liveErr}`);
+    if (d && d.refresh_error) bad.push(`Server refresh error: ${d.refresh_error}`);
+    if (d && d.parse_error) bad.push(`Newest screening file unreadable, previous one served: ${String(d.parse_error).slice(0, 160)}`);
     if (d && d.files && typeof d.files === 'object') {
-      Object.keys(d.files).forEach((k) => { const f = d.files[k]; if (f && f.error) lines.push(`sort-${k}.csv: ${String(f.error).slice(0, 180)}`); });
+      Object.keys(d.files).forEach((k) => { const f = d.files[k]; if (f && f.error) bad.push(`sort-${k}.csv: ${String(f.error).slice(0, 160)}`); });
     }
-    (S.liveExtraErr || []).forEach((x) => lines.push(`Could not load ${x}`));
-    // the other live inputs: element sets (flight paths, collision points), SATCAT (object types), SWPC (F10/AP)
-    const SRC_NAMES = { gp: 'Element sets (CelesTrak GP)', satcat: 'SATCAT object types', swpc: 'Space weather (NOAA SWPC)' };
-    const srcBad = [];
+    (S.liveExtraErr || []).forEach((x) => bad.push(`Could not load ${x}`));
+    const SRC_NAMES = { gp: 'Orbit data (CelesTrak)', satcat: 'Object types (SATCAT)', swpc: 'Space weather (NOAA SWPC)' };
     const ls = get(S.health, 'live_sources') || {};
+    let srcBad = 0;
     Object.keys(SRC_NAMES).forEach((k) => {
       const v = ls[k];
       if (v && v !== 'ok' && v !== 'disabled') {
+        srcBad++;
         const det = get(S.health, `live_sources_detail.${k}`) || {};
         const err = det.error || get(det, 'bulk.cache.error') || get(det, 'bulk.error') || '';
-        srcBad.push(`${SRC_NAMES[k]}: ${v.toUpperCase()}${err ? ' - ' + String(err).slice(0, 160) : ''}`);
+        bad.push(`${SRC_NAMES[k]}: ${v}${err ? '. ' + String(err).slice(0, 140) : ''}`);
       }
     });
-    if (S.healthErr) srcBad.push(`Server health check failed: ${S.healthErr}`);
-    lines.push(...srcBad);
-    let cls = 'is-wait'; let label = 'CONNECTING';
-    if (MOCK) { cls = 'is-mock'; label = 'MOCK'; }
-    else if (!d && S.liveErr) { cls = 'is-off'; label = 'OFFLINE'; }
-    else if (d && (d.stale || S.liveErr)) { cls = 'is-stale'; label = 'STALE'; if (S.liveErr) lines.unshift('API unreachable - showing the last data received'); else lines.unshift('A source was unreachable - server is serving its last cached snapshot'); }
-    else if (d && (srcBad.length || (S.liveExtraErr || []).length)) { cls = 'is-stale'; label = 'LIVE*'; lines.unshift('SOCRATES screening is live, but another input is stale or failed (details below)'); }
-    else if (d) { cls = ''; label = 'LIVE'; }
-    if (cls) el.classList.add(cls);
-    txt.textContent = label;
-    el.title = lines.join('\n') || 'Connecting to the live feed';
-    el.setAttribute('aria-label', `${label}. ${lines.join('. ')}`);
-  }
+    if (S.healthErr) { srcBad++; bad.push(`Server health check failed: ${S.healthErr}`); }
 
-  function renderSpaceWeather() {
-    const el = $('#sw-chip');
-    if (!el) return;
-    const d = S.sw;
-    if (!d) {
-      el.innerHTML = `F10.7 – <i>|</i> Ap – <i>|</i> Kp –`;
-      el.title = S.swErr ? `Space weather unavailable: ${S.swErr}` : 'Loading space weather (NOAA SWPC)';
-      return;
-    }
-    const f = get(d, 'f107.latest'); const a = get(d, 'ap.latest'); const k = get(d, 'kp.latest');
-    el.innerHTML = `F10.7 ${esc(fmtNum(f, 0))} <i>|</i> Ap ${esc(fmtNum(a, 0))} <i>|</i> Kp ${esc(fixed(k, 1))}`;
-    el.classList.toggle('is-stale', !!d.stale);
-    const lines = [
-      `F10.7 solar flux: ${fmtNum(f, 1)} sfu (${get(d, 'f107.source', 'NOAA SWPC')}${get(d, 'f107.time') ? ', ' + fmtUTC(get(d, 'f107.time')) : ''})`,
-      `Ap geomagnetic index: ${fmtNum(a, 1)} (${get(d, 'ap.source', 'NOAA SWPC')})`,
-      `Kp: ${fixed(k, 2)}${get(d, 'kp.time') ? ' at ' + fmtUTC(get(d, 'kp.time')) : ''}`,
-      `Fetched: ${fmtUTC(d.fetched_at)} (${ago(d.fetched_at)})${d.stale ? ' - STALE (served from cache)' : ''}`,
-      'F10 and AP are model inputs for live screening.',
-    ];
-    el.title = lines.join('\n');
-  }
-
-  function renderTicker() {
-    const track = $('#ticker-track');
-    if (!track) return;
-    const rows = sortRows(liveRows().filter((r) => (tierOf(r) || 0) >= 1 && num(r.hours_to_tca) >= 0), 'risk').slice(0, 14);
-    if (!rows.length) {
-      track.classList.remove('run');
-      track.innerHTML = `<span class="tick-empty">${S.live ? 'No Elevated or Critical conjunctions in this window' : (S.liveErr ? 'Live feed unavailable' : 'Waiting for live conjunctions…')}</span>`;
-      return;
-    }
-    const item = (r) => {
-      const t = tierOf(r);
-      return `<button type="button" class="tick-item" data-sel="${esc(r.id)}" title="Select this conjunction">` +
-        `${tierPill(t)} <b>${pairHtml(get(r, 'sat1.name'), get(r, 'sat2.name'))}</b>` +
-        `<span class="sep">·</span>${esc(fmtDist(r.miss_distance))}` +
-        `<span class="sep">·</span>max Pc ${esc(maxPcText(r))}` +
-        `<span class="sep">·</span><span data-tca="${esc(r.tca)}">${esc(countdown(r.tca))}</span></button>`;
-    };
-    const html = rows.map(item).join('');
-    track.innerHTML = html + html.replace(/<button /g, '<button tabindex="-1" aria-hidden="true" ');
-    track.style.setProperty('--tick-dur', `${Math.max(30, rows.length * 7)}s`);
-    track.classList.add('run');
+    let cls = 'is-wait'; let label = 'Connecting';
+    if (MOCK) { cls = 'is-mock'; label = 'Mock data'; }
+    else if (!d && S.liveErr) { cls = 'is-off'; label = 'Offline'; warn.push('Live data unavailable. Check that the backend is running, then retry.'); }
+    else if (d && (d.stale || S.liveErr)) {
+      cls = 'is-stale'; label = 'Stale';
+      warn.push(S.liveErr ? 'The API is unreachable. Showing the last data received.' : 'A source was unreachable. The server is serving its last cached copy.');
+    } else if (d && (srcBad || (S.liveExtraErr || []).length)) { cls = 'is-stale'; label = 'Live'; warn.push('Screening data is live, but another input failed (details below).'); }
+    else if (d) { cls = ''; label = 'Live'; }
+    el.className = `status ${cls}`.trim();
+    $('.status-label', el).textContent = label;
+    $('.status-time', el).textContent = d ? `Data from ${fmtUTC(d.data_as_of, 'hm')}` : '';
+    $('#status-pop').innerHTML = (warn.length ? `<p class="pop-warn">${warn.map(esc).join('<br>')}</p>` : '') +
+      (rows.length ? `<dl>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : '<p class="muted">Waiting for the first update.</p>') +
+      (bad.length ? `<p class="pop-bad">${bad.map(esc).join('<br>')}</p>` : '');
+    el.setAttribute('aria-label', `${label}${d ? `, data from ${fmtUTC(d.data_as_of, 'hm')}` : ''}`);
   }
 
   // ================================================================ router / views
@@ -564,13 +545,14 @@
     if (!S.live) renderFeed();
     try {
       // The risk-sorted top 500 is usually all Critical, so the Elevated and Needs-review queues are
-      // loaded with two small server-side filtered requests and merged (optional: older servers ignore
-      // the filter params and the duplicates are dropped).
+      // loaded with two small server-side filtered requests, plus the closest approaches for the
+      // insights, and merged (optional: older servers ignore the params and duplicates are dropped).
       const base = { window_h: S.windowH, sort: 'risk', points: 1 };
       const [main, ...extra] = await Promise.allSettled([
         api('/api/live/conjunctions', Object.assign({ limit: LIVE_LIMIT }, base)),
         api('/api/live/conjunctions', Object.assign({ limit: EXTRA_LIMIT, tier: 1 }, base)),
         api('/api/live/conjunctions', Object.assign({ limit: EXTRA_LIMIT, needs_review: 1 }, base)),
+        api('/api/live/conjunctions', Object.assign({}, base, { limit: CLOSEST_LIMIT, sort: 'range' })),
       ]);
       if (main.status === 'rejected') throw main.reason;
       const d = main.value;
@@ -582,7 +564,7 @@
       const extraErr = [];
       extra.forEach((x, i) => {
         if (x.status !== 'fulfilled' || !x.value || !Array.isArray(x.value.conjunctions)) {
-          extraErr.push(`${['the top Elevated', 'the needs-review'][i]} conjunctions (${x.status === 'rejected' ? (x.reason && x.reason.message) || x.reason : 'no conjunctions list'})`);
+          extraErr.push(`${['the top Elevated', 'the needs-review', 'the closest'][i]} conjunctions (${x.status === 'rejected' ? (x.reason && x.reason.message) || x.reason : 'no conjunctions list'})`);
           return;
         }
         x.value.conjunctions.forEach((r) => {
@@ -602,7 +584,7 @@
     } catch (e) {
       if (seq !== S.liveSeq) return;
       S.liveErr = e.message || String(e);
-      if (!opts || !opts.quiet) toast(`Live update failed: ${S.liveErr}${S.live ? ' - showing the last data received' : ''}`, true);
+      if (!opts || !opts.quiet) toast(S.live ? `Live data unavailable. Showing data from ${fmtUTC(S.live.data_as_of, 'hm')}.` : `Live data unavailable: ${S.liveErr}.`, true);
     } finally {
       if (seq === S.liveSeq) S.liveLoading = false;
     }
@@ -611,185 +593,245 @@
       const id = S.pendingSelect;
       S.pendingSelect = null;
       if (rowById(id)) selectEvent(id, { fly: true });
-      else toast('The linked conjunction is not in the current window.', true);
+      else toast('That conjunction is not in the current window. Try a longer window.', true);
     }
   }
   function renderLiveAll() {
-    renderLivePill();
-    renderTicker();
+    renderStatus();
+    renderWarnings();
+    renderInsights();
     renderFeed();
-    renderKpiCard();
-    renderOverlayCounts();
+    renderLegend();
     updatePoints();
     if (S.selectedId && $('#detail').classList.contains('open')) renderDetail();
   }
   async function loadSpaceWeather() {
     try { S.sw = await api('/api/live/spaceweather'); S.swErr = null; } catch (e) { S.swErr = e.message; }
-    renderSpaceWeather();
+    renderStatus();
   }
   async function loadHealth() {
     try { S.health = await api('/api/health'); S.healthErr = null; } catch (e) { S.healthErr = e.message; }
-    renderLivePill();
-    renderSideFoot();
+    renderStatus();
   }
 
-  // ================================================================ sidebar: live feed
+  // ================================================================ sidebar 1: warning for the selected window
+  const winText = () => `the next ${S.windowH}\u00a0hours`;
+  const fmtInt = (v) => (isNum(num(v)) ? num(v).toLocaleString('en-US') : '–');
+  const hourText = (h) => `in ${h}–${h + 1} h`;
+  function renderLiveErr() {
+    const el = $('#live-err');
+    if (!el) return;
+    if (!S.liveErr) { el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    el.innerHTML = S.live
+      ? `<b>Live data unavailable.</b> Showing data from ${esc(fmtUTC(S.live.data_as_of, 'hm'))}. <button type="button" class="btn sm" data-act="retry-live">Retry</button>`
+      : `<b>Live data unavailable.</b> ${esc(S.liveErr)}. <button type="button" class="btn sm" data-act="retry-live">Retry</button>`;
+  }
+  const STAT_TIPS = {
+    'Within 5 km': 'Miss distance up to 5 km: Elevated or worse on distance alone',
+    Critical: 'Pc of 1e-4 or more, or miss distance under 1 km',
+    Elevated: 'Pc from 1e-6 to 1e-4, or miss distance from 1 to 5 km',
+  };
+  function renderWarnings() {
+    const w = get(S.live, 'warnings') || null;
+    const head = $('#warn-head');
+    if (!w) {
+      head.textContent = S.liveErr && !S.live ? 'No conjunction data yet.' : 'Loading conjunctions…';
+      $('#warn-stats').innerHTML = '';
+    } else {
+      const n1 = num(w.n_within_1km);
+      head.innerHTML = n1 === 0 ? `No conjunctions pass within 1 km in ${esc(winText())}.`
+        : `<span class="n">${fmtInt(n1)}</span> conjunction${n1 === 1 ? ' passes' : 's pass'} within 1&nbsp;km in ${esc(winText())}.`;
+      $('#warn-stats').innerHTML = [['Within 5 km', w.n_within_5km, ''], ['Critical', w.n_critical, 'c2'], ['Elevated', w.n_elevated, 'c1']]
+        .map(([l, v, c]) => `<div title="${esc(STAT_TIPS[l])}"><dt>${l}</dt><dd class="${c}">${fmtInt(v)}</dd></div>`).join('');
+    }
+    renderHours(w);
+  }
+  // Critical conjunctions per hour of the window; a bar filters the risk list to that hour.
+  function renderHours(w) {
+    const el = $('#hours');
+    const axis = $('#hours-axis');
+    const peak = $('#hours-peak');
+    if (!w || !Array.isArray(w.by_hour) || !w.by_hour.length) {
+      el.innerHTML = `<span class="state">${S.live ? 'No hourly breakdown returned.' : ''}</span>`;
+      axis.innerHTML = ''; peak.textContent = '';
+      return;
+    }
+    const bins = w.by_hour.map((b) => ({ h: num(b.hour), c: num(b.critical) || 0, e: num(b.elevated) || 0 })).filter((b) => b.h != null);
+    const max = Math.max(1, ...bins.map((b) => b.c));
+    const focusH = S.hourFilter != null ? S.hourFilter : bins[0].h;
+    peak.textContent = `Peak ${max.toLocaleString('en-US')}`;
+    el.classList.toggle('filtered', S.hourFilter != null);
+    el.innerHTML = bins.map((b) => {
+      const tip = `TCA ${hourText(b.h)}: ${b.c.toLocaleString('en-US')} Critical, ${b.e.toLocaleString('en-US')} Elevated`;
+      return `<button type="button" data-hour="${b.h}" class="${S.hourFilter === b.h ? 'on' : ''}" tabindex="${b.h === focusH ? 0 : -1}" aria-pressed="${S.hourFilter === b.h}" aria-label="${esc(tip)}" title="${esc(tip)}"><i style="height:${Math.max(4, 100 * b.c / max).toFixed(1)}%"></i></button>`;
+    }).join('');
+    const W = bins.length;
+    const step = W <= 12 ? W / 2 : (W <= 24 ? 6 : (W <= 48 ? 12 : 24));
+    const ticks = [];
+    for (let h = 0; h <= W + 1e-9; h += step) ticks.push(h === 0 ? 'Now' : `+${Math.round(h)} h`);
+    axis.innerHTML = ticks.map((t) => `<span>${t}</span>`).join('');
+  }
+  function setHourFilter(h) {
+    S.hourFilter = h == null || S.hourFilter === h ? null : h;
+    renderHours(get(S.live, 'warnings'));
+    renderFeed();
+  }
+
+  // ================================================================ sidebar 2: insights (plain sentences)
+  function renderInsights() {
+    const el = $('#insights');
+    if (!el) return;
+    if (!S.live) { el.innerHTML = `<li class="empty">${S.liveErr ? 'Nothing to summarise until live data loads.' : 'Waiting for data…'}</li>`; return; }
+    const w = get(S.live, 'warnings') || {};
+    const rows = liveRows().filter((r) => num(r.hours_to_tca) >= 0);
+    if (!rows.length) { el.innerHTML = `<li class="empty">No conjunctions in ${esc(winText())}. Try a longer window.</li>`; return; }
+    const total = (num(w.n_in_window) || 0) + (num(w.n_recent_past) || 0);
+    const truncated = total > liveRows().length;
+    const link = (r) => `<a href="#live/${esc(encodeURIComponent(r.id))}" data-sel="${esc(r.id)}">${esc(get(r, 'sat1.name', '?'))} and ${esc(get(r, 'sat2.name', '?'))}</a>`;
+    const items = [];
+    const closest = sortRows(rows, 'md')[0];
+    if (closest && num(closest.miss_distance) != null) {
+      items.push(`Closest approach: ${link(closest)} pass ${esc(fmtDist(closest.miss_distance))} apart at ${esc(fmtWhen(closest.tca))}, ${esc(countdown(closest.tca))}.`);
+    }
+    const mx = (r) => firstNum(r.max_risk_estimate, isNum(r.max_prob) && r.max_prob > 0 ? Math.log10(r.max_prob) : null, -31);
+    const byPc = rows.slice().sort((a, b) => mx(b) - mx(a))[0];
+    if (byPc && mx(byPc) > -29.9) items.push(`Highest ${truncated ? 'listed ' : ''}collision probability: ${link(byPc)}, with Pc up to ${esc(maxPcText(byPc))}.`);
+    if (isNum(w.n_critical_by_pc) && w.n_critical_by_pc > 0) {
+      items.push(`${fmtInt(w.n_critical_by_pc)} conjunction${w.n_critical_by_pc === 1 ? ' is' : 's are'} Critical on collision probability alone, with a miss distance over 1\u00a0km.`);
+    }
+    if (isNum(w.n_debris_or_rb) && num(w.n_in_window) > 0) {
+      items.push(`${esc(pct(w.n_debris_or_rb / w.n_in_window))} of conjunctions involve debris or a rocket body.`);
+    } else {
+      const n1 = rows.filter((r) => num(r.miss_distance) < 1000);
+      const deb = n1.filter((r) => /DEBRIS|ROCKET/.test(`${get(r, 'sat2.type', '')} ${get(r, 'sat1.type', '')}`)).length;
+      if (n1.length) items.push(`${deb} of ${n1.length} listed approaches under 1 km involve debris or a rocket body.`);
+    }
+    const top = Array.isArray(w.top_primaries) ? w.top_primaries[0] : null;
+    if (top && top.name) {
+      items.push(`<a href="#" data-q="${esc(top.norad != null ? top.norad : top.name)}" title="Show only conjunctions involving ${esc(top.name)}">${esc(top.name)}</a> is involved in the most conjunctions (${fmtInt(top.count)}).`);
+    }
+    const bins = Array.isArray(w.by_hour) ? w.by_hour.filter((b) => num(b.hour) != null) : [];
+    if (bins.length > 1) {
+      const busy = bins.slice().sort((a, b) => (num(b.critical) || 0) - (num(a.critical) || 0))[0];
+      if (num(busy.critical) > 0) items.push(`Busiest hour: <a href="#" data-hour="${num(busy.hour)}">TCA ${hourText(num(busy.hour))}</a>, with ${fmtInt(busy.critical)} Critical.`);
+    }
+    el.innerHTML = items.slice(0, 5).map((i) => `<li>${i}</li>`).join('');
+  }
+
+  // ================================================================ sidebar 3: risk list
+  const isReview = (r) => get(r, 'assessment.needs_review') === true;
+  function tierFilter(rows, f) {
+    if (f === 'critical') return rows.filter((r) => tierOf(r) === 2);
+    if (f === 'elevated') return rows.filter((r) => tierOf(r) === 1);
+    if (f === 'review') return rows.filter(isReview);
+    return rows;
+  }
   function feedRows() {
     let rows = liveRows();
     if (S.search) rows = rows.filter((r) => matchesSearch(r, S.search));
     if (S.hourFilter != null) rows = rows.filter((r) => Math.floor(num(r.hours_to_tca)) === S.hourFilter);
-    if (S.onlyPoints) rows = rows.filter((r) => r.tca_point && isNum(r.tca_point.lat));
-    const counts = {
-      critical: rows.filter((r) => tierOf(r) === 2).length,
-      elevated: rows.filter((r) => tierOf(r) === 1).length,
-      review: rows.filter((r) => get(r, 'assessment.needs_review') === true).length,
-      all: rows.length,
-    };
-    const f = S.feedFilter;
-    if (f === 'critical') rows = rows.filter((r) => tierOf(r) === 2);
-    else if (f === 'elevated') rows = rows.filter((r) => tierOf(r) === 1);
-    else if (f === 'review') rows = rows.filter((r) => get(r, 'assessment.needs_review') === true);
-    return { rows: sortRows(rows, S.feedSort), counts };
+    return { rows: sortRows(tierFilter(rows, S.feedFilter), S.feedSort) };
   }
-  const FEED_TITLES = { critical: 'Critical events', elevated: 'Elevated events', review: 'Needs review', all: 'All events' };
+  const FILTER_NAME = { critical: 'Critical', elevated: 'Elevated', review: 'needs-review', all: '' };
+  const chipHtml = (text, act, label) => `<span class="chip"><span>${esc(text)}</span><button type="button" data-act="${act}" aria-label="${esc(label)}">×</button></span>`;
+  // "Showing the 500 highest-risk of 1,226": only when the API limit cut the list
+  function truncText() {
+    const W = get(S.live, 'warnings') || {};
+    const totals = { critical: W.n_critical, elevated: W.n_elevated, review: W.n_needs_review, all: (num(W.n_in_window) || 0) + (num(W.n_recent_past) || 0) };
+    const total = num(totals[S.feedFilter]);
+    const loaded = tierFilter(liveRows(), S.feedFilter).length;
+    return total != null && total > loaded ? `Showing the ${loaded.toLocaleString('en-US')} highest-risk of ${total.toLocaleString('en-US')}` : '';
+  }
   function renderFeed() {
     const list = $('#feed');
     if (!list) return;
-    const { rows, counts } = feedRows();
-    $$('#feed-filter button').forEach((b) => { $('span', b).textContent = counts[b.dataset.f]; });
-    $('#feed-title').textContent = FEED_TITLES[S.feedFilter];
-    const fc = $('#feed-count');
-    fc.textContent = rows.length;
-    fc.className = `count ${S.feedFilter === 'critical' ? 'count-crit' : ''}`;
-    $('#rail-count').textContent = counts.critical;
-    const hourChip = $('#feed-hour');
-    if (S.hourFilter != null) {
-      hourChip.hidden = false;
-      hourChip.innerHTML = `TCA +${S.hourFilter}–${S.hourFilter + 1} h <button type="button" aria-label="Clear hour filter" data-act="clear-hour">×</button>`;
-    } else hourChip.hidden = true;
-    const total = get(S.live, 'warnings.n_in_window');
-    const past = num(get(S.live, 'warnings.n_recent_past')) || 0;
-    $('#feed-meta').textContent = S.live ? `${liveRows().length}${isNum(total) && total + past > liveRows().length ? ' of ' + (total + past).toLocaleString('en-US') : ''} in ${S.windowH} h` : '';
-    const note = $('#feed-note');
-    const W = get(S.live, 'warnings') || {};
-    const notes = [];
+    renderLiveErr();
+    const { rows } = feedRows();
+    $('#feed-count').textContent = S.live ? rows.length.toLocaleString('en-US') : '';
+    const meta = [];
+    if (S.hourFilter != null) meta.push(chipHtml(`TCA ${hourText(S.hourFilter)}`, 'clear-hour', 'Clear hour filter'));
+    if (S.search) meta.push(chipHtml(`Matching “${S.search}”`, 'clear-search', 'Clear search'));
+    if (S.live) { const t = truncText(); if (t) meta.push(`<span>${esc(t)}</span>`); }
     const extraErr = S.liveExtraErr || [];
-    if (extraErr.length) notes.push(`<span class="warn-txt"><b>Could not load</b> ${esc(extraErr.join('; '))}: the Elevated / Needs-review tabs may be incomplete. <button type="button" class="btn sm" data-act="retry-live">Retry</button></span>`);
-    if (S.live && isNum(total) && total + past > liveRows().length) {
-      const nMain = isNum(S.live.n_main) ? S.live.n_main : liveRows().length;
-      const nExtra = liveRows().length - nMain;
-      notes.push(`Loaded the <b>${nMain}</b> highest-risk${nExtra > 0 ? ` plus <b>${nExtra}</b> top Elevated / needs-review` : ''} of <b>${(total + past).toLocaleString('en-US')}</b> conjunctions in the feed (API limit). Next ${S.windowH} h totals: ` +
-        `<b>${fmtNum(W.n_critical, 0)}</b> Critical · <b>${fmtNum(W.n_elevated, 0)}</b> Elevated${isNum(W.n_needs_review) ? ` · <b>${fmtNum(W.n_needs_review, 0)}</b> need review` : ''}${past ? ` (plus ${fmtNum(past, 0)} whose TCA passed in the last hour)` : ''}. Narrow the window to see more of the queue.`);
-    }
-    if (S.live && rows.length) {
-      const withPt = rows.filter((r) => r.tca_point && isNum(r.tca_point.lat)).length;
-      const top = rows.slice(0, 20);
-      const topPt = top.filter((r) => r.tca_point && isNum(r.tca_point.lat)).length;
-      const nDis = rows.filter((r) => { const c = pointCheck(r); return c.known && !c.agrees; }).length;
-      notes.push(`Collision points: <b>${withPt}</b> of ${rows.length} listed (${topPt} of the top ${top.length})${nDis ? ` · <span class="warn-txt">${nDis} where SGP4 disagrees with SOCRATES</span>` : ''}${S.onlyPoints ? ' · showing only rows with a point' : ''}.`);
-    }
-    note.hidden = !notes.length;
-    note.innerHTML = notes.join('<br>');
+    if (extraErr.length) meta.push(`<span class="warn-line" title="${esc('Could not load ' + extraErr.join('; '))}">Some rows did not load. <button type="button" class="btn sm" data-act="retry-live">Retry</button></span>`);
+    $('#feed-meta').innerHTML = meta.join('');
 
     if (!S.live) {
-      if (S.liveErr) {
-        list.innerHTML = `<li class="state err-state"><b>Live feed unavailable.</b><br>${esc(S.liveErr)}<br><br><button type="button" class="btn sm" data-act="retry-live">Retry</button></li>`;
-      } else {
-        list.innerHTML = '<li class="skel"></li><li class="skel"></li><li class="skel"></li><li class="skel"></li>';
-      }
-      renderSideFoot();
+      list.innerHTML = S.liveErr
+        ? `<li class="state err-state"><b>Live data unavailable.</b> ${esc(S.liveErr)}. <button type="button" class="btn sm" data-act="retry-live">Retry</button></li>`
+        : '<li class="skel"></li><li class="skel"></li><li class="skel"></li><li class="skel"></li>';
       return;
     }
     if (!rows.length) {
-      // never claim "nothing" when the window totals say otherwise (e.g. a filtered request failed)
+      const W = get(S.live, 'warnings') || {};
       const inWin = { critical: W.n_critical, elevated: W.n_elevated, review: W.n_needs_review, all: W.n_in_window }[S.feedFilter];
-      const missing = !S.search && S.hourFilter == null && !S.onlyPoints && num(inWin) > 0;
-      const why = S.search ? `No loaded conjunction matches “${esc(S.search)}”.` :
-        (S.onlyPoints ? 'No listed conjunction has a collision point yet (element sets pending).' :
-          (missing ? `<b>${fmtNum(inWin, 0)}</b> in the window, but none could be loaded${extraErr.length ? ` (${esc(extraErr.join('; '))})` : ''}. <button type="button" class="btn sm" data-act="retry-live">Retry</button>` :
-            (S.feedFilter === 'critical' ? `No Critical conjunctions in the next ${S.windowH} h.` :
-              S.feedFilter === 'review' ? 'Nothing is flagged for review.' : 'No conjunctions in this window.')));
-      list.innerHTML = `<li class="state${missing ? ' err-state' : ''}">${why}${S.feedFilter !== 'all' && !missing ? ' <button type="button" class="btn sm ghost" data-act="feed-all">Show all</button>' : ''}</li>`;
-      renderSideFoot();
+      const missing = !S.search && S.hourFilter == null && num(inWin) > 0;
+      const fname = FILTER_NAME[S.feedFilter];
+      let why;
+      if (S.search) why = `Nothing in the list matches “${esc(S.search)}”. <button type="button" class="btn sm" data-act="clear-search">Clear search</button>`;
+      else if (S.hourFilter != null) why = `No ${fname ? fname + ' ' : ''}conjunctions loaded for TCA ${hourText(S.hourFilter)}. <button type="button" class="btn sm" data-act="clear-hour">Show all hours</button>`;
+      else if (missing) why = `${fmtInt(inWin)} in the window, but none loaded. <button type="button" class="btn sm" data-act="retry-live">Retry</button>`;
+      else if (S.feedFilter === 'critical') why = `No Critical conjunctions in ${esc(winText())}. <button type="button" class="btn sm" data-act="feed-all">Show all</button>`;
+      else if (S.feedFilter === 'review') why = 'Nothing needs review. <button type="button" class="btn sm" data-act="feed-all">Show all</button>';
+      else if (S.feedFilter === 'elevated') why = `No Elevated conjunctions in ${esc(winText())}. <button type="button" class="btn sm" data-act="feed-all">Show all</button>`;
+      else why = 'No conjunctions in this window. Choose a longer window above.';
+      list.innerHTML = `<li class="state${missing ? ' err-state' : ''}">${why}</li>`;
       return;
     }
     const decs = latestDecisions();
-    list.innerHTML = rows.map((r) => cardHtml(r, decs[r.id])).join('');
-    renderSideFoot();
+    list.innerHTML = rows.map((r) => rowHtml(r, decs[r.id])).join('');
   }
-  function cardHtml(r, dec) {
+  function rowHtml(r, dec) {
     const a = r.assessment || {};
     const t = tierOf(r);
+    const tc = TIER_CSS[t] || '';
     const tcaMs = parseT(r.tca);
     const soon = tcaMs != null && tcaMs - Date.now() < 6 * 3.6e6;
-    const s1 = r.sat1 || {}; const s2 = r.sat2 || {};
-    const tle = [num(s1.tle_age_d), num(s2.tle_age_d)];
-    const hit = S.search && matchesSearch(r, S.search);
     const chk = pointCheck(r);
-    const ptTxt = r.tle_status === 'pending' ? ' · point pending TLE' : (r.tle_status === 'missing' ? ' · no TLE' :
-      (chk.known && !r.tca_point ? ' · not plotted' : ''));
-    const pi = pcInfo(r);
-    const ruleCrit = num(a.md_tier) === 2;
-    const pcc = num(a.p_pc_critical);
-    const pcTitle = `P(Pc ≥ 1e-4) = ${pct(pcc)} from the screening model (Pc part of the rule only)${pi.informative ? '' : '. ' + pi.tip}`;
-    const sgChip = chk.known && !chk.agrees ? `<span class="pill sg" title="${esc(chk.text + '. ' + SGP4_DISAGREE_TIP)}">SGP4 disagrees</span>` : '';
-    const estPc = pi.informative
-      ? `<span>est. Pc <b>${pcHtml(a.log_pc)}</b> <small>[${esc(pcText(a.log_pc_lo))}–${esc(pcText(a.log_pc_hi))}]</small></span>`
-      : `<span class="pc-un" title="${esc(pi.tip)}">est. Pc uninformative</span>`;
-    const bar = ruleCrit
-      ? `<div class="card-bar rule" title="SOCRATES miss distances come from TLEs without covariance, so no probability is attached to the distance rule">Critical by distance rule (screening miss ${esc(fmtDist(r.miss_distance))} &lt; 1 km)</div>`
-      : `<div class="card-bar" title="${esc(pcTitle)}"><span>P(Pc≥1e-4)</span><span class="pbar${pi.informative ? '' : ' un'}"><i style="width:${clamp((pcc || 0) * 100, 0, 100).toFixed(1)}%"></i></span><span>${esc(pct(pcc))}</span></div>`;
-    return `<li><div class="card${S.selectedId === r.id ? ' sel' : ''}${hit ? ' hit' : ''}" role="button" tabindex="0" data-sel="${esc(r.id)}" aria-label="${esc(`${TIERS[t] || 'Unknown'}: ${s1.name} and ${s2.name}, miss distance ${fmtDist(r.miss_distance)}${chk.known && !chk.agrees ? ', SGP4 disagrees' : ''}`)}">
-      <div class="card-top">${tierPill(t)}${a.needs_review ? reviewPill() : ''}${sgChip}<span class="cd${soon ? ' soon' : ''}" data-tca="${esc(r.tca)}">${esc(countdown(r.tca))}</span></div>
-      <div class="card-title">${pairHtml(s1.name, s2.name)}</div>
-      <div class="card-meta"><span>miss <b>${esc(fmtDist(r.miss_distance))}</b></span><span><b>${esc(fmtSpeed(r.relative_speed))}</b></span><span title="SOCRATES worst-case Pc over covariance scaling (screening reference)">max Pc <b>${esc(maxPcText(r))}</b></span>${estPc}</div>
-      ${bar}
-      <div class="card-foot"><span>${esc(s1.type || '?')} × ${esc(s2.type || '?')}</span><span>·</span><span title="TLE age (days since epoch) for primary / secondary">TLE ${tle[0] == null ? '?' : tle[0].toFixed(1)} / ${tle[1] == null ? '?' : tle[1].toFixed(1)} d${esc(ptTxt)}</span>${dec ? `<span class="dec">${decBadge(dec.action)}</span>` : ''}</div>
+    const mismatch = chk.known && !chk.agrees;
+    const tags = [];
+    if (a.needs_review && S.feedFilter !== 'review') tags.push(reviewPill());
+    if (mismatch) tags.push(`<span class="tag warn" title="${esc(`${chk.text}. ${MISMATCH_TIP}`)}">Orbit mismatch</span>`);
+    else if (r.tle_status === 'missing') tags.push('<span class="tag" title="No element set found for one of the objects, so there is no collision point or flight path.">No orbit data</span>');
+    if (dec) tags.push(decTag(dec.action));
+    const mx = num(r.max_risk_estimate) != null || isNum(r.max_prob);
+    const label = `${TIERS[t] || 'No tier'}: ${pairText(r)}, miss ${fmtDist(r.miss_distance)}, closest approach ${countdown(r.tca)}${a.needs_review ? ', needs review' : ''}${mismatch ? ', orbit mismatch' : ''}`;
+    return `<li><div class="item ${tc}${S.selectedId === r.id ? ' sel' : ''}" role="button" tabindex="0" data-sel="${esc(r.id)}" title="${esc(pairText(r))}" aria-label="${esc(label)}">
+      <div class="it1"><i class="dot ${tc}"></i><span class="it-name">${pairHtml(get(r, 'sat1.name'), get(r, 'sat2.name'))}</span><span class="it-time${soon ? ' soon' : ''}" data-tca="${esc(r.tca)}">${esc(countdown(r.tca))}</span></div>
+      <div class="it2"><span>Miss <b>${esc(fmtDist(r.miss_distance))}</b></span>${mx ? `<span title="Screening maximum collision probability">Pc ≤ <b>${esc(maxPcText(r))}</b></span>` : ''}${tags.join('')}</div>
     </div></li>`;
   }
-  function renderSideFoot() {
-    const el = $('#side-foot');
+
+  // ================================================================ map legend
+  function renderLegend() {
+    const rows = liveRows();
+    $('#lg-safe').hidden = !rows.some((r) => tierOf(r) === 0 && r.tca_point);
+    const el = $('#lg-count');
     if (!el) return;
-    const d = S.live;
-    const ml = get(S.health, 'model_loaded');
-    const parts = [];
-    if (d) parts.push(`<b>${esc(d.source || 'Live screening')}</b> · data as of ${esc(fmtUTC(d.data_as_of))} (${esc(ago(d.data_as_of))})${d.stale ? ' · <span class="pill st">STALE</span>' : ''}`);
-    parts.push('Screening-grade (TLE/SGP4, no covariance) – confirm with CSpOC CDMs before any manoeuvre.');
-    if (ml === false) parts.push('<span style="color:var(--stale)">Model not loaded on the server: estimates use the max-Pc / physics fallback.</span>');
-    el.innerHTML = parts.join('<br>');
+    el.title = '';
+    if (!S.live) { el.textContent = ''; return; }
+    if (!rows.some((r) => 'tle_status' in r || 'tca_point' in r)) { el.textContent = 'This server does not send collision points.'; return; }
+    const ok = rows.filter((r) => r.tca_point && isNum(r.tca_point.lat)).length;
+    const pend = rows.filter((r) => r.tle_status === 'pending').length;
+    const miss = rows.filter((r) => r.tle_status === 'missing').length;
+    const far = rows.filter((r) => !r.tca_point && pointCheck(r).known && !pointCheck(r).agrees).length;
+    el.textContent = `${ok.toLocaleString('en-US')} of ${rows.length.toLocaleString('en-US')} listed conjunctions are on the map.`;
+    el.title = [pend ? `${pend}: no orbit data yet (fetched in the background; the map updates every minute)` : '',
+      miss ? `${miss}: no orbit data` : '',
+      far ? `${far}: not drawn, because our orbit data puts the objects more than 100 km apart` : ''].filter(Boolean).join('\n');
   }
 
-  // ================================================================ bottom-left KPI card ("Next 24 h")
-  function renderKpiCard() {
-    const w = get(S.live, 'warnings') || null;
-    $('#kpi-title').textContent = `Next ${S.windowH} h`;
-    $('#kpi-sub').textContent = S.live ? `as of ${fmtUTC(S.live.data_as_of, false)}` : '';
-    const v = (k) => (w && isNum(w[k]) ? w[k].toLocaleString('en-US') : '–');
-    $('#kpi-tiles').innerHTML = [
-      ['n_in_window', 'In window', ''], ['n_within_1km', '< 1 km', 'k2'], ['n_within_5km', '≤ 5 km', 'k1'],
-      ['n_critical', 'Critical', 'k2'], ['n_elevated', 'Elevated', 'k1'],
-    ].map(([k, l, c]) => `<div class="kpi ${c}" title="${esc(kpiTip(k))}"><div class="v">${v(k)}</div><div class="l">${l}</div></div>`).join('');
-    renderHoursChart(w);
-    renderInsights(w);
-  }
-  function kpiTip(k) {
-    return {
-      n_in_window: `Conjunctions with TCA in the next ${S.windowH} h (SOCRATES screens to 5 km)${num(get(S.live, 'warnings.n_recent_past')) ? `; ${fmtNum(S.live.warnings.n_recent_past, 0)} whose TCA passed in the last hour are listed in the feed but not counted here` : ''}`,
-      n_within_1km: 'Miss distance below 1 km: Critical by the hard distance rule',
-      n_within_5km: 'Miss distance up to 5 km: at least Elevated by the distance rule',
-      n_critical: 'Operational decision Critical (Pc ≥ 1e-4 or < 1 km)',
-      n_elevated: 'Operational decision Elevated',
-    }[k];
-  }
+  // ================================================================ Plotly helpers
   function plotlyBase(extra) {
     return Object.assign({
       paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
-      font: { family: 'Inter, system-ui, sans-serif', size: 11, color: COLORS.text2 },
-      margin: { l: 44, r: 12, t: 10, b: 34 },
-      hoverlabel: { bgcolor: '#18212B', bordercolor: '#526477', font: { color: COLORS.text, family: 'Inter, sans-serif', size: 12 } },
+      font: { family: FONT, size: 12, color: COLORS.muted },
+      margin: { l: 48, r: 12, t: 10, b: 36 },
+      hoverlabel: { bgcolor: COLORS.panel, bordercolor: COLORS.line, font: { color: COLORS.text, family: FONT, size: 12 } },
       xaxis: { gridcolor: COLORS.grid, zerolinecolor: COLORS.line, linecolor: COLORS.line, tickcolor: COLORS.line },
       yaxis: { gridcolor: COLORS.grid, zerolinecolor: COLORS.line, linecolor: COLORS.line, tickcolor: COLORS.line },
-      legend: { orientation: 'h', x: 0, y: 1.12, font: { size: 11 } },
+      legend: { orientation: 'h', x: 0, y: 1.14, font: { size: 12, color: COLORS.text } },
     }, extra || {});
   }
   const PCFG = { displayModeBar: false, responsive: true };
@@ -799,102 +841,22 @@
     Array.from(el.children).forEach((n) => { if (n.classList && n.classList.contains('state')) n.remove(); });
     Plotly.react(el, data, layout, cfg || PCFG);
   }
-  function noPlotly(el) { el.innerHTML = '<div class="state">Chart unavailable (Plotly failed to load).</div>'; }
-  function renderHoursChart(w) {
-    const el = $('#kpi-hours');
-    if (!el) return;
-    if (!w || !Array.isArray(w.by_hour) || !w.by_hour.length) { if (window.Plotly) { try { Plotly.purge(el); } catch (e) { /* ignore */ } el._cwClick = false; } el.innerHTML = `<div class="state">${S.live ? 'No hourly breakdown returned' : (S.liveErr ? 'No data' : 'Loading…')}</div>`; return; }
-    if (!window.Plotly) { noPlotly(el); return; }
-    const hours = w.by_hour.map((b) => num(b.hour));
-    const now = Date.now();
-    const hourLabel = (h) => `+${h}–${h + 1} h (${fmtUTC(new Date(now + h * 3.6e6).toISOString(), false).slice(0, 5)}Z)`;
-    const mk = (key, name, color) => ({
-      type: 'bar', name, x: hours, y: w.by_hour.map((b) => num(b[key]) || 0),
-      marker: { color, line: { color: COLORS.panel, width: 1 } },
-      customdata: hours.map(hourLabel),
-      hovertemplate: `%{customdata}<br>${name}: <b>%{y}</b><extra></extra>`,
-    });
-    const layout = plotlyBase({
-      barmode: 'stack', bargap: 0.18, margin: { l: 28, r: 6, t: 18, b: 22 },
-      legend: { orientation: 'h', x: 0, y: 1.25, font: { size: 10.5 } },
-      xaxis: { gridcolor: 'rgba(0,0,0,0)', linecolor: COLORS.line, tickfont: { size: 10 }, ticksuffix: 'h', dtick: hours.length > 36 ? 12 : (hours.length > 12 ? 6 : 1), fixedrange: true },
-      yaxis: { gridcolor: COLORS.grid, tickfont: { size: 10 }, fixedrange: true, rangemode: 'tozero' },
-    });
-    plotReact(el, [mk('critical', 'Critical', COLORS.crit), mk('elevated', 'Elevated', COLORS.elev)], layout, PCFG);
-    if (!el._cwClick) {
-      el._cwClick = true;
-      el.on('plotly_click', (ev) => {
-        const p = ev && ev.points && ev.points[0];
-        if (!p) return;
-        S.hourFilter = S.hourFilter === p.x ? null : p.x;
-        if (S.feedFilter !== 'all') setFeedFilter('all');
-        renderFeed();
-      });
-    }
-  }
-  function renderInsights(w) {
-    const el = $('#kpi-insights');
-    if (!el) return;
-    const rows = liveRows();
-    if (!rows.length) { el.innerHTML = ''; return; }
-    const items = [];
-    const closest = sortRows(rows.filter((r) => num(r.hours_to_tca) >= 0), 'md')[0];
-    if (closest) items.push(`Closest approach <b>${esc(fmtDist(closest.miss_distance))}</b>: <a href="#" data-sel="${esc(closest.id)}">${pairHtml(get(closest, 'sat1.name'), get(closest, 'sat2.name'))}</a>, ${esc(countdown(closest.tca))}`);
-    const mxOf = (r) => firstNum(r.max_risk_estimate, get(r, 'assessment.log_pc'), -31);
-    const byPc = rows.filter((r) => num(r.hours_to_tca) >= 0).sort((a, b) => mxOf(b) - mxOf(a))[0];
-    if (byPc && mxOf(byPc) > -29.9) items.push(`Highest SOCRATES max Pc <b>${esc(maxPcText(byPc))}</b>: <a href="#" data-sel="${esc(byPc.id)}">${pairHtml(get(byPc, 'sat1.name'), get(byPc, 'sat2.name'))}</a>`);
-    if (isNum(get(w, 'n_debris_or_rb')) && isNum(get(w, 'n_in_window'))) items.push(`<b>${w.n_debris_or_rb.toLocaleString('en-US')}</b> of ${w.n_in_window.toLocaleString('en-US')} involve debris or a rocket body`);
-    else {
-      const n1 = rows.filter((r) => num(r.miss_distance) < 1000);
-      const deb = n1.filter((r) => /DEBRIS|ROCKET/.test(`${get(r, 'sat2.type', '')} ${get(r, 'sat1.type', '')}`)).length;
-      if (n1.length) items.push(`<b>${deb}</b> of ${n1.length} loaded sub-km approaches involve debris or a rocket body`);
-    }
-    const rv = isNum(get(w, 'n_needs_review')) ? w.n_needs_review : rows.filter((r) => get(r, 'assessment.needs_review') === true).length;
-    if (rv) items.push(`<b>${rv.toLocaleString('en-US')}</b> flagged for analyst review (uncertainty straddles a tier boundary)`);
-    if (isNum(get(w, 'n_critical_by_pc')) && w.n_critical_by_pc > 0) items.splice(1, 0, `<b>${w.n_critical_by_pc.toLocaleString('en-US')}</b> Critical only because of Pc (miss ≥ 1 km: a distance-only rule would miss them)`);
-    const top = (w && Array.isArray(w.top_primaries)) ? w.top_primaries.slice(0, 5) : [];
-    items.splice(4);
-    el.innerHTML = `<ul>${items.map((i) => `<li><span>${i}</span></li>`).join('')}</ul>` +
-      (top.length ? `<div class="prim-chips" aria-label="Primaries with most conjunctions">${top.map((p) => `<button type="button" data-q="${esc(p.norad != null ? p.norad : p.name)}" title="Filter the feed by ${esc(p.name)}${p.norad != null ? ' (NORAD ' + esc(p.norad) + ')' : ''}">${esc(p.name)}<b>${esc(p.count)}</b></button>`).join('')}</div>` : '');
-  }
-
-  // ================================================================ overlay panel (layers)
-  function renderOverlayCounts() {
-    const rows = liveRows();
-    const c = { 0: 0, 1: 0, 2: 0, r: 0 };
-    rows.forEach((r) => { const t = tierOf(r); if (t != null) c[t]++; if (get(r, 'assessment.needs_review')) c.r++; });
-    $$('#layer-grid [data-c]').forEach((el) => { el.textContent = c[el.dataset.c]; });
-    const st = $('#pts-status');
-    if (!st) return;
-    if (!S.live) { st.textContent = S.liveErr ? 'Collision points: no data' : 'Collision points: waiting for data'; return; }
-    const hasStatus = rows.some((r) => 'tle_status' in r || 'tca_point' in r);
-    if (!hasStatus) { st.innerHTML = 'Collision points not provided by the server (<code>points=1</code> unsupported).'; return; }
-    const ok = rows.filter((r) => r.tca_point && isNum(r.tca_point.lat)).length;
-    const pend = rows.filter((r) => r.tle_status === 'pending').length;
-    const miss = rows.filter((r) => r.tle_status === 'missing').length;
-    const dis = rows.filter((r) => { const c = pointCheck(r); return c.known && !c.agrees; });
-    const hidden = dis.filter((r) => !r.tca_point).length;
-    st.innerHTML = `<b>${ok}</b> points drawn` +
-      (dis.length ? ` · <span class="pend" title="${esc(SGP4_DISAGREE_TIP)}">${dis.length} SGP4 ≠ SOCRATES (hollow${hidden ? `; ${hidden} > 100 km apart, not drawn` : ''})</span>` : '') +
-      (pend ? ` · <span class="pend">${pend} pending TLE</span>` : '') +
-      (miss ? ` · ${miss} without TLE` : '');
-    st.title = 'Collision point = midpoint of both objects at our SGP4 closest approach near the SOCRATES TCA. Hollow = our element sets do not reproduce the SOCRATES miss distance. Pending points appear as the server resolves TLEs (re-polled every 60 s).';
-  }
+  function noPlotly(el) { el.innerHTML = '<div class="state">Chart unavailable: Plotly did not load.</div>'; }
 
   // ================================================================ Cesium globe
   const G = { viewer: null, ptsDS: null, selDS: null, ptEntities: new Map(), cartoLayer: null, tileErrors: 0, fellBack: false,
-    hoverId: null, sel: null, lastTick: 0, ringImg: null };
+    hoverId: null, sel: null, lastTick: 0 };
 
   function requestRender() { if (G.viewer) G.viewer.scene.requestRender(); }
 
   function globeFallback(msg) {
     const fb = $('#globe-fallback');
     fb.hidden = false;
-    fb.innerHTML = `<div><b>3D globe unavailable</b>${esc(msg)}<br><br>Every conjunction is still listed in the sidebar, and the detail drawer, reasons and analyst actions work without the globe.</div>`;
+    fb.innerHTML = `<div><b>Globe unavailable</b>${esc(msg)} The list, details and decisions still work.</div>`;
   }
 
   function initGlobe() {
-    if (!window.Cesium) { globeFallback('CesiumJS failed to load from the CDN (offline or blocked).'); return; }
+    if (!window.Cesium) { globeFallback('CesiumJS did not load from the CDN (offline or blocked).'); return; }
     const C = window.Cesium;
     try {
       const bm = BASEMAPS[BASEMAP] || BASEMAPS.esri;
@@ -914,8 +876,8 @@
       });
       G.viewer = viewer;
       const sc = viewer.scene;
-      sc.backgroundColor = C.Color.fromCssColorString('#0B1118');
-      sc.globe.baseColor = C.Color.fromCssColorString('#111A24');
+      sc.backgroundColor = C.Color.fromCssColorString(COLORS.bg);
+      sc.globe.baseColor = C.Color.fromCssColorString(COLORS.panel);
       sc.globe.showGroundAtmosphere = false;
       sc.globe.enableLighting = false;
       sc.fog.enabled = false;
@@ -925,9 +887,9 @@
       sc.screenSpaceCameraController.minimumZoomDistance = 2.0e5;
       sc.screenSpaceCameraController.maximumZoomDistance = 1.2e8;
       viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(C.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
-      viewer.camera.setView({ destination: C.Cartesian3.fromDegrees(100, 12, 2.4e7) });
+      viewer.camera.setView({ destination: C.Cartesian3.fromDegrees(100, 12, 1.75e7) });
 
-      if (bm.ref) {
+      if (bm.ref && QS.get('placenames') === '1') {   // place-name overlay is off by default (clutter)
         try {
           const ref = viewer.imageryLayers.addImageryProvider(new C.UrlTemplateImageryProvider({ url: bm.ref, maximumLevel: 8, credit: bm.credit }));
           ref.alpha = 0.55;
@@ -949,7 +911,6 @@
       G.selDS = new C.CustomDataSource('selection');
       viewer.dataSources.add(G.ptsDS);
       viewer.dataSources.add(G.selDS);
-      G.ringImg = makeRing();
 
       const handler = new C.ScreenSpaceEventHandler(sc.canvas);
       let pending = null; let raf = 0;
@@ -965,6 +926,7 @@
       sc.canvas.addEventListener('mouseleave', () => hideTip());
 
       viewer.clock.onTick.addEventListener(onClockTick);
+      viewer.camera.moveEnd.addEventListener(() => { if (S.layers.labels && !S.selectedId) updatePoints(); });
       sc.morphComplete.addEventListener(() => { requestRender(); });
       updatePoints();
     } catch (e) {
@@ -987,16 +949,6 @@
       requestRender();
     } catch (e) { console.warn('imagery fallback failed', e); }
   }
-  function makeRing() {
-    const c = document.createElement('canvas');
-    c.width = c.height = 96;
-    const g = c.getContext('2d');
-    g.strokeStyle = '#FF5D6C'; g.lineWidth = 6;
-    g.beginPath(); g.arc(48, 48, 40, 0, Math.PI * 2); g.stroke();
-    g.strokeStyle = 'rgba(255,93,108,.45)'; g.lineWidth = 3;
-    g.beginPath(); g.arc(48, 48, 26, 0, Math.PI * 2); g.stroke();
-    return c;
-  }
   function pickId(pos) {
     if (!G.viewer || !pos) return null;
     let picked;
@@ -1017,12 +969,11 @@
     const tip = $('#map-tip');
     const a = r.assessment || {};
     const chk = pointCheck(r);
-    tip.innerHTML = `<div>${tierPill(tierOf(r))} ${a.needs_review ? reviewPill() : ''}</div>
+    tip.innerHTML = `<div>${tierPill(tierOf(r))}${a.needs_review ? ' ' + reviewPill() : ''}</div>
       <div class="tt">${pairHtml(get(r, 'sat1.name'), get(r, 'sat2.name'))}</div>
-      <div class="tm">Miss distance <b>${esc(fmtDist(r.miss_distance))}</b> · max Pc <b>${esc(maxPcText(r))}</b></div>
-      <div class="tm">TCA ${esc(fmtUTC(r.tca))} · ${esc(countdown(r.tca))}</div>
-      ${chk.known ? `<div class="tm ${chk.agrees ? 'hint' : 'warn-txt'}">${chk.agrees ? 'SGP4 reproduces the screening' : '<b>SGP4 disagrees</b>'}: ${esc(chk.text)}</div>` : ''}
-      ${r.tca_point ? `<div class="tm hint">${esc(fixed(r.tca_point.lat, 2))}°, ${esc(fixed(r.tca_point.lon, 2))}°, ${esc(fmtNum(r.tca_point.alt_km, 0))} km alt</div>` : ''}`;
+      <div class="tm">Miss <b>${esc(fmtDist(r.miss_distance))}</b>&emsp;Pc ≤ <b>${esc(maxPcText(r))}</b></div>
+      <div class="tm">TCA <b>${esc(fmtWhen(r.tca))}</b>, ${esc(countdown(r.tca))}</div>
+      ${chk.known && !chk.agrees ? `<div class="tw">Orbit mismatch: ${esc(chk.text)}.</div>` : ''}`;
     tip.hidden = false;
     const box = $('#view-live').getBoundingClientRect();
     const tw = tip.offsetWidth; const th = tip.offsetHeight;
@@ -1037,26 +988,47 @@
   function pointVisible(r) {
     const t = tierOf(r);
     if (t == null) return false;
-    if (t < S.minSev) return false;
-    if (t === 2 && !S.layers.crit) return false;
     if (t === 1 && !S.layers.elev) return false;
-    if (t === 0 && !S.layers.safe) return false;
     return true;
   }
+  // 7-11 px by the screening maximum Pc (1e-10 -> 7 px, 1e-2 and above -> 11 px)
   function pointSize(r) {
     const lp = firstNum(r.max_risk_estimate, get(r, 'assessment.log_pc'));
-    const base = 6 + 10 * clamp(((lp == null ? -30 : lp) + 12) / 12, 0, 1);
-    return Math.round(base);
+    return Math.round(7 + 4 * clamp(((lp == null ? -12 : lp) + 10) / 8, 0, 1));
   }
-  function labelText(r) { return `${get(r, 'sat1.name', '?')} × ${get(r, 'sat2.name', '?')}`; }
+  const labelText = (r) => pairText(r);
+  // compact label on the selected collision point: "TCA 10:53:32 UTC, 60 m" (our propagation when known)
+  function selLabel(r) {
+    const t = S.track && S.selectedId === r.id ? S.track : null;
+    const md = firstNum(t && t.min_range_m, get(r, 'sgp4_check.min_range_m'),
+      r.tca_point && num(r.tca_point.range_km) != null ? r.tca_point.range_km * 1000 : null, r.miss_distance);
+    return `TCA ${fmtUTC((t && t.tca_model) || r.tca, false)}, ${fmtDist(md)}`;
+  }
+  function labelStyle(C, selected) {
+    return {
+      font: `${selected ? 600 : 500} 12px ${FONT}`, fillColor: C.Color.fromCssColorString(COLORS.text),
+      showBackground: true, backgroundColor: C.Color.fromCssColorString(COLORS.panel).withAlpha(0.92),
+      backgroundPadding: new C.Cartesian2(6, 3), pixelOffset: new C.Cartesian2(0, selected ? -14 : -11),
+      horizontalOrigin: C.HorizontalOrigin.CENTER, verticalOrigin: C.VerticalOrigin.BOTTOM,
+    };
+  }
 
+  // Collision points are filled dots: colour = tier, size = risk, 1 px dark outline. A faded dot
+  // (35% alpha) means our orbit data does not reproduce the screening. While an event is selected
+  // (or a search is active) the other dots dim to 40%.
   function updatePoints() {
     if (!G.viewer || !G.ptsDS) return;
     const C = window.Cesium;
     const rows = liveRows().filter((r) => r.tca_point && isNum(r.tca_point.lat) && isNum(r.tca_point.lon));
     const keep = new Set();
-    const labelled = new Set(sortRows(rows.filter((r) => tierOf(r) === 2), 'risk').slice(0, 12).map((r) => r.id));
+    const anySel = !!S.selectedId;
     const q = S.search;
+    const hits = q ? rows.filter((r) => matchesSearch(r, q)) : [];
+    const labelled = new Set(q ? (hits.length <= 8 ? hits.map((r) => r.id) : [])
+      : sortRows(rows.filter((r) => tierOf(r) === 2), 'risk').slice(0, 5).map((r) => r.id));
+    const outline = C.Color.fromCssColorString(COLORS.outline);
+    const sc = G.viewer.scene;
+    const occluder = sc.mode === C.SceneMode.SCENE3D ? new C.EllipsoidalOccluder(C.Ellipsoid.WGS84, G.viewer.camera.positionWC) : null;
     const ents = G.ptsDS.entities;
     ents.suspendEvents();
     rows.forEach((r) => {
@@ -1064,39 +1036,33 @@
       keep.add(key);
       const t = tierOf(r) || 0;
       const color = C.Color.fromCssColorString(TIER_COLOR[t]);
-      const review = !!get(r, 'assessment.needs_review') && S.layers.review;
       const isSel = S.selectedId === r.id;
-      const isHit = q && matchesSearch(r, q);
-      const dim = q && !isHit;
       const chk = pointCheck(r);
-      const hollow = chk.known && !chk.agrees;          // our SGP4 does not reproduce the screening
-      const size = pointSize(r) + (isSel ? 6 : 0) + (isHit ? 3 : 0);
+      const faded = chk.known && !chk.agrees;
+      let alpha = faded ? 0.35 : 1;
+      if (!isSel && (anySel || (q && !matchesSearch(r, q)))) alpha *= 0.4;
       const pos = C.Cartesian3.fromDegrees(r.tca_point.lon, r.tca_point.lat, Math.max(num(r.tca_point.alt_km) || 0, 0) * 1000);
+      const point = {
+        pixelSize: isSel ? 14 : pointSize(r),
+        color: color.withAlpha(alpha),
+        outlineColor: isSel ? C.Color.WHITE : outline.withAlpha(alpha),
+        outlineWidth: isSel ? 2 : 1,
+        disableDepthTestDistance: isSel ? Number.POSITIVE_INFINITY : 0,
+      };
+      const showLabel = isSel || (S.layers.labels && !anySel && labelled.has(r.id) && (!occluder || occluder.isPointVisible(pos)));
+      const text = isSel ? selLabel(r) : labelText(r);
       let e = G.ptEntities.get(key);
-      const outlineColor = isSel || isHit ? C.Color.WHITE : (hollow ? color : (review ? C.Color.fromCssColorString(COLORS.review) : C.Color.fromCssColorString('#0B1118').withAlpha(0.8)));
-      const outlineWidth = isSel ? 3 : (review || isHit || hollow ? 2.5 : 1);
-      const fill = color.withAlpha(hollow ? 0.08 : (dim ? 0.25 : 0.92));
-      const showLabel = S.layers.labels && (labelled.has(r.id) || isSel || isHit);
       if (!e) {
-        e = ents.add({
-          id: key, position: pos,
-          point: { pixelSize: size, color: fill, outlineColor, outlineWidth },
-          label: {
-            text: labelText(r), font: '600 11px Inter, sans-serif', fillColor: C.Color.fromCssColorString(COLORS.text),
-            showBackground: true, backgroundColor: C.Color.fromCssColorString('#18212B').withAlpha(0.85),
-            backgroundPadding: new C.Cartesian2(6, 3), pixelOffset: new C.Cartesian2(0, -16),
-            horizontalOrigin: C.HorizontalOrigin.CENTER, verticalOrigin: C.VerticalOrigin.BOTTOM,
-            show: showLabel, scaleByDistance: new C.NearFarScalar(2e6, 1.0, 3e7, 0.75),
-          },
-        });
+        e = ents.add({ id: key, position: pos, point,
+          label: Object.assign(labelStyle(C, isSel), { text, show: showLabel, disableDepthTestDistance: Number.POSITIVE_INFINITY }) });
         G.ptEntities.set(key, e);
       } else {
         e.position = pos;
-        e.point.pixelSize = size;
-        e.point.color = fill;
-        e.point.outlineColor = outlineColor;
-        e.point.outlineWidth = outlineWidth;
-        e.label.text = labelText(r);
+        Object.keys(point).forEach((k) => { e.point[k] = point[k]; });
+        const ls = labelStyle(C, isSel);
+        e.label.font = ls.font;
+        e.label.pixelOffset = ls.pixelOffset;
+        e.label.text = text;
         e.label.show = showLabel;
       }
       e.show = pointVisible(r) || isSel;
@@ -1105,7 +1071,6 @@
       if (!keep.has(key)) { ents.remove(e); G.ptEntities.delete(key); }
     }
     ents.resumeEvents();
-    G.ptsDS.show = S.layers.points;
     requestRender();
   }
 
@@ -1140,7 +1105,7 @@
       dest = C.Cartesian3.add(target, C.Cartesian3.add(C.Cartesian3.multiplyByScalar(up, H, new C.Cartesian3()),
         C.Cartesian3.multiplyByScalar(east, shift, new C.Cartesian3()), new C.Cartesian3()), new C.Cartesian3());
     }
-    G.viewer.camera.flyTo({ destination: dest, orientation: { heading: 0, pitch: -Math.PI / 2, roll: 0 }, duration: 1.4 });
+    G.viewer.camera.flyTo({ destination: dest, orientation: { heading: 0, pitch: -Math.PI / 2, roll: 0 }, duration: REDUCED_MOTION ? 0 : 1.4 });
   }
   function drawTrack(r, t) {
     if (!G.viewer) return;
@@ -1164,50 +1129,41 @@
     const A = mk(t.a || {}); const B = mk(t.b || {});
     if (A.positions.length < 2 || B.positions.length < 2) throw new Error('track has too few samples');
     const colA = C.Color.fromCssColorString(COLORS.a); const colB = C.Color.fromCssColorString(COLORS.b);
-    const showLbl = S.layers.labels;
+    // flight paths keep a subtle glow; small moving markers show where each object is now
     const path = (id, pos, col) => G.selDS.entities.add({
-      id, show: S.layers.paths,
-      polyline: { positions: pos, width: 5, arcType: C.ArcType.NONE,
-        material: new C.PolylineGlowMaterialProperty({ glowPower: 0.22, taperPower: 1.0, color: col }) },
+      id,
+      polyline: { positions: pos, width: 4, arcType: C.ArcType.NONE,
+        material: new C.PolylineGlowMaterialProperty({ glowPower: 0.2, taperPower: 1.0, color: col }) },
     });
     path('sel:path-a', A.positions, colA);
     path('sel:path-b', B.positions, colB);
     const marker = (id, prop, col, name) => G.selDS.entities.add({
       id, position: prop,
-      point: { pixelSize: 10, color: col, outlineColor: C.Color.WHITE, outlineWidth: 2 },
-      label: { text: name || '', font: '600 12px Inter, sans-serif', fillColor: col, showBackground: true,
-        backgroundColor: C.Color.fromCssColorString('#18212B').withAlpha(0.85), backgroundPadding: new C.Cartesian2(6, 3),
-        pixelOffset: new C.Cartesian2(12, 0), horizontalOrigin: C.HorizontalOrigin.LEFT, verticalOrigin: C.VerticalOrigin.CENTER, show: showLbl },
+      point: { pixelSize: 8, color: col, outlineColor: C.Color.fromCssColorString(COLORS.outline), outlineWidth: 1 },
+      label: { text: name || '', font: `500 12px ${FONT}`, fillColor: col, showBackground: true,
+        backgroundColor: C.Color.fromCssColorString(COLORS.panel).withAlpha(0.92), backgroundPadding: new C.Cartesian2(6, 3),
+        pixelOffset: new C.Cartesian2(10, 0), horizontalOrigin: C.HorizontalOrigin.LEFT, verticalOrigin: C.VerticalOrigin.CENTER, show: S.layers.labels },
     });
     marker('sel:obj-a', A.prop, colA, get(t, 'a.name') || get(r, 'sat1.name'));
     marker('sel:obj-b', B.prop, colB, get(t, 'b.name') || get(r, 'sat2.name'));
 
-    // collision point at the model's closest approach (midpoint of both objects), fallback SOCRATES point
+    // The selected collision point is the row's own dot (restyled in updatePoints). Only when the row
+    // has no point do we add one at our closest approach (midpoint of both objects).
     const tcaIso = t.tca_model || r.tca;
     const tcaJd = C.JulianDate.fromIso8601(String(tcaIso));
-    let tcaPos = null;
-    const pa = A.prop.getValue(tcaJd); const pb = B.prop.getValue(tcaJd);
-    if (pa && pb) tcaPos = C.Cartesian3.midpoint(pa, pb, new C.Cartesian3());
-    else if (r.tca_point) tcaPos = C.Cartesian3.fromDegrees(r.tca_point.lon, r.tca_point.lat, (num(r.tca_point.alt_km) || 0) * 1000);
-    const md = num(t.min_range_m) != null ? t.min_range_m : r.miss_distance;
-    if (tcaPos) {
-      const t0 = performance.now();
-      const phase = () => ((performance.now() - t0) % 1600) / 1600;
-      G.selDS.entities.add({
-        id: 'sel:tca', position: tcaPos,
-        billboard: {
-          image: G.ringImg,
-          scale: new C.CallbackProperty(() => 0.35 + 0.55 * phase(), false),
-          color: new C.CallbackProperty(() => C.Color.WHITE.withAlpha(1 - 0.85 * phase()), false),
-          disableDepthTestDistance: Number.POSITIVE_INFINITY,
-        },
-        point: { pixelSize: 9, color: C.Color.fromCssColorString(COLORS.crit), outlineColor: C.Color.WHITE, outlineWidth: 2, disableDepthTestDistance: Number.POSITIVE_INFINITY },
-        label: { text: `TCA ${fmtUTC(tcaIso, false)} · SGP4 ${fmtDist(md)}${pointCheck(r).agrees === false ? ` (SOCRATES ${fmtDist(r.miss_distance)})` : ''}`, font: '700 12px Inter, sans-serif',
-          fillColor: C.Color.fromCssColorString('#FFD6DA'), showBackground: true,
-          backgroundColor: C.Color.fromCssColorString('#3A1D25').withAlpha(0.92), backgroundPadding: new C.Cartesian2(7, 4),
-          pixelOffset: new C.Cartesian2(0, -26), verticalOrigin: C.VerticalOrigin.BOTTOM, disableDepthTestDistance: Number.POSITIVE_INFINITY, show: true },
-      });
+    const hasDot = r.tca_point && isNum(r.tca_point.lat) && isNum(r.tca_point.lon);
+    if (!hasDot) {
+      const pa = A.prop.getValue(tcaJd); const pb = B.prop.getValue(tcaJd);
+      if (pa && pb) {
+        const C2 = C.Color.fromCssColorString(TIER_COLOR[tierOf(r) || 0]);
+        G.selDS.entities.add({
+          id: 'sel:tca', position: C.Cartesian3.midpoint(pa, pb, new C.Cartesian3()),
+          point: { pixelSize: 14, color: C2, outlineColor: C.Color.WHITE, outlineWidth: 2, disableDepthTestDistance: Number.POSITIVE_INFINITY },
+          label: Object.assign(labelStyle(C, true), { text: selLabel(r), show: true, disableDepthTestDistance: Number.POSITIVE_INFINITY }),
+        });
+      }
     }
+    updatePoints();   // refresh the selected dot's label with our closest approach
 
     const start = C.JulianDate.compare(A.times[0], B.times[0]) > 0 ? A.times[0] : B.times[0];
     const stop = C.JulianDate.compare(A.times[A.times.length - 1], B.times[B.times.length - 1]) < 0 ? A.times[A.times.length - 1] : B.times[B.times.length - 1];
@@ -1220,7 +1176,7 @@
     clk.clockRange = C.ClockRange.LOOP_STOP;
     clk.clockStep = C.ClockStep.SYSTEM_CLOCK_MULTIPLIER;
     clk.multiplier = G.speed || 60;
-    clk.shouldAnimate = true;
+    clk.shouldAnimate = !REDUCED_MOTION;
     G.viewer.scene.requestRenderMode = false;
     G.sel = { start, stop, tcaJd, positions: A.positions.concat(B.positions), span: C.JulianDate.secondsDifference(stop, start) };
     $('#playbar').hidden = false;
@@ -1241,7 +1197,9 @@
     const sign = dt < 0 ? '−' : '+';
     const a = Math.abs(dt);
     const iso = C.JulianDate.toIso8601(clk.currentTime, 0);
-    $('#pb-time').textContent = `T${sign}${pad(Math.floor(a / 60))}:${pad(Math.floor(a % 60))} · ${fmtUTC(iso, false)}`;
+    const pbt = $('#pb-time');
+    pbt.textContent = `T${sign}${pad(Math.floor(a / 60))}:${pad(Math.floor(a % 60))}`;
+    pbt.title = `${fmtUTC(iso, false)}; T is the time from closest approach`;
     const scrub = $('#pb-scrub');
     if (!G.scrubbing) scrub.value = String(Math.round(1000 * C.JulianDate.secondsDifference(clk.currentTime, G.sel.start) / Math.max(1, G.sel.span)));
     const play = $('#pb-play');
@@ -1253,56 +1211,34 @@
     if (!G.viewer || !G.sel) return;
     const C = window.Cesium;
     const bs = C.BoundingSphere.fromPoints(G.sel.positions);
-    G.viewer.camera.flyToBoundingSphere(bs, { duration: 1.2, offset: new C.HeadingPitchRange(0, -1.2, bs.radius * 3.2) });
+    G.viewer.camera.flyToBoundingSphere(bs, { duration: REDUCED_MOTION ? 0 : 1.2, offset: new C.HeadingPitchRange(0, -1.2, bs.radius * 3.2) });
   }
   function applyLayerVisibility() {
     if (!G.viewer) return;
-    G.ptsDS.show = S.layers.points;
     G.selDS.entities.values.forEach((e) => {
-      if (e.id.startsWith('sel:path')) e.show = S.layers.paths;
       if (e.id.startsWith('sel:obj') && e.label) e.label.show = S.layers.labels;
     });
     updatePoints();
   }
 
   // ================================================================ select / deselect a live event
-  // Map overlays (Layers, Next-N-h) cover the encounter; fold them away while an event is open and
-  // restore whatever the analyst had before.
-  const OVERLAYS = [['#ovl-toggle', '#overlay'], ['#kpi-toggle', '#kpi-card']];
-  function setOverlayCollapsed(btnSel, boxSel, c) {
-    const box = $(boxSel), btn = $(btnSel);
-    if (!box || !btn) return;
-    box.classList.toggle('collapsed', c);
-    btn.innerHTML = c ? '+' : '&minus;';
-    btn.setAttribute('aria-expanded', c ? 'false' : 'true');
-  }
-  function foldOverlays() {
-    if (S.overlaysBefore) return;
-    S.overlaysBefore = OVERLAYS.map(([, box]) => !!($(box) && $(box).classList.contains('collapsed')));
-    OVERLAYS.forEach(([btn, box]) => setOverlayCollapsed(btn, box, true));
-  }
-  function restoreOverlays() {
-    if (!S.overlaysBefore) return;
-    OVERLAYS.forEach(([btn, box], i) => setOverlayCollapsed(btn, box, S.overlaysBefore[i]));
-    S.overlaysBefore = null;
-    setTimeout(resizePlots, 30);
-  }
   function selectEvent(id, opts) {
     opts = opts || {};
     const r = rowById(id);
     if (!r) return;
-    foldOverlays();
     try { history.replaceState(null, '', `#live/${encodeURIComponent(id)}`); } catch (e) { /* ignore */ }
     if (S.view !== 'live') setView('live');
     const same = S.selectedId === id;
     S.selectedId = id;
     S.selectedRow = r;
-    $$('#feed .card.sel').forEach((c) => c.classList.remove('sel'));
-    const card = $(`#feed .card[data-sel="${CSS.escape(id)}"]`);
+    $$('#feed .item.sel').forEach((c) => c.classList.remove('sel'));
+    const card = $(`#feed .item[data-sel="${CSS.escape(id)}"]`);
     if (card) {
       card.classList.add('sel');
-      if (opts.scroll !== false) card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      if (opts.scroll !== false && window.innerWidth > 900) card.scrollIntoView({ block: 'nearest', behavior: REDUCED_MOTION ? 'auto' : 'smooth' });
     }
+    // phones: the drawer is a bottom sheet, so bring the map into view above it
+    if (window.innerWidth <= 900) $('#view-live').scrollIntoView({ block: 'start', behavior: REDUCED_MOTION ? 'auto' : 'smooth' });
     openDetail();
     updatePoints();
     if (opts.fly !== false) flyToRow(r);
@@ -1315,10 +1251,9 @@
     S.selectedId = null;
     S.selectedRow = null;
     S.track = null; S.trackErr = null; S.trackLoading = false; S.trackSeq++;
-    $$('#feed .card.sel').forEach((c) => c.classList.remove('sel'));
+    $$('#feed .item.sel').forEach((c) => c.classList.remove('sel'));
     closeDetail();
     clearSelectionGraphics();
-    restoreOverlays();
     updatePoints();
   }
   async function loadTrack(r) {
@@ -1328,13 +1263,13 @@
     renderDetail();
     const a = get(r, 'sat1.norad'); const b = get(r, 'sat2.norad');
     if (a == null || b == null || !r.tca) {
-      S.trackLoading = false; S.trackErr = 'missing NORAD ids or TCA'; renderDetail(); return;
+      S.trackLoading = false; S.trackErr = 'NORAD ids or closest-approach time missing'; renderDetail(); return;
     }
     try {
       const t = await api('/api/live/track', { a, b, tca: r.tca, span_min: 50 });
       if (seq !== S.trackSeq) return;
       S.track = t;
-      try { drawTrack(r, t); if (!(r.tca_point && isNum(r.tca_point.lat))) fitPaths(); } catch (e) { console.warn(e); S.trackErr = `could not draw the track (${e.message})`; }
+      try { drawTrack(r, t); if (!(r.tca_point && isNum(r.tca_point.lat))) fitPaths(); } catch (e) { console.warn(e); S.trackErr = `could not draw the paths (${e.message})`; }
     } catch (e) {
       if (seq !== S.trackSeq) return;
       S.trackErr = e.message || String(e);
@@ -1357,40 +1292,49 @@
   }
 
   // ================================================================ detail drawer
-  // SOCRATES' element set (epoch = TCA - DSE) and ours (bulk / per-object GP) are labelled separately:
-  // when they differ, our SGP4 and the SOCRATES screening can disagree.
-  function objCard(o, cls, label, trackObj, tca, shiftH) {
+  const sentenceCase = (s) => { s = String(s || '').trim(); return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : ''; };
+  function objRow(o, cls, trackObj, tca) {
     o = o || {};
     const st = o.status == null ? '' : String(o.status);
-    const sAge = num(o.tle_age_d);
     const tcaMs = parseT(tca);
-    const sEpochMs = sAge != null && tcaMs != null ? tcaMs - sAge * 864e5 : null;
-    let ourMs = trackObj ? parseT(trackObj.tle_epoch) : null;
-    if (ourMs == null && sEpochMs != null && num(shiftH) != null) ourMs = sEpochMs + shiftH * 3.6e6;
-    const ourAge = ourMs != null && tcaMs != null ? (tcaMs - ourMs) / 864e5 : null;
-    const dh = ourMs != null && sEpochMs != null ? (ourMs - sEpochMs) / 3.6e6 : null;
-    const iso = (ms) => new Date(ms).toISOString();
-    return `<div class="obj ${cls}">
-      <div class="hint">${label}</div>
-      <div class="on">${esc(o.name || '?')}</div>
-      <div class="om">NORAD <b>${esc(o.norad != null ? o.norad : '?')}</b> · <b>${esc(o.type || 'type ?')}</b></div>
-      <div class="om">${esc(STATUS_TEXT[st] || `Status “${st}”`)}${st ? ` <span class="muted">[${esc(st)}]</span>` : ''}</div>
-      <div class="om" title="SOCRATES DSE: days from the epoch of the element set SOCRATES screened with to TCA">SOCRATES TLE age at TCA <b>${esc(sAge != null ? sAge.toFixed(1) + ' d' : '?')}</b>${sEpochMs != null ? ` <small>(epoch ≈ ${esc(fmtUTC(iso(sEpochMs)))})</small>` : ''}</div>
-      ${ourMs != null ? `<div class="om" title="Element set used for our SGP4 flight paths and collision point">Our TLE epoch <b>${esc(fmtUTC(iso(ourMs)))}</b>${ourAge != null ? ` <small>(age ${esc(ourAge.toFixed(1))} d at TCA)</small>` : ''}</div>` : ''}
-      ${dh != null ? `<div class="om">Epoch difference <b>${dh >= 0 ? '+' : '−'}${esc(Math.abs(dh).toFixed(1))} h</b> <small>(${dh >= 0 ? 'ours newer' : 'ours older'})</small></div>` : ''}
-      ${trackObj && trackObj.elements_source ? `<div class="om"><small>${esc(trackObj.elements_source)}</small></div>` : ''}
-      ${trackObj && trackObj.tle_stale ? `<div class="om warn-txt">Element set STALE: refresh failed, cached copy fetched ${esc(fmtUTC(trackObj.tle_fetched_at))}</div>` : ''}
+    const ourMs = trackObj ? parseT(trackObj.tle_epoch) : null;
+    const age = ourMs != null && tcaMs != null ? (tcaMs - ourMs) / 864e5 : num(o.tle_age_d);
+    return `<div class="obj">
+      <div class="obj-name"><i class="ln ${cls}" aria-hidden="true"></i>${esc(o.name || '?')}</div>
+      <div class="obj-meta"><span>NORAD <b>${esc(o.norad != null ? o.norad : '?')}</b></span><span>${esc(o.type ? sentenceCase(o.type) : 'Type unknown')}</span><span>${esc(STATUS_TEXT[st] || 'Status unknown')}</span>${age != null ? `<span title="Days from the element set epoch to the closest approach">Orbit data <b>${esc(age.toFixed(1))} days</b> old</span>` : ''}</div>
+      ${trackObj && trackObj.tle_stale ? `<div class="warn-line">Orbit data refresh failed; using the copy fetched ${esc(fmtUTC(trackObj.tle_fetched_at))}.</div>` : ''}
     </div>`;
   }
   function stackBar(p) {
     p = Array.isArray(p) ? p.map((x) => num(x) || 0) : [0, 0, 0];
-    const seg = (i) => (p[i] > 0.001 ? `<div class="s${i}" style="flex:${p[i]}" title="P(${TIERS[i]}) = ${pct(p[i], 1)}">${p[i] >= 0.12 ? pct(p[i]) : ''}</div>` : '');
+    const seg = (i) => (p[i] > 0.001 ? `<div class="s${i}" style="flex:${p[i]}" title="P(${TIERS[i]}) = ${pct(p[i], 1)}"></div>` : '');
     return `<div class="stack" role="img" aria-label="P(Safe) ${pct(p[0])}, P(Elevated) ${pct(p[1])}, P(Critical) ${pct(p[2])}">${seg(0)}${seg(1)}${seg(2)}</div>
-      <div class="stack-legend"><span><i class="dot t0"></i>Safe ${pct(p[0], 1)}</span><span><i class="dot t1"></i>Elevated ${pct(p[1], 1)}</span><span><i class="dot t2"></i>Critical ${pct(p[2], 1)}</span></div>`;
+      <div class="stack-legend"><span><i class="dot t0"></i>Safe <b>${pct(p[0], 1)}</b></span><span><i class="dot t1"></i>Elevated <b>${pct(p[1], 1)}</b></span><span><i class="dot t2"></i>Critical <b>${pct(p[2], 1)}</b></span></div>`;
   }
+  // reasons are API text, shown verbatim as a plain list
   function reasonsHtml(reasons) {
-    if (!Array.isArray(reasons) || !reasons.length) return '<p class="hint">No reasons returned by the model.</p>';
-    return `<ol class="reasons">${reasons.map((x) => `<li>${esc(x)}</li>`).join('')}</ol>`;
+    if (!Array.isArray(reasons) || !reasons.length) return '<p class="muted">The model returned no reasons.</p>';
+    return `<ul class="reasons">${reasons.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  }
+  // one sentence, in the tier colour, built from the tier, the distance rule and the numbers
+  function verdictText(r) {
+    const a = r.assessment || {};
+    const t = tierOf(r);
+    const md = num(r.miss_distance);
+    const mdt = num(a.md_tier);
+    const mx = num(r.max_risk_estimate);
+    if (t === 2) {
+      if (mdt === 2 && md != null) return `Critical: the objects pass ${fmtDist(md)} apart, under the 1\u00a0km limit.`;
+      if (mx != null && mx >= -4) return `Critical: collision probability up to ${pcText(mx)}, above the 1e-4 limit.`;
+      return `Critical: the model gives a ${pct(a.p_pc_critical)} chance that the collision probability is 1e-4 or more.`;
+    }
+    if (t === 1) {
+      if (mdt === 1 && md != null) return `Elevated: the objects pass ${fmtDist(md)} apart, inside the 5\u00a0km warning distance.`;
+      if (mx != null && mx >= -6) return `Elevated: collision probability up to ${pcText(mx)}, above the 1e-6 limit.`;
+      return `Elevated: the model gives a ${pct(a.p_pc_elevated)} chance that the collision probability is 1e-6 or more.`;
+    }
+    if (t === 0) return `Safe: the objects pass ${fmtDist(md)} apart and the collision probability stays under 1e-6.`;
+    return 'No tier: the model returned no assessment for this conjunction.';
   }
   function renderDetail() {
     const el = $('#detail');
@@ -1398,81 +1342,62 @@
     if (!el || !r) return;
     const a = r.assessment || {};
     const t = S.track;
+    const tier = tierOf(r);
     const s1 = r.sat1 || {}; const s2 = r.sat2 || {};
     const keepScroll = el.scrollTop;
     const oldNote = $('.act-note', el);
     const prevNote = oldNote ? oldNote.value : '';
     const noteFocused = oldNote && document.activeElement === oldNote;
-    const ptxt = r.tca_point ? `${fixed(r.tca_point.lat, 2)}°, ${fixed(r.tca_point.lon, 2)}°, ${fmtNum(r.tca_point.alt_km, 0)} km` :
-      (r.tle_status === 'pending' ? 'pending TLE download' : (r.tle_status === 'missing' ? 'no TLE available' :
-        (r.tle_status === 'inconsistent' ? 'not drawn: with our element sets the objects stay > 100 km apart' : 'not provided')));
-    let trackHtml;
-    if (S.trackLoading) trackHtml = '<div class="loading">Propagating both objects with SGP4…</div>';
-    else if (S.trackErr) trackHtml = `<div class="err-box"><b>Trajectory unavailable.</b> ${esc(S.trackErr)}<br><button type="button" class="btn sm" data-act="retry-track" style="margin-top:6px">Retry</button></div>`;
-    else if (t) trackHtml = `<div id="rtn-chart" class="rtn-chart" aria-label="Relative trajectory of the secondary in the primary's RTN frame"></div>
-      <div class="chart-note">B relative to A in A's RTN frame, projected on the T (along-track) / N (cross-track) plane.${Array.isArray(t.rtn_at_tca_m) ? ` Radial offset at TCA: ${esc(fmtDist(t.rtn_at_tca_m[0]))}.` : ''}${t.mock_note ? ` <b>${esc(t.mock_note)}.</b>` : ''}</div>`;
-    else trackHtml = '';
-    const modelMin = t && num(t.min_range_m) != null ? `${fmtDist(t.min_range_m)}${t.tca_model ? ` <small>at ${esc(fmtUTC(t.tca_model, false))}</small>` : ''}` : (S.trackLoading ? '<small>computing…</small>' : '–');
-    const decs = decisionsFor('live', r.id);
     const chk = pointCheck(r);
     const pi = pcInfo(r);
-    const shifts = get(r, 'sgp4_check.epoch_shift_h') || [];
-    const sh = (x) => (num(x) != null ? `${x >= 0 ? '+' : ''}${x.toFixed(1)} h` : '?');
-    const shiftTxt = shifts.some((x) => num(x) != null) ? ` Element-set epochs (ours minus SOCRATES'): A ${sh(shifts[0])}, B ${sh(shifts[1])}.` : '';
-    const consistency = chk.known && !chk.agrees ? `<div class="screen-warn bad-warn"><b>SGP4 disagrees with the screening.</b> ${esc(chk.text)} (distance rule: ${esc(TIERS[mdTier(chk.sgp)])} vs ${esc(TIERS[mdTier(chk.miss)])}).${esc(shiftTxt)} The element sets differ (newer TLE, or a manoeuvre since screening): re-screen before acting.${r.tca_point ? '' : ' No collision point is drawn: with our element sets the objects stay more than 100 km apart.'}</div>` : '';
-    const edgeWarn = t && t.min_at_edge ? '<div class="hint" style="color:var(--stale)">Closest approach is at the edge of the propagated window: the true minimum lies outside ±25 min.</div>' : '';
+    const ours = firstNum(t && t.min_range_m, get(r, 'sgp4_check.min_range_m'));
+    const tcaMs = parseT(r.tca);
+
+    let trackHtml;
+    if (S.trackLoading) trackHtml = '<div class="loading">Computing flight paths…</div>';
+    else if (S.trackErr) trackHtml = `<p class="err-box"><b>Flight paths unavailable.</b> ${esc(S.trackErr)}. <button type="button" class="btn sm" data-act="retry-track">Retry</button></p>`;
+    else if (t) trackHtml = `<div id="rtn-chart" class="rtn-chart" aria-label="Path of object B relative to object A, along-track against cross-track"></div>${t.mock_note ? `<p class="chart-note">${esc(t.mock_note)}.</p>` : ''}`;
+    else trackHtml = '';
+    const edgeWarn = t && t.min_at_edge ? '<p class="warn-line">The closest approach is at the edge of the computed window; the true minimum may lie outside it.</p>' : '';
+
+    // our orbit data vs the screening: one line, only when they disagree
+    let mismatch = '';
+    if (chk.known && !chk.agrees) {
+      const shifts = get(r, 'sgp4_check.epoch_shift_h') || [];
+      const ourNewer = shifts.length ? shifts.every((x) => num(x) == null || x >= 0) : (t && parseT(get(t, 'a.tle_epoch')) != null);
+      mismatch = `<p class="mismatch" title="${esc(chk.text + '. ' + MISMATCH_TIP)}">Our ${ourNewer ? 'newer ' : ''}orbit data puts them ${esc(fmtDist(chk.sgp))} apart; re-screen before acting.</p>`;
+    }
+
     const M = get(S.live, 'model') || {};
     const swu = get(S.live, 'space_weather_used') || {};
     const prov = [r.provenance,
-      S.live && `Assessed by the ${M.kind || 'screening model'}${M.trained === false ? ' (NOT trained: fallback estimates)' : ''}${M.trained_at ? `, trained ${fmtUTC(M.trained_at)}` : ''}, at ${fmtUTC(S.live.assessed_at)}, with F10.7 ${fmtNum(swu.F10, 1)} / Ap ${fmtNum(swu.AP, 1)}${swu.stale ? ' (space weather STALE)' : ''}`,
-      t && t.propagator, t && get(t, 'a.tle_epoch') && `Our TLE epochs A ${fmtUTC(get(t, 'a.tle_epoch'))}, B ${fmtUTC(get(t, 'b.tle_epoch'))}`,
-      S.live && `Feed fetched ${fmtUTC(S.live.fetched_at)}${S.live.stale ? ' (STALE)' : ''}`].filter(Boolean);
-    const ruleCrit = num(a.md_tier) === 2;
-    const probHtml = ruleCrit
-      ? `<h4>Tier</h4><div class="rule-box"><b>Critical by the distance rule</b>: screening miss ${esc(fmtDist(r.miss_distance))} &lt; 1 km. No probability is attached: SOCRATES miss distances come from TLEs without covariance, and the rule treats them as exact.</div>
-        <div class="hint" style="margin-top:6px">Pc part of the rule only: P(Pc ≥ 1e-4) = ${esc(pct(a.p_pc_critical, 1))}${pi.informative ? '' : ' (uninformative, see below)'}</div>`
-      : `<h4>Tier probabilities <small class="muted">(given the screening miss distance is exact)</small></h4>${stackBar(a.p_tier)}`;
-    const ourMin = t && num(t.min_range_m) != null ? modelMin : (chk.known && get(r, 'sgp4_check.min_range_m') != null ? `${esc(fmtDist(chk.sgp))} <small>(±2 min search)</small>` : modelMin);
+      S.live && `Assessed by the ${M.kind || 'screening model'}${M.trained === false ? ' (not trained: fallback estimates)' : ''}${M.trained_at ? `, trained ${fmtUTC(M.trained_at)}` : ''}, at ${fmtUTC(S.live.assessed_at)}`,
+      S.live && `Space weather used: F10.7 ${fmtNum(swu.F10, 1)} sfu, Ap ${fmtNum(swu.AP, 1)}${swu.stale ? ' (cached copy)' : ''}`,
+      t && t.propagator,
+      t && get(t, 'a.elements_source') && `Orbit data, object A: ${get(t, 'a.elements_source')}`,
+      t && get(t, 'b.elements_source') && `Orbit data, object B: ${get(t, 'b.elements_source')}`,
+      r.tca_point && `Collision point: ${fixed(r.tca_point.lat, 2)}°, ${fixed(r.tca_point.lon, 2)}°, ${fmtNum(r.tca_point.alt_km, 0)} km altitude`,
+      S.live && `Feed fetched ${fmtUTC(S.live.fetched_at)}${S.live.stale ? ' (cached copy)' : ''}`].filter(Boolean);
 
     el.innerHTML = `
       <div class="dt-head">
-        <div class="row"><div class="dt-title">${pairHtml(s1.name, s2.name)}</div>
-          <button type="button" class="mini-btn" data-act="deselect" aria-label="Close detail (Esc)" title="Close (Esc)">&times;</button></div>
-        <div class="dt-badges">${tierPill(tierOf(r), 'Decision')}${a.needs_review ? reviewPill() : ''}
-          <span class="pill nt" title="Tier from the miss-distance rule alone">Distance rule: ${esc(TIERS[num(a.md_tier)] || '?')}</span>
-          ${chk.known ? (chk.agrees ? `<span class="pill nt" title="${esc(chk.text)}">SGP4 reproduces</span>` : `<span class="pill sg" title="${esc(chk.text + '. ' + SGP4_DISAGREE_TIP)}">SGP4 disagrees</span>`) : ''}
-          ${a.heads_disagree ? '<span class="pill rv" title="The classifier alone raised the tier while the Pc quantiles stay below its threshold">Model heads disagree</span>' : ''}
-          ${S.live && S.live.stale ? '<span class="pill st">Stale data</span>' : ''}</div>
-        ${consistency}
+        <h2 class="dt-title">${pairHtml(s1.name, s2.name)}</h2>
+        <button type="button" class="icon-btn" data-act="deselect" aria-label="Close (Esc)" title="Close (Esc)">&times;</button>
       </div>
-      <div class="dt-sec"><div class="objs">${objCard(s1, 'a', 'Primary (A)', t && t.a, r.tca, shifts[0])}${objCard(s2, 'b', 'Secondary (B)', t && t.b, r.tca, shifts[1])}</div></div>
-      <div class="dt-sec">
-        ${probHtml}
-        <dl class="kv" style="margin-top:10px">
-          <dt>SOCRATES max Pc</dt><dd><b>${esc(isNum(r.max_prob) ? (r.max_prob > 0 ? r.max_prob.toExponential(1) : '0') : '–')}</b> <small>worst case over covariance scaling · dilution ${esc(isNum(r.dilution_km) ? fmtDist(r.dilution_km * 1000) : '–')}</small></dd>
-          <dt>Est. Pc (median)</dt><dd>${pi.informative ? `${pcHtml(a.log_pc)} <small>log10 ${esc(fixed(a.log_pc, 2))}</small>` : `<span class="pc-un">uninformative</span> <small class="muted">${esc(pcText(a.log_pc))}</small>`}</dd>
-          <dt>80% interval</dt><dd>${esc(pcText(a.log_pc_lo))} – ${esc(pcText(a.log_pc_hi))}${pi.width != null ? ` <small>(${esc(pi.width.toFixed(1))} decades)</small>` : ''}</dd>
-          <dt>P(Pc ≥ 1e-6) / P(Pc ≥ 1e-4)</dt><dd>${esc(pct(a.p_pc_elevated, 1))} / ${esc(pct(a.p_pc_critical, 1))}</dd>
-          ${pi.informative ? '' : `<dt></dt><dd><small class="warn-txt">${esc(pi.tip)}</small></dd>`}
-          <dt>Miss distance (SOCRATES)</dt><dd>${esc(fmtDist(r.miss_distance))}</dd>
-          <dt>Our min range (SGP4)</dt><dd>${ourMin}</dd>
-          <dt>Relative speed</dt><dd>${esc(fmtSpeed(r.relative_speed))}${t && num(t.relative_speed_ms) ? ` <small>SGP4 ${esc(fmtSpeed(t.relative_speed_ms))}</small>` : ''}</dd>
-          <dt>TCA (UTC)</dt><dd>${esc(fmtUTC(r.tca))} <small data-tca="${esc(r.tca)}">${esc(countdown(r.tca))}</small></dd>
-          <dt>Collision point</dt><dd><small>${esc(ptxt)}</small></dd>
-          ${t && (get(t, 'a.elements_source') || get(t, 'b.elements_source')) ? `<dt>Element sets</dt><dd><small>A: ${esc(get(t, 'a.elements_source') || '?')}<br>B: ${esc(get(t, 'b.elements_source') || '?')}</small></dd>` : ''}
-        </dl>
+      <p class="verdict ${TIER_CSS[tier] || 'nt'}">${esc(verdictText(r))}${a.needs_review ? '<span class="verdict-sub">Needs review: the uncertainty spans a tier boundary.</span>' : ''}</p>
+      <div class="keys">
+        <div><div class="k-l">Miss distance</div><div class="k-v">${esc(fmtDist(r.miss_distance))}</div><div class="k-s">${ours != null ? `${esc(fmtDist(ours))} with our orbit data` : 'From the screening'}</div></div>
+        <div title="Screening maximum Pc: the worst case over covariance scaling"><div class="k-l">Collision risk</div><div class="k-v">${maxPcText(r) !== '–' ? `Pc ≤ ${esc(maxPcText(r))}` : '–'}</div><div class="k-s">${pi.informative && num(a.p_pc_critical) != null ? `Model: ${esc(pct(a.p_pc_critical))} chance of Pc ≥ 1e-4` : 'Screening maximum'}</div></div>
+        <div><div class="k-l">Closest approach</div><div class="k-v">${esc(fmtUTC(r.tca, false))}</div><div class="k-s">${tcaMs != null && !sameUtcDay(tcaMs, Date.now()) ? `${esc(fmtUTC(r.tca).split(' ').slice(0, 2).join(' '))}, ` : ''}<span data-tca="${esc(r.tca)}">${esc(countdown(r.tca))}</span></div></div>
+        <div><div class="k-l">Relative speed</div><div class="k-v">${esc(fmtSpeed(r.relative_speed))}</div><div class="k-s">&nbsp;</div></div>
       </div>
-      <div class="dt-sec"><h4>Why this tier (model reasons, verbatim)</h4>${reasonsHtml(a.reasons)}</div>
-      <div class="dt-sec"><h4>Relative trajectory around TCA</h4>${edgeWarn}${trackHtml}</div>
-      <div class="dt-sec">
-        <h4>Provenance</h4>
-        <div class="prov">${prov.map(esc).join('<br>')}</div>
-        <div class="screen-warn">Screening-grade (TLE/SGP4, no covariance) – confirm with CSpOC CDMs before any manoeuvre.</div>
-      </div>
-      <div class="dt-sec">
-        <h4>Analyst action</h4>
-        ${actionsHtml('live', r.id, decs)}
-      </div>`;
+      ${pi.informative ? '' : `<p class="keys-note" title="${esc(pi.tip)}">Model estimate hidden: these inputs are outside the training data.</p>`}
+      <div class="dt-sec"><h3>Why</h3>${reasonsHtml(a.reasons)}</div>
+      <div class="dt-sec"><h3>Relative path</h3>${edgeWarn}${trackHtml}</div>
+      <div class="dt-sec"><h3>Objects</h3><div class="objs">${objRow(s1, 'a', t && t.a, r.tca)}${objRow(s2, 'b', t && t.b, r.tca)}</div>${mismatch}</div>
+      <p class="caveat">Based on public TLE screening without covariance. Confirm with CSpOC CDMs before manoeuvring.</p>
+      <details class="prov"><summary>Data sources</summary><div>${prov.map(esc).join('<br>')}</div></details>
+      <div class="dt-sec" style="margin-top:12px"><h3>Decision</h3>${actionsHtml('live', r.id, decisionsFor('live', r.id), true)}</div>`;
     el.scrollTop = keepScroll;
     const newNote = $('.act-note', el);
     if (newNote && prevNote) newNote.value = prevNote;
@@ -1484,7 +1409,7 @@
     if (!el) return;
     if (!window.Plotly) { noPlotly(el); return; }
     const rel = (t.relative_rtn || []).filter((p) => Array.isArray(p) && p.length >= 4);
-    if (!rel.length) { el.innerHTML = '<div class="state">No relative trajectory samples.</div>'; return; }
+    if (!rel.length) { el.innerHTML = '<div class="state">No relative path samples.</div>'; return; }
     let tca = Array.isArray(t.rtn_at_tca_m) ? t.rtn_at_tca_m : null;
     if (!tca) {
       let best = rel[0]; let bd = Infinity;
@@ -1495,46 +1420,44 @@
     const half = Math.max(7, 1.6 * Math.max(Math.abs(km(tca[1])), Math.abs(km(tca[2]))));
     const circ = (rad, dash, col) => ({ type: 'circle', xref: 'x', yref: 'y', x0: -rad, y0: -rad, x1: rad, y1: rad, line: { color: col, width: 1.2, dash } });
     const data = [
-      { type: 'scatter', mode: 'lines', name: 'B relative to A', x: rel.map((p) => km(p[2])), y: rel.map((p) => km(p[3])),
+      { type: 'scatter', mode: 'lines', name: 'Object B', x: rel.map((p) => km(p[2])), y: rel.map((p) => km(p[3])),
         customdata: rel.map((p) => [p[0], Math.hypot(p[1], p[2], p[3])]), line: { color: COLORS.b, width: 2 },
-        hovertemplate: 't = %{customdata[0]:.0f} s from TCA<br>T %{x:.2f} km · N %{y:.2f} km<br>range %{customdata[1]:,.0f} m<extra></extra>' },
-      { type: 'scatter', mode: 'markers', name: 'A (origin)', x: [0], y: [0], marker: { color: COLORS.a, size: 9, line: { color: COLORS.text, width: 1 } }, hovertemplate: 'Primary A at origin<extra></extra>' },
-      { type: 'scatter', mode: 'markers+text', name: 'TCA', x: [km(tca[1])], y: [km(tca[2])], text: [`TCA ${fmtDist(num(t.min_range_m) != null ? t.min_range_m : Math.hypot(tca[0], tca[1], tca[2]))}`],
-        textposition: 'top right', textfont: { color: COLORS.text, size: 11 },
-        marker: { color: COLORS.crit, size: 10, symbol: 'diamond', line: { color: COLORS.text, width: 1 } },
-        hovertemplate: `Closest approach<br>T %{x:.3f} km · N %{y:.3f} km<br>R ${esc(fmtDist(tca[0]))}<extra></extra>` },
+        hovertemplate: '%{customdata[0]:.0f} s from TCA<br>Along-track %{x:.2f} km, cross-track %{y:.2f} km<br>Range %{customdata[1]:,.0f} m<extra></extra>' },
+      { type: 'scatter', mode: 'markers', name: 'Object A', x: [0], y: [0], marker: { color: COLORS.a, size: 9, line: { color: COLORS.outline, width: 1 } }, hovertemplate: 'Object A<extra></extra>' },
+      { type: 'scatter', mode: 'markers+text', name: 'Closest approach', x: [km(tca[1])], y: [km(tca[2])], text: [fmtDist(num(t.min_range_m) != null ? t.min_range_m : Math.hypot(tca[0], tca[1], tca[2]))],
+        textposition: 'top right', textfont: { color: COLORS.text, size: 12, family: FONT },
+        marker: { color: COLORS.text, size: 7, line: { color: COLORS.outline, width: 1 } },
+        hovertemplate: `Closest approach<br>Along-track %{x:.3f} km, cross-track %{y:.3f} km<br>Radial ${esc(fmtDist(tca[0]))}<extra></extra>` },
     ];
     const layout = plotlyBase({
-      margin: { l: 42, r: 10, t: 26, b: 36 }, showlegend: true,
-      legend: { orientation: 'h', x: 0, y: 1.14, font: { size: 10.5 } },
-      xaxis: { title: { text: 'T along-track (km)', font: { size: 10.5 } }, range: [-half, half], gridcolor: COLORS.grid, zerolinecolor: COLORS.line },
-      yaxis: { title: { text: 'N cross-track (km)', font: { size: 10.5 } }, range: [-half, half], scaleanchor: 'x', scaleratio: 1, gridcolor: COLORS.grid, zerolinecolor: COLORS.line },
-      shapes: [circ(1, 'solid', COLORS.crit), circ(5, 'dash', COLORS.elev)],
-      annotations: [
-        { x: -0.75, y: -0.75, text: '1 km', showarrow: false, font: { color: COLORS.crit, size: 10 }, xanchor: 'right', yanchor: 'top' },
-        { x: 3.6, y: 3.6, text: '5 km', showarrow: false, font: { color: COLORS.elev, size: 10 }, xanchor: 'left' },
-      ],
+      margin: { l: 44, r: 8, t: 8, b: 38 }, showlegend: false,
+      xaxis: { title: { text: 'Along-track (km)', font: { size: 12 } }, range: [-half, half], gridcolor: COLORS.grid, zerolinecolor: COLORS.line },
+      yaxis: { title: { text: 'Cross-track (km)', font: { size: 12 } }, range: [-half, half], scaleanchor: 'x', scaleratio: 1, gridcolor: COLORS.grid, zerolinecolor: COLORS.line },
+      // the 1 km and 5 km circles only mean something at a readable scale
+      shapes: half <= 60 ? [circ(1, 'solid', COLORS.crit), circ(5, 'dash', COLORS.elev)] : [],
+      annotations: half <= 60 ? [
+        { x: -0.75, y: -0.75, text: '1 km', showarrow: false, font: { color: COLORS.crit, size: 11 }, xanchor: 'right', yanchor: 'top' },
+        { x: 3.6, y: 3.6, text: '5 km', showarrow: false, font: { color: COLORS.elev, size: 11 }, xanchor: 'left' },
+      ] : [],
     });
     plotReact(el, data, layout, Object.assign({}, PCFG, { scrollZoom: true }));
   }
 
   // ================================================================ analyst actions + decision log
   const ACTIONS = [
-    { key: 'acknowledge', label: 'Acknowledge', cls: 'ack' },
+    { key: 'acknowledge', label: 'Acknowledge', cls: '' },
     { key: 'escalate', label: 'Escalate to flight dynamics', cls: 'esc' },
-    { key: 'dismiss', label: 'Dismiss (false alarm)', cls: 'ghost' },
+    { key: 'dismiss', label: 'Dismiss', cls: 'ghost' },
   ];
-  function decBadge(action) {
-    const a = ACTIONS.find((x) => x.key === action);
-    return `<span class="dec-badge ${esc(action)}" title="Latest analyst decision">${esc(a ? (action === 'escalate' ? 'ESCALATED' : action === 'acknowledge' ? 'ACK' : 'DISMISSED') : action)}</span>`;
-  }
-  function actionsHtml(view, id, decs) {
+  const DEC_WORD = { acknowledge: 'Acknowledged', escalate: 'Escalated', dismiss: 'Dismissed' };
+  const decTag = (action) => `<span class="dec ${esc(action)}" title="Latest analyst decision">${esc(DEC_WORD[action] || sentenceCase(action))}</span>`;
+  function actionsHtml(view, id, decs, withNote) {
     return `<div class="actions" data-view="${esc(view)}" data-id="${esc(id)}">
-      <label class="analyst${S.analyst ? '' : ' need'}" style="margin:0">Analyst <input class="analyst-inline" maxlength="24" value="${esc(S.analyst)}" placeholder="initials" aria-label="Analyst initials"></label>
-      <textarea class="act-note" placeholder="Note (rationale, CDM ids checked, who was informed)…" aria-label="Decision note"></textarea>
+      <textarea class="act-note" placeholder="Note: rationale, CDMs checked, who you told" aria-label="Decision note"></textarea>
+      <label class="analyst">Your initials <input class="analyst-inline" maxlength="24" value="${esc(S.analyst)}" placeholder="e.g. GW" aria-label="Your initials"></label>
       <div class="act-row">${ACTIONS.map((a) => `<button type="button" class="btn sm ${a.cls}" data-decide="${a.key}">${esc(a.label)}</button>`).join('')}</div>
-      <div class="hint">The recommendation does not act on its own: your decision, note and initials are logged with the evidence shown.</div>
-      ${decs.length ? `<ul class="act-hist">${decs.slice(0, 5).map((d) => `<li><b>${esc(d.action)}</b> by ${esc(d.analyst)} · ${esc(fmtUTC(d.ts))}${d.note ? ` – ${esc(d.note)}` : ''}</li>`).join('')}</ul>` : ''}
+      ${withNote ? '<p class="act-note-line">You make the call; this tool only recommends.</p>' : ''}
+      ${decs.length ? `<ul class="act-hist">${decs.slice(0, 5).map((d) => `<li><b>${esc(DEC_WORD[d.action] || d.action)}</b> by ${esc(d.analyst)}, ${esc(fmtUTC(d.ts))}${d.note ? `: ${esc(d.note)}` : ''}</li>`).join('')}</ul>` : ''}
     </div>`;
   }
   function loadLog() {
@@ -1566,7 +1489,7 @@
     const initials = ($('.analyst-inline', box).value || '').trim();
     if (!initials) {
       const lab = $('.analyst', box); lab.classList.add('need'); $('.analyst-inline', box).focus();
-      toast('Enter your initials first: every decision is attributed to an analyst.', true);
+      toast('Add your initials first. Every decision is logged with a name.', true);
       return;
     }
     setAnalyst(initials);
@@ -1592,7 +1515,7 @@
     }
     S.log.push(entry);
     saveLog();
-    toast(`${ACTIONS.find((x) => x.key === action).label} logged for ${entry.pair || id} by ${initials}${S.logPersist ? '' : ' (not persisted: browser storage unavailable)'}`);
+    toast(`${DEC_WORD[action]}: ${entry.pair || id}, logged by ${initials}.${S.logPersist ? '' : ' Browser storage is off, so export the log before closing this tab.'}`);
     if (view === 'live') { renderDetail(); renderFeed(); } else if (view === 'evaluator') renderTestDetail();
     renderLogDrawer();
   }
@@ -1613,15 +1536,16 @@
   function renderLogDrawer() {
     const list = $('#ld-list');
     if (!list) return;
-    $('#ld-storage').textContent = S.logPersist ? `${S.log.length} decision${S.log.length === 1 ? '' : 's'} stored in this browser (localStorage). Export to CSV to hand over a shift.` :
-      'Browser storage is unavailable: decisions are kept only until this tab closes. Export to CSV.';
+    $('#ld-storage').textContent = S.logPersist ? `${S.log.length} decision${S.log.length === 1 ? '' : 's'} saved in this browser. Export a CSV to hand over a shift.` :
+      'Browser storage is off: decisions last only until this tab closes. Export a CSV to keep them.';
     const f = $('#ld-filter').value;
     const rows = S.log.filter((d) => f === 'all' || d.view === f).slice().sort((a, b) => (a.ts < b.ts ? 1 : -1));
-    if (!rows.length) { list.innerHTML = '<li class="hint">No decisions logged yet. Select an event and use Acknowledge / Escalate / Dismiss.</li>'; return; }
+    if (!rows.length) { list.innerHTML = '<li class="empty">No decisions yet. Open a conjunction and choose Acknowledge, Escalate or Dismiss.</li>'; return; }
+    const VIEW_NAME = { live: 'Map', evaluator: 'Evaluator', assess: 'Assess' };
     list.innerHTML = rows.map((d) => `<li>
-      <div class="r1">${decBadge(d.action)}<b>${esc(d.pair || d.event_id)}</b><span class="t">${esc(fmtUTC(d.ts))}</span></div>
-      <div class="r2">${d.note ? esc(d.note) : '<span class="muted">no note</span>'}</div>
-      <div class="r3">${esc(d.analyst)} · ${esc(d.view)}${d.model_tier ? ` · model said ${esc(d.model_tier)}` : ''}${d.needs_review ? ' (review)' : ''}${isNum(d.miss_distance_m) ? ` · ${esc(fmtDist(d.miss_distance_m))}` : ''}${d.tca ? ` · TCA ${esc(fmtUTC(d.tca))}` : ''}</div>
+      <div class="r1">${decTag(d.action)}<b>${esc(d.pair || d.event_id)}</b><span class="t">${esc(fmtUTC(d.ts))}</span></div>
+      ${d.note ? `<div class="r2">${esc(d.note)}</div>` : ''}
+      <div class="r3"><span>By ${esc(d.analyst)}</span><span>${esc(VIEW_NAME[d.view] || d.view)}</span>${d.model_tier ? `<span>Model said ${esc(d.model_tier)}${d.needs_review ? ', review' : ''}</span>` : ''}${isNum(d.miss_distance_m) ? `<span>Miss ${esc(fmtDist(d.miss_distance_m))}</span>` : ''}${d.tca ? `<span>TCA ${esc(fmtUTC(d.tca))}</span>` : ''}</div>
     </li>`).join('');
   }
   function exportLog() {
@@ -1684,26 +1608,24 @@
     if (!list) return;
     if (S.test.loading && !S.test.events) { list.innerHTML = '<li class="skel"></li><li class="skel"></li><li class="skel"></li>'; return; }
     if (S.test.err && !S.test.events) {
-      list.innerHTML = `<li class="state err-state"><b>Test-set events unavailable.</b><br>${esc(S.test.err)}<br><br><button type="button" class="btn sm" data-act="retry-test">Retry</button></li>`;
-      $('#tq-count').textContent = '0';
+      list.innerHTML = `<li class="state err-state"><b>Test events unavailable.</b> ${esc(S.test.err)}. <button type="button" class="btn sm" data-act="retry-test">Retry</button></li>`;
+      $('#tq-count').textContent = '';
       return;
     }
     const rows = testRows();
-    $('#tq-count').textContent = rows.length;
+    $('#tq-count').textContent = rows.length.toLocaleString('en-US');
     const all = S.test.events || [];
     const nDis = all.filter((e) => isNum(num(e.true_tier)) && num(get(e, 'assessment.tier')) !== num(e.true_tier)).length;
     const nUnder = all.filter((e) => isNum(num(e.true_tier)) && num(get(e, 'assessment.tier')) < num(e.true_tier)).length;
-    $('#tq-foot').innerHTML = `${all.length} events (latest CDM per event, ≥ 2 days to TCA). <b>${nDis}</b> disagree with ground truth, <b>${nUnder}</b> under-called. Ground truth uses the CDM's own <code>risk</code>, which the model never sees.`;
+    $('#tq-foot').innerHTML = `<span title="Latest CDM per event, 2 or more days before TCA. Ground truth comes from the CDM's risk column, which the model never sees.">${all.length.toLocaleString('en-US')} events: ${nDis} with the wrong tier, ${nUnder} under-called</span>`;
     if (!rows.length) { list.innerHTML = '<li class="state">No events match these filters.</li>'; return; }
     list.innerHTML = rows.slice(0, 600).map((e) => {
       const a = e.assessment || {};
-      const pt = num(a.tier); const tt = num(e.true_tier); const ft = fcTier(e);
-      const flag = tt == null || pt == null ? '' : (pt < tt ? '<span class="pill t2" title="Predicted tier is below the ground-truth tier">Under-called</span>' : (pt > tt ? '<span class="pill nt" title="Predicted tier is above the ground-truth tier (false alarm)">Over-called</span>' : ''));
-      return `<li><div class="card${String(S.test.selected) === String(e.event_id) ? ' sel' : ''}" role="button" tabindex="0" data-test="${esc(e.event_id)}">
-        <div class="card-top">${tierPill(pt, 'Pred')}${a.needs_review ? reviewPill() : ''}${flag}<span class="cd">${esc(fixed(e.time_to_tca, 2))} d to TCA</span></div>
-        <div class="card-title">Event #${esc(e.event_id)} <span class="x">·</span><span class="muted" style="font-weight:500">${esc(e.c_object_type || '?')}</span></div>
-        <div class="card-meta"><span>miss <b>${esc(fmtDist(e.miss_distance))}</b></span><span>est. Pc <b>${pcHtml(a.log_pc)}</b></span><span>true Pc <b>${pcHtml(e.true_log_pc)}</b></span></div>
-        <div class="card-foot">${tierPill(tt, 'Truth')}${ft != null ? tierPill(ft, 'Forecast') : ''}<span>${esc(e.n_cdms != null ? e.n_cdms : '?')} CDMs</span></div>
+      const pt = num(a.tier); const tt = num(e.true_tier);
+      const flag = tt == null || pt == null ? '' : (pt < tt ? `<span class="tag bad" title="Predicted ${TIERS[pt]}, ground truth ${TIERS[tt]}">Under-called</span>` : (pt > tt ? `<span class="tag" title="Predicted ${TIERS[pt]}, ground truth ${TIERS[tt]}">Over-called</span>` : ''));
+      return `<li><div class="item ${TIER_CSS[pt] || ''}${String(S.test.selected) === String(e.event_id) ? ' sel' : ''}" role="button" tabindex="0" data-test="${esc(e.event_id)}" aria-label="${esc(`Event ${e.event_id}, predicted ${TIERS[pt] || 'no tier'}`)}">
+        <div class="it1"><i class="dot ${TIER_CSS[pt] || ''}"></i><span class="it-name">Event ${esc(e.event_id)} <span class="x">${esc(e.c_object_type ? sentenceCase(e.c_object_type) : '')}</span></span><span class="it-time">${esc(fixed(e.time_to_tca, 1))} d to TCA</span></div>
+        <div class="it2"><span>Miss <b>${esc(fmtDist(e.miss_distance))}</b></span><span>Pc <b>${pcHtml(a.log_pc)}</b></span>${a.needs_review ? reviewPill() : ''}${flag}</div>
       </div></li>`;
     }).join('');
   }
@@ -1712,8 +1634,8 @@
     S.test.selected = id;
     S.test.cdmIdx = null;
     if (!opts.noHash && location.hash !== `#evaluator/${id}`) history.replaceState(null, '', `#evaluator/${id}`);
-    $$('#tq .card.sel').forEach((c) => c.classList.remove('sel'));
-    const card = $(`#tq .card[data-test="${CSS.escape(String(id))}"]`);
+    $$('#tq .item.sel').forEach((c) => c.classList.remove('sel'));
+    const card = $(`#tq .item[data-test="${CSS.escape(String(id))}"]`);
     if (card) { card.classList.add('sel'); card.scrollIntoView({ block: 'nearest' }); }
     const seq = ++S.test.seq;
     S.test.detail = null; S.test.detailErr = null; S.test.detailLoading = true;
@@ -1736,16 +1658,18 @@
     if (!el) return;
     const id = S.test.selected;
     if (id == null) {
-      el.innerHTML = S.test.err ? `<div class="state err-state"><b>Could not load test-set events.</b> ${esc(S.test.err)}</div>` :
-        '<div class="state">Select an event from the queue to see its CDM history, the model estimate with its 80% band against ground truth, and the reasons behind the tier.</div>';
+      el.innerHTML = S.test.err ? `<div class="state err-state"><b>Test events unavailable.</b> ${esc(S.test.err)}. <button type="button" class="btn sm" data-act="retry-test">Retry</button></div>` :
+        '<div class="state">Pick an event from the list to see its CDM history, the model estimate against ground truth, and the reasons for its tier.</div>';
       return;
     }
     const ev = (S.test.events || []).find((e) => String(e.event_id) === String(id)) || { event_id: id };
     const pT = num(get(ev, 'assessment.tier')); const tT = num(ev.true_tier);
-    const errPill = pT == null || tT == null ? '' : (pT < tT ? '<span class="pill t2" title="Predicted tier below ground truth: a missed escalation">Under-called</span>' : (pT > tT ? '<span class="pill nt" title="Predicted tier above ground truth: a false alarm">Over-called</span>' : '<span class="pill t0" title="Predicted tier equals ground truth">Agrees with truth</span>'));
-    const head = `<div class="ev-head"><h2>Event #${esc(id)}</h2>${errPill}${tierPill(num(get(ev, 'assessment.tier')), 'Predicted')}${tierPill(num(ev.true_tier), 'Ground truth')}${fcTier(ev) != null ? tierPill(fcTier(ev), 'Forecast at TCA') : ''}${get(ev, 'assessment.needs_review') ? reviewPill() : ''}<span class="hint">${esc(ev.c_object_type || '')}</span></div>`;
-    if (S.test.detailLoading) { el.innerHTML = head + '<div class="loading" style="padding:20px">Loading CDM history…</div>'; return; }
-    if (S.test.detailErr) { el.innerHTML = head + `<div class="err-box"><b>Event detail unavailable.</b> ${esc(S.test.detailErr)} <button type="button" class="btn sm" data-act="retry-test-detail">Retry</button></div>`; return; }
+    const errTag = pT == null || tT == null || pT === tT ? '' : (pT < tT ? '<span class="tag bad" title="Predicted tier is below ground truth: a missed escalation">Under-called</span>' : '<span class="tag" title="Predicted tier is above ground truth: a false alarm">Over-called</span>');
+    const head = `<div class="page-head"><h2>Event ${esc(id)}</h2>
+      ${lv('Predicted', tierPill(pT))}${lv('Ground truth', tierPill(tT))}${fcTier(ev) != null ? lv('Forecast at TCA', tierPill(fcTier(ev))) : ''}
+      ${get(ev, 'assessment.needs_review') ? reviewPill() : ''}${errTag}${ev.c_object_type ? lv('Secondary', esc(sentenceCase(ev.c_object_type))) : ''}</div>`;
+    if (S.test.detailLoading) { el.innerHTML = head + '<div class="loading">Loading CDM history…</div>'; return; }
+    if (S.test.detailErr) { el.innerHTML = head + `<p class="err-box"><b>Event detail unavailable.</b> ${esc(S.test.detailErr)}. <button type="button" class="btn sm" data-act="retry-test-detail">Retry</button></p>`; return; }
     const d = S.test.detail;
     if (!d || !d.cdms.length) { el.innerHTML = head + '<div class="state">This event has no CDMs.</div>'; return; }
     const cdms = d.cdms;
@@ -1756,33 +1680,36 @@
     const prevNote = ($('.act-note', el) || {}).value || '';
     el.innerHTML = head + `
       <div class="tiles">
-        <div class="tile"><div class="v">${esc(cdms.length)}</div><div class="l">CDMs in history</div></div>
-        <div class="tile"><div class="v">${esc(fixed(c.time_to_tca, 2))} <small>d</small></div><div class="l">time to TCA (selected CDM)</div></div>
-        <div class="tile"><div class="v">${esc(fmtDist(c.miss_distance))}</div><div class="l">miss distance</div></div>
-        <div class="tile"><div class="v">${pcHtml(a.log_pc)}</div><div class="l">est. Pc (80%: ${esc(pcText(a.log_pc_lo))} – ${esc(pcText(a.log_pc_hi))})</div></div>
-        <div class="tile"><div class="v">${pcHtml(c.true_log_pc)}</div><div class="l">ground-truth Pc (<code>risk</code>, evaluation only)</div></div>
-        <div class="tile"><div class="v">${esc(fmtSpeed(c.relative_speed))}</div><div class="l">relative speed</div></div>
+        <div class="tile"><div class="l">CDMs</div><div class="v">${esc(cdms.length)}</div></div>
+        <div class="tile"><div class="l">Time to TCA</div><div class="v">${esc(fixed(c.time_to_tca, 2))} <small>days</small></div></div>
+        <div class="tile"><div class="l">Miss distance</div><div class="v">${esc(fmtDist(c.miss_distance))}</div></div>
+        <div class="tile"><div class="l">Estimated Pc</div><div class="v">${pcHtml(a.log_pc)}</div><div class="d">80%: ${esc(pcText(a.log_pc_lo))} to ${esc(pcText(a.log_pc_hi))}</div></div>
+        <div class="tile" title="From the CDM's risk column; used for evaluation only"><div class="l">True Pc</div><div class="v">${pcHtml(c.true_log_pc)}</div></div>
+        <div class="tile"><div class="l">Relative speed</div><div class="v">${esc(fmtSpeed(c.relative_speed))}</div></div>
       </div>
       <div class="ev-grid">
-        <div class="panel wide"><div class="panel-head"><h3>Collision probability vs days to TCA</h3><span class="hint">Click a CDM to inspect it · dashed lines = 1e-6 / 1e-4 thresholds</span></div><div id="ev-pc" class="chart"></div></div>
-        <div class="panel"><div class="panel-head"><h3>Miss distance</h3><span class="hint">1 km / 5 km rule lines</span></div><div id="ev-md" class="chart sm"></div></div>
-        <div class="panel"><div class="panel-head"><h3>Miss vector in RTN (m)</h3><span class="hint">Flyby line from relative_velocity: display only</span></div><div id="ev-rtn" class="chart sm"></div></div>
-        <div class="panel"><div class="panel-head"><h3>Why this tier</h3><span class="cdm-pick">CDM ${idx + 1} of ${cdms.length} · ${esc(fixed(c.time_to_tca, 2))} d to TCA</span></div>
-          <div class="dt-badges" style="margin:0 0 8px">${tierPill(num(a.tier), 'Decision')}${a.needs_review ? reviewPill() : ''}<span class="pill nt">Distance rule: ${esc(TIERS[num(a.md_tier)] || '?')}</span></div>
+        <div class="panel wide"><div class="panel-head"><h3>Collision probability over time</h3><span class="hint">Select a point to inspect that CDM</span></div><div id="ev-pc" class="chart"></div></div>
+        <div class="panel"><div class="panel-head"><h3>Miss distance</h3></div><div id="ev-md" class="chart sm"></div></div>
+        <div class="panel"><div class="panel-head"><h3>Miss vector (RTN, m)</h3></div><div id="ev-rtn" class="chart sm"></div></div>
+        <div class="panel"><div class="panel-head"><h3>Why</h3><span class="hint">CDM ${idx + 1} of ${cdms.length}, ${esc(fixed(c.time_to_tca, 2))} days to TCA</span></div>
+          <div class="page-head" style="margin-bottom:12px">${lv('Decision', tierPill(num(a.tier)))}${lv('Distance rule', tierPill(num(a.md_tier)))}${a.needs_review ? reviewPill() : ''}</div>
           ${stackBar(a.p_tier)}
-          <div style="margin-top:10px">${reasonsHtml(a.reasons)}</div>
-          ${fc ? `<p class="hint" style="margin-top:8px">Event forecast (tier at the final CDM): <b>${esc(TIERS[num(fc.tier)] || '?')}</b>${Array.isArray(fc.p_tier) ? ` · P = ${fc.p_tier.map((p, i) => `${TIERS[i][0]} ${pct(p)}`).join(' / ')}` : ''}${fc.description ? ` – ${esc(fc.description)}` : ''}</p>` : ''}
+          <div style="margin-top:12px">${reasonsHtml(a.reasons)}</div>
+          ${fc ? `<p class="hint" style="margin-top:10px">Forecast tier at the final CDM: <b>${esc(TIERS[num(fc.tier)] || '?')}</b>${Array.isArray(fc.p_tier) ? `, P(Critical) ${esc(pct(fc.p_tier[2]))}` : ''}.</p>` : ''}
         </div>
-        <div class="panel"><div class="panel-head"><h3>Analyst action</h3></div>${actionsHtml('evaluator', id, decisionsFor('evaluator', id))}
-          <p class="hint" style="margin-top:8px">Inputs used: only the 13 allowed columns. Covariance: c_sigma_r ${esc(fmtDist(c.c_sigma_r))}${num(c.c_sigma_r) >= 6e7 ? ' (unavailable sentinel)' : ''}, t_sigma_r ${esc(fmtDist(c.t_sigma_r))}; max-Pc bound ${esc(pcText(c.max_risk_estimate))}; F10 ${esc(fmtNum(c.F10, 0))}, AP ${esc(fmtNum(c.AP, 0))}.</p></div>
-        <div class="panel wide"><div class="panel-head"><h3>CDM history</h3><span class="hint">Rows ordered from first to latest CDM</span></div>
-          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>days to TCA</th><th>miss distance</th><th>rel. speed</th><th>est. Pc</th><th>80% interval</th><th>max-Pc bound</th><th>true Pc</th><th>decision</th><th>review</th></tr></thead><tbody>
-          ${cdms.map((x, i) => { const xa = x.assessment || {}; return `<tr class="click${i === idx ? ' chosen' : ''}" data-cdm="${i}"><td>${i + 1}</td><td>${esc(fixed(x.time_to_tca, 2))} d</td><td>${esc(fmtDist(x.miss_distance))}</td><td>${esc(fmtSpeed(x.relative_speed))}</td><td>${esc(pcText(xa.log_pc))}</td><td>${esc(pcText(xa.log_pc_lo))} – ${esc(pcText(xa.log_pc_hi))}</td><td>${esc(pcText(x.max_risk_estimate))}</td><td>${esc(pcText(x.true_log_pc))}</td><td>${tierPill(num(xa.tier))}</td><td>${xa.needs_review ? reviewPill() : ''}</td></tr>`; }).join('')}
+        <div class="panel"><div class="panel-head"><h3>Decision</h3></div>${actionsHtml('evaluator', id, decisionsFor('evaluator', id), false)}
+          <p class="hint" style="margin-top:10px" title="Only the 13 allowed columns are model inputs">Inputs: c_sigma_r ${esc(fmtDist(c.c_sigma_r))}${num(c.c_sigma_r) >= 6e7 ? ' (not available)' : ''}, t_sigma_r ${esc(fmtDist(c.t_sigma_r))}, max Pc bound ${esc(pcText(c.max_risk_estimate))}, F10.7 ${esc(fmtNum(c.F10, 0))}, Ap ${esc(fmtNum(c.AP, 0))}.</p></div>
+        <!-- Reserved: "Full-covariance Pc and manoeuvre options" panel (physics engine). Leave empty until wired. -->
+        <div id="physics-slot" class="physics-slot wide" data-panel="Full-covariance Pc and manoeuvre options"></div>
+        <div class="panel wide"><div class="panel-head"><h3>CDM history</h3><span class="hint">First to latest CDM</span></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>CDM</th><th>Days to TCA</th><th>Miss distance</th><th>Relative speed</th><th>Estimated Pc</th><th>80% interval</th><th>Max Pc bound</th><th>True Pc</th><th class="l" style="min-width:0">Decision</th><th></th></tr></thead><tbody>
+          ${cdms.map((x, i) => { const xa = x.assessment || {}; return `<tr class="click${i === idx ? ' chosen' : ''}" data-cdm="${i}"><td>${i + 1}</td><td>${esc(fixed(x.time_to_tca, 2))}</td><td>${esc(fmtDist(x.miss_distance))}</td><td>${esc(fmtSpeed(x.relative_speed))}</td><td>${esc(pcText(xa.log_pc))}</td><td>${esc(pcText(xa.log_pc_lo))} to ${esc(pcText(xa.log_pc_hi))}</td><td>${esc(pcText(x.max_risk_estimate))}</td><td>${esc(pcText(x.true_log_pc))}</td><td class="l" style="min-width:0">${tierPill(num(xa.tier))}</td><td>${xa.needs_review ? reviewPill() : ''}</td></tr>`; }).join('')}
           </tbody></table></div></div>
       </div>`;
     const note = $('.act-note', el); if (note && prevNote) note.value = prevNote;
     renderEvCharts(cdms, idx);
   }
+
   function renderEvCharts(cdms, idx) {
     const pcEl = $('#ev-pc'); const mdEl = $('#ev-md'); const rtnEl = $('#ev-rtn');
     if (!window.Plotly) { [pcEl, mdEl, rtnEl].forEach((e) => e && noPlotly(e)); return; }
@@ -1794,47 +1721,47 @@
     const finite = [].concat(med, lo, hi, tru, bound).filter((v) => v != null);
     const ymin = Math.max(-31, Math.min(-8, Math.floor(Math.min.apply(null, finite.length ? finite : [-10])) - 1));
     const hl = (y, col, txt) => ({ type: 'line', xref: 'paper', x0: 0, x1: 1, y0: y, y1: y, line: { color: col, width: 1, dash: 'dash' } });
-    const ann = (y, col, txt) => ({ xref: 'paper', x: 0, y, text: txt, showarrow: false, xanchor: 'left', yanchor: 'bottom', font: { color: col, size: 10 } });
+    const ann = (y, col, txt) => ({ xref: 'paper', x: 0, y, text: txt, showarrow: false, xanchor: 'left', yanchor: 'bottom', font: { color: col, size: 11 } });
     const sel = [x[idx]];
     const pcData = [
       { x, y: hi, mode: 'lines', line: { width: 0 }, hoverinfo: 'skip', showlegend: false },
-      { x, y: lo, mode: 'lines', line: { width: 0 }, fill: 'tonexty', fillcolor: 'rgba(138,180,248,.18)', name: '80% interval', hoverinfo: 'skip' },
-      { x, y: med, mode: 'lines+markers', name: 'Model median', line: { color: COLORS.primaryText, width: 2 }, marker: { size: 8, color: COLORS.primaryText, line: { color: COLORS.panel, width: 2 } },
+      { x, y: lo, mode: 'lines', line: { width: 0 }, fill: 'tonexty', fillcolor: 'rgba(124,196,255,.16)', name: '80% interval', hoverinfo: 'skip' },
+      { x, y: med, mode: 'lines+markers', name: 'Model estimate', line: { color: COLORS.focus, width: 2 }, marker: { size: 7, color: COLORS.focus, line: { color: COLORS.panel, width: 1 } },
         customdata: cdms.map((c) => [pcText(get(c, 'assessment.log_pc')), pcText(get(c, 'assessment.log_pc_lo')), pcText(get(c, 'assessment.log_pc_hi'))]),
-        hovertemplate: '%{x:.2f} d to TCA<br>est. Pc %{customdata[0]} (80%: %{customdata[1]} – %{customdata[2]})<extra>model</extra>' },
-      { x, y: tru, mode: 'lines+markers', name: 'Ground truth (risk)', line: { color: COLORS.text, width: 1.5, dash: 'dot' }, marker: { size: 8, symbol: 'diamond', color: COLORS.text, line: { color: COLORS.panel, width: 2 } },
-        hovertemplate: '%{x:.2f} d<br>true log10 Pc %{y:.2f}<extra>ground truth</extra>' },
-      { x, y: bound, mode: 'lines', name: 'Max-Pc bound (input)', line: { color: COLORS.muted, width: 1, dash: 'dashdot' }, hovertemplate: '%{x:.2f} d<br>max_risk_estimate %{y:.2f}<extra>input</extra>' },
-      { x: sel, y: [med[idx]], mode: 'markers', name: 'Selected CDM', marker: { size: 16, color: 'rgba(0,0,0,0)', line: { color: COLORS.live, width: 2 } }, hoverinfo: 'skip' },
+        hovertemplate: '%{x:.2f} days to TCA<br>Estimated Pc %{customdata[0]} (80%: %{customdata[1]} to %{customdata[2]})<extra></extra>' },
+      { x, y: tru, mode: 'lines+markers', name: 'Ground truth', line: { color: COLORS.text, width: 1.5, dash: 'dot' }, marker: { size: 7, symbol: 'diamond', color: COLORS.text, line: { color: COLORS.panel, width: 1 } },
+        hovertemplate: '%{x:.2f} days to TCA<br>True log10 Pc %{y:.2f}<extra></extra>' },
+      { x, y: bound, mode: 'lines', name: 'Max Pc bound', line: { color: COLORS.muted, width: 1, dash: 'dashdot' }, hovertemplate: '%{x:.2f} days to TCA<br>Max Pc bound (log10) %{y:.2f}<extra></extra>' },
+      { x: sel, y: [med[idx]], mode: 'markers', name: 'Selected CDM', showlegend: false, marker: { size: 15, color: 'rgba(0,0,0,0)', line: { color: COLORS.text, width: 2 } }, hoverinfo: 'skip' },
     ];
     plotReact(pcEl, pcData, plotlyBase({
       margin: { l: 50, r: 12, t: 30, b: 40 },
-      xaxis: { title: { text: 'days to TCA', font: { size: 11 } }, autorange: 'reversed', gridcolor: COLORS.grid, zeroline: false },
-      yaxis: { title: { text: 'log10 Pc', font: { size: 11 } }, range: [ymin, 0.3], gridcolor: COLORS.grid, zeroline: false },
+      xaxis: { title: { text: 'Days to TCA', font: { size: 12 } }, autorange: 'reversed', gridcolor: COLORS.grid, zeroline: false },
+      yaxis: { title: { text: 'log10 Pc', font: { size: 12 } }, range: [ymin, 0.3], gridcolor: COLORS.grid, zeroline: false },
       shapes: [hl(-6, COLORS.elev), hl(-4, COLORS.crit)],
-      annotations: [ann(-6, COLORS.elev, 'Elevated ≥ 1e-6'), ann(-4, COLORS.crit, 'Critical ≥ 1e-4')],
+      annotations: [ann(-6, COLORS.elev, 'Elevated from 1e-6'), ann(-4, COLORS.crit, 'Critical from 1e-4')],
     }), PCFG);
     if (!pcEl._cw) { pcEl._cw = true; pcEl.on('plotly_click', (ev) => { const p = ev.points && ev.points[0]; if (p && isNum(p.pointIndex) && p.curveNumber >= 2 && p.curveNumber <= 4) { S.test.cdmIdx = p.pointIndex; renderTestDetail(); } }); }
 
     const md = cdms.map((c) => num(c.miss_distance));
     plotReact(mdEl, [
-      { x, y: md.map((m) => (m == null ? null : m / 1000)), mode: 'lines+markers', name: 'Miss distance', line: { color: COLORS.primaryText, width: 2 }, marker: { size: 8, color: COLORS.primaryText, line: { color: COLORS.panel, width: 2 } }, hovertemplate: '%{x:.2f} d<br>%{y:.3f} km<extra></extra>' },
-      { x: sel, y: [md[idx] / 1000], mode: 'markers', marker: { size: 16, color: 'rgba(0,0,0,0)', line: { color: COLORS.live, width: 2 } }, hoverinfo: 'skip', showlegend: false },
+      { x, y: md.map((m) => (m == null ? null : m / 1000)), mode: 'lines+markers', name: 'Miss distance', line: { color: COLORS.focus, width: 2 }, marker: { size: 7, color: COLORS.focus, line: { color: COLORS.panel, width: 1 } }, hovertemplate: '%{x:.2f} days to TCA<br>%{y:.3f} km<extra></extra>' },
+      { x: sel, y: [md[idx] / 1000], mode: 'markers', marker: { size: 15, color: 'rgba(0,0,0,0)', line: { color: COLORS.text, width: 2 } }, hoverinfo: 'skip', showlegend: false },
     ], plotlyBase({
       showlegend: false, margin: { l: 50, r: 12, t: 10, b: 40 },
-      xaxis: { title: { text: 'days to TCA', font: { size: 11 } }, autorange: 'reversed', gridcolor: COLORS.grid, zeroline: false },
-      yaxis: { title: { text: 'miss distance (km)', font: { size: 11 } }, type: 'log', dtick: 1, tickformat: '~g', gridcolor: COLORS.grid },
+      xaxis: { title: { text: 'Days to TCA', font: { size: 12 } }, autorange: 'reversed', gridcolor: COLORS.grid, zeroline: false },
+      yaxis: { title: { text: 'Miss distance (km)', font: { size: 12 } }, type: 'log', dtick: 1, tickformat: '~g', gridcolor: COLORS.grid },
       shapes: [{ type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 1, y1: 1, line: { color: COLORS.crit, dash: 'dash', width: 1 } }, { type: 'line', xref: 'paper', x0: 0, x1: 1, y0: 5, y1: 5, line: { color: COLORS.elev, dash: 'dash', width: 1 } }],
-      annotations: [{ xref: 'paper', x: 1, y: 0, yref: 'y', text: '1 km', showarrow: false, xanchor: 'right', yanchor: 'bottom', font: { color: COLORS.crit, size: 10 } },
-        { xref: 'paper', x: 1, y: Math.log10(5), yref: 'y', text: '5 km', showarrow: false, xanchor: 'right', yanchor: 'bottom', font: { color: COLORS.elev, size: 10 } }],
+      annotations: [{ xref: 'paper', x: 1, y: 0, yref: 'y', text: '1 km', showarrow: false, xanchor: 'right', yanchor: 'bottom', font: { color: COLORS.crit, size: 11 } },
+        { xref: 'paper', x: 1, y: Math.log10(5), yref: 'y', text: '5 km', showarrow: false, xanchor: 'right', yanchor: 'bottom', font: { color: COLORS.elev, size: 11 } }],
     }), PCFG);
 
     const R = cdms.map((c) => num(c.relative_position_r)); const T = cdms.map((c) => num(c.relative_position_t)); const N = cdms.map((c) => num(c.relative_position_n));
     const data3 = [
       { type: 'scatter3d', mode: 'lines+markers', name: 'Miss vector per CDM', x: T, y: N, z: R,
-        line: { color: COLORS.primaryText, width: 3 }, marker: { size: 4, color: x, colorscale: [[0, COLORS.primaryText], [1, '#2D3B49']], reversescale: true },
-        customdata: x, hovertemplate: '%{customdata:.2f} d to TCA<br>T %{x:.0f} m · N %{y:.0f} m · R %{z:.0f} m<extra></extra>' },
-      { type: 'scatter3d', mode: 'markers', name: 'Primary (origin)', x: [0], y: [0], z: [0], marker: { size: 5, color: COLORS.a }, hovertemplate: 'Primary at origin<extra></extra>' },
+        line: { color: COLORS.focus, width: 3 }, marker: { size: 4, color: x, colorscale: [[0, COLORS.focus], [1, '#3B4A59']], reversescale: true },
+        customdata: x, hovertemplate: '%{customdata:.2f} days to TCA<br>T %{x:.0f} m, N %{y:.0f} m, R %{z:.0f} m<extra></extra>' },
+      { type: 'scatter3d', mode: 'markers', name: 'Primary (origin)', x: [0], y: [0], z: [0], marker: { size: 5, color: COLORS.a }, hovertemplate: 'Primary at the origin<extra></extra>' },
     ];
     const c = cdms[idx];
     const vr = num(c.relative_velocity_r); const vt = num(c.relative_velocity_t); const vn = num(c.relative_velocity_n);
@@ -1842,13 +1769,13 @@
       const vmag = Math.hypot(vr, vt, vn) || 1;
       const dt = 2.5 * Math.max(200, num(c.miss_distance) || 1000) / vmag;
       const pts = [-1, 0, 1].map((s) => [T[idx] + vt * dt * s, N[idx] + vn * dt * s, R[idx] + vr * dt * s]);
-      data3.push({ type: 'scatter3d', mode: 'lines', name: 'Straight-line flyby (display only)', x: pts.map((p) => p[0]), y: pts.map((p) => p[1]), z: pts.map((p) => p[2]),
-        line: { color: COLORS.b, width: 4, dash: 'dash' }, hovertemplate: 'flyby from relative_velocity (display only)<extra></extra>' });
+      data3.push({ type: 'scatter3d', mode: 'lines', name: 'Flyby line', x: pts.map((p) => p[0]), y: pts.map((p) => p[1]), z: pts.map((p) => p[2]),
+        line: { color: COLORS.b, width: 4, dash: 'dash' }, hovertemplate: 'Straight-line flyby from the relative velocity (illustration)<extra></extra>' });
     }
-    data3.push({ type: 'scatter3d', mode: 'markers', name: 'Selected CDM', x: [T[idx]], y: [N[idx]], z: [R[idx]], marker: { size: 7, color: COLORS.live, symbol: 'diamond' }, hoverinfo: 'skip' });
-    const ax = (t) => ({ title: { text: t, font: { size: 10 } }, gridcolor: COLORS.grid, zerolinecolor: COLORS.line, backgroundcolor: 'rgba(0,0,0,0)', color: COLORS.text2 });
+    data3.push({ type: 'scatter3d', mode: 'markers', name: 'Selected CDM', x: [T[idx]], y: [N[idx]], z: [R[idx]], marker: { size: 7, color: COLORS.text, symbol: 'diamond' }, hoverinfo: 'skip' });
+    const ax = (t) => ({ title: { text: t, font: { size: 11 } }, gridcolor: COLORS.grid, zerolinecolor: COLORS.line, backgroundcolor: 'rgba(0,0,0,0)', color: COLORS.muted });
     plotReact(rtnEl, data3, plotlyBase({
-      margin: { l: 0, r: 0, t: 0, b: 0 }, legend: { orientation: 'h', x: 0, y: 1.02, font: { size: 10 } },
+      margin: { l: 0, r: 0, t: 0, b: 0 }, legend: { orientation: 'h', x: 0, y: 1.02, font: { size: 12, color: COLORS.text } },
       scene: { xaxis: ax('T (m)'), yaxis: ax('N (m)'), zaxis: ax('R (m)'), aspectmode: 'cube', bgcolor: 'rgba(0,0,0,0)', camera: { eye: { x: 1.5, y: 1.4, z: 0.9 } } },
     }), PCFG);
   }
@@ -1869,174 +1796,174 @@
     const m = S.metrics;
     if (!m || typeof m !== 'object' || (!m.methods && !m.generated_at)) {
       const notGen = !S.metricsErr || S.metricsErrStatus === 404 || S.metricsErrStatus === 503;
-      el.innerHTML = `<div class="state ${S.metricsErr ? 'err-state' : ''}"><b>${notGen ? 'Metrics not generated yet.' : 'Metrics unavailable.'}</b> ${S.metricsErr ? esc(S.metricsErr) + '. ' : ''}${notGen ? 'Run <code>python src/train.py</code> to write <code>outputs/metrics.json</code>, then reload.' : ''}<br><br><button type="button" class="btn sm" data-act="retry-metrics">Reload</button></div>`;
+      el.innerHTML = `<div class="state ${S.metricsErr ? 'err-state' : ''}"><b>${notGen ? 'No metrics yet.' : 'Metrics unavailable.'}</b> ${S.metricsErr ? esc(S.metricsErr) + '. ' : ''}${notGen ? 'Run <code>python src/train.py</code> to write <code>outputs/metrics.json</code>, then reload.' : ''} <button type="button" class="btn sm" data-act="retry-metrics">Reload</button></div>`;
       return;
     }
     const methods = Array.isArray(m.methods) ? m.methods : [];
+    const mName = (n) => String(n || '').replace(/\s*\(chosen\)\s*$/i, '');   // the tag already says it
     const chosen = methods.find((x) => x.name === m.chosen_method) || methods.find((x) => x.kind === 'model') || methods[0];
     const base = methods.find((x) => /miss-distance rule/i.test(x.name || '')) || methods.find((x) => x.kind === 'baseline');
     const split = S.metricSplit || 'test';
     const ct = get(chosen, split) || {}; const bt = get(base, split) || {};
-    const delta = (a, b, lowerBetter) => { if (!isNum(num(a)) || !isNum(num(b))) return ''; const d = num(a) - num(b); const good = lowerBetter ? d < 0 : d > 0; return `<div class="d" style="color:${d === 0 ? COLORS.muted : (good ? COLORS.live : COLORS.crit)}">${d > 0 ? '+' : ''}${Number.isInteger(d) ? d : d.toFixed(3)} vs distance rule</div>`; };
+    const delta = (a, b, lowerBetter) => {
+      if (!isNum(num(a)) || !isNum(num(b))) return '';
+      const d = num(a) - num(b); const good = lowerBetter ? d < 0 : d > 0;
+      return `<div class="d ${d === 0 ? '' : (good ? 'good' : 'bad')}">${d > 0 ? '+' : ''}${Number.isInteger(d) ? d : d.toFixed(3)} vs distance rule</div>`;
+    };
     const ev = m.eval_set || {};
     const known = ['generated_at', 'eval_set', 'cv_set', 'chosen_method', 'thresholds', 'methods', 'regression', 'review_queue', 'pc_driven_escalations', 'calibration', 'calibration_elevated', 'feature_importance', 'failure_cases', 'event_forecast', 'screening_model', 'notes', 'runtime_s'];
     const extra = Object.keys(m).filter((k) => !known.includes(k));
     const rq = m.review_queue || {}; const pe = m.pc_driven_escalations || {}; const rg = m.regression || {};
     const recC = get(ct, 'recall.2');
+    const splitName = split === 'test' ? 'held-out test set' : 'cross-validation folds';
 
-    let html = `<div class="page-head"><h2>Model evidence</h2>
-      <span class="pill nt">${esc(m.chosen_method || 'chosen method not named')}</span>
-      <span class="hint">generated ${esc(fmtUTC(m.generated_at))} · eval on ${esc(ev.name || '?')} (${esc(fmtNum(ev.n_rows, 0))} CDMs, ${esc(fmtNum(ev.n_events, 0))} events${Array.isArray(ev.true_tier_counts) ? `; true tiers S/E/C ${ev.true_tier_counts.join(' / ')}` : ''})</span>
+    let html = `<div class="page-head"><h2>Model</h2>
+      ${lv('Chosen', `<span>${esc(mName(m.chosen_method) || 'not named')}</span>`)}
+      <span class="hint" title="${esc(Array.isArray(ev.true_tier_counts) ? `True tiers (Safe, Elevated, Critical): ${ev.true_tier_counts.join(', ')}` : '')}">Evaluated on ${esc(ev.name || '?')}: ${esc(fmtNum(ev.n_rows, 0))} CDMs, ${esc(fmtNum(ev.n_events, 0))} events. Generated ${esc(fmtUTC(m.generated_at))}.</span>
       <div class="seg" id="metric-split" role="group" aria-label="Evaluation split" style="margin-left:auto">
         <button type="button" data-split="test" class="${split === 'test' ? 'on' : ''}">Held-out test</button><button type="button" data-split="cv" class="${split === 'cv' ? 'on' : ''}">Cross-validation</button></div></div>`;
     html += `<div class="tiles">
-      <div class="tile"><div class="v">${f3(ct.macro_f1)}</div><div class="l">macro F1 (${split})</div>${delta(ct.macro_f1, bt.macro_f1)}</div>
-      <div class="tile"><div class="v">${f3(ct.f2_critical)}</div><div class="l">F2 Critical (recall-weighted)</div>${delta(ct.f2_critical, bt.f2_critical)}</div>
-      <div class="tile"><div class="v">${isNum(num(recC)) ? pct(recC, 1) : '–'}</div><div class="l">Critical recall</div>${delta(recC, get(bt, 'recall.2'))}</div>
-      <div class="tile"><div class="v">${esc(fmtNum(ct.missed_critical, 0))}</div><div class="l">missed Critical CDMs</div>${delta(ct.missed_critical, bt.missed_critical, true)}</div>
-      <div class="tile"><div class="v">${esc(fmtNum(ct.false_alarms_critical, 0))}</div><div class="l">false Critical alarms</div>${delta(ct.false_alarms_critical, bt.false_alarms_critical, true)}</div>
-      <div class="tile"><div class="v">${isNum(num(rg.interval_coverage_80)) ? pct(rg.interval_coverage_80, 1) : '–'}</div><div class="l">80% interval coverage</div><div class="d">target 80%</div></div>
+      <div class="tile"><div class="l">Macro F1</div><div class="v">${f3(ct.macro_f1)}</div>${delta(ct.macro_f1, bt.macro_f1)}</div>
+      <div class="tile" title="Recall-weighted F score for the Critical tier"><div class="l">F2 Critical</div><div class="v">${f3(ct.f2_critical)}</div>${delta(ct.f2_critical, bt.f2_critical)}</div>
+      <div class="tile"><div class="l">Critical recall</div><div class="v">${isNum(num(recC)) ? pct(recC, 1) : '–'}</div>${delta(recC, get(bt, 'recall.2'))}</div>
+      <div class="tile"><div class="l">Missed Critical</div><div class="v">${esc(fmtNum(ct.missed_critical, 0))}</div>${delta(ct.missed_critical, bt.missed_critical, true)}</div>
+      <div class="tile"><div class="l">False Critical alarms</div><div class="v">${esc(fmtNum(ct.false_alarms_critical, 0))}</div>${delta(ct.false_alarms_critical, bt.false_alarms_critical, true)}</div>
+      <div class="tile"><div class="l">80% interval coverage</div><div class="v">${isNum(num(rg.interval_coverage_80)) ? pct(rg.interval_coverage_80, 1) : '–'}</div><div class="d">Target 80%</div></div>
     </div>`;
-    // methods table
-    html += `<div class="panel" style="margin-bottom:12px"><div class="panel-head"><h3>Baselines vs model</h3><span class="hint">Recall / precision per tier on the ${split === 'test' ? 'held-out test set' : 'cross-validation folds'} · S / E / C = Safe / Elevated / Critical</span></div><div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th rowspan="2">Method</th><th rowspan="2">kind</th><th class="grp" colspan="2">CV</th><th class="grp" colspan="2">Test</th><th class="grp" colspan="3">Recall (${split})</th><th class="grp" colspan="3">Precision (${split})</th><th rowspan="2">missed Crit</th><th rowspan="2">Crit called Safe</th><th rowspan="2">false Crit alarms</th></tr>
-      <tr><th>macro F1</th><th>F2 Crit</th><th>macro F1</th><th>F2 Crit</th><th>S</th><th>E</th><th>C</th><th>S</th><th>E</th><th>C</th></tr></thead><tbody>`;
+    html += `<div class="panel mb"><div class="panel-head"><h3>Baselines and model</h3><span class="hint">Recall and precision per tier on the ${splitName}. S, E, C = Safe, Elevated, Critical.</span></div><div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th rowspan="2">Method</th><th rowspan="2">Kind</th><th class="grp" colspan="2">Cross-validation</th><th class="grp" colspan="2">Test</th><th class="grp" colspan="3">Recall</th><th class="grp" colspan="3">Precision</th><th rowspan="2">Missed Critical</th><th rowspan="2">Critical called Safe</th><th rowspan="2">False Critical alarms</th></tr>
+      <tr><th>Macro F1</th><th>F2 Critical</th><th>Macro F1</th><th>F2 Critical</th><th>S</th><th>E</th><th>C</th><th>S</th><th>E</th><th>C</th></tr></thead><tbody>`;
     const best = (k, sp) => Math.max.apply(null, methods.map((x) => num(get(x, `${sp}.${k}`))).filter((v) => v != null).concat([-1]));
     methods.forEach((x) => {
       const s = get(x, split) || {};
       const cell = (sp, k) => { const v = num(get(x, `${sp}.${k}`)); return `<td class="${v != null && v === best(k, sp) ? 'best' : ''}">${f3(v)}</td>`; };
       const arr = (k, i) => `<td>${isNum(num(get(s, `${k}.${i}`))) ? pct(get(s, `${k}.${i}`), 1) : '–'}</td>`;
-      html += `<tr class="${x === chosen ? 'chosen' : ''}" title="${esc(x.description || '')}"><td class="l"><b>${esc(x.name)}</b>${x === chosen ? ' <span class="pill nt">chosen</span>' : ''}${x.description ? `<div class="hint">${esc(x.description)}</div>` : ''}</td><td>${esc(x.kind || '')}</td>
+      html += `<tr class="${x === chosen ? 'chosen' : ''}" title="${esc(x.description || '')}"><td class="l">${esc(mName(x.name))}${x === chosen ? ' <span class="tag">Chosen</span>' : ''}</td><td>${esc(sentenceCase(x.kind || ''))}</td>
         ${cell('cv', 'macro_f1')}${cell('cv', 'f2_critical')}${cell('test', 'macro_f1')}${cell('test', 'f2_critical')}
         ${arr('recall', 0)}${arr('recall', 1)}${arr('recall', 2)}${arr('precision', 0)}${arr('precision', 1)}${arr('precision', 2)}
         <td>${esc(fmtNum(s.missed_critical, 0))}</td><td>${esc(fmtNum(s.critical_called_safe, 0))}</td><td>${esc(fmtNum(s.false_alarms_critical, 0))}</td></tr>`;
     });
     if (!methods.length) html += '<tr><td colspan="15" class="l hint">No methods in metrics.json.</td></tr>';
     html += '</tbody></table></div></div>';
-    // confusion + calibration
-    const opts = methods.map((x, i) => `<option value="${i}" ${x === chosen ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
-    html += `<div class="grid3" style="margin-bottom:12px">
-      <div class="panel"><div class="panel-head"><h3>Confusion</h3><select id="cm-method" aria-label="Method for the confusion matrix" style="max-width:220px">${opts}</select></div><div id="cm-a" class="chart sm"></div></div>
-      <div class="panel"><div class="panel-head"><h3>Confusion: ${esc(base ? base.name : 'baseline')}</h3></div><div id="cm-b" class="chart sm"></div></div>
-      <div class="panel"><div class="panel-head"><h3>Calibration</h3><span class="hint">predicted vs observed frequency</span></div><div id="calib" class="chart sm"></div></div>
+    const opts = methods.map((x, i) => `<option value="${i}" ${x === chosen ? 'selected' : ''}>${esc(mName(x.name))}</option>`).join('');
+    html += `<div class="grid3">
+      <div class="panel"><div class="panel-head"><h3>Confusion</h3><select id="cm-method" aria-label="Method for the confusion matrix" style="max-width:220px;margin-left:auto">${opts}</select></div><div id="cm-a" class="chart sm"></div></div>
+      <div class="panel"><div class="panel-head"><h3>Confusion: ${esc(base ? mName(base.name) : 'baseline')}</h3></div><div id="cm-b" class="chart sm"></div></div>
+      <div class="panel"><div class="panel-head"><h3>Calibration</h3><span class="hint">Predicted against observed</span></div><div id="calib" class="chart sm"></div></div>
     </div>`;
-    // review / escalations / regression / thresholds
-    html += `<div class="grid3" style="margin-bottom:12px">
-      <div class="panel"><div class="panel-head"><h3>Human review queue</h3></div><dl class="kv">
-        <dt>CDMs routed to review</dt><dd>${isNum(num(rq.needs_review_rate)) ? pct(rq.needs_review_rate, 2) : '–'}</dd>
-        <dt>Error rate inside review queue</dt><dd>${isNum(num(rq.error_rate_in_review_queue)) ? pct(rq.error_rate_in_review_queue, 1) : '–'}</dd>
-        <dt>Error rate auto-decided</dt><dd>${isNum(num(rq.error_rate_auto_decided)) ? pct(rq.error_rate_auto_decided, 1) : '–'}</dd></dl>
-        <p class="hint">Review flags fire when the 80% Pc interval straddles a tier boundary or the max-Pc bound reaches 1e-4; errors should concentrate there.</p></div>
-      <div class="panel"><div class="panel-head"><h3>Pc-driven escalations</h3></div><dl class="kv">
+    html += `<div class="grid3">
+      <div class="panel"><div class="panel-head"><h3 title="Review flags fire when the 80% Pc interval spans a tier boundary or the max Pc bound reaches 1e-4">Review queue</h3></div><dl class="kv">
+        <dt>CDMs sent to review</dt><dd>${isNum(num(rq.needs_review_rate)) ? pct(rq.needs_review_rate, 2) : '–'}</dd>
+        <dt>Error rate in review</dt><dd>${isNum(num(rq.error_rate_in_review_queue)) ? pct(rq.error_rate_in_review_queue, 1) : '–'}</dd>
+        <dt>Error rate, decided automatically</dt><dd>${isNum(num(rq.error_rate_auto_decided)) ? pct(rq.error_rate_auto_decided, 1) : '–'}</dd></dl></div>
+      <div class="panel"><div class="panel-head"><h3 title="Cases the 1 km / 5 km distance rule cannot see">Escalations driven by Pc</h3></div><dl class="kv">
         <dt>CDMs where Pc raises the tier</dt><dd>${esc(fmtNum(pe.n_rows_where_pc_raises_tier, 0))}</dd>
-        <dt>caught by the model</dt><dd>${esc(fmtNum(pe.caught_by_model, 0))}</dd>
-        <dt>caught by the distance rule</dt><dd>${esc(fmtNum(pe.caught_by_distance_rule, 0))}</dd></dl>
-        <p class="hint">Cases the 1 km / 5 km rule cannot see: the value added over distance-only triage.</p></div>
-      <div class="panel"><div class="panel-head"><h3>Pc regression &amp; thresholds</h3></div><dl class="kv">
-        <dt>MAE log10 Pc (all)</dt><dd>${f3(rg.test_mae_log_pc)}</dd>
-        <dt>MAE log10 Pc (high risk)</dt><dd>${f3(rg.test_mae_log_pc_high_risk)}</dd>
-        <dt>80% coverage (non-floor)</dt><dd>${isNum(num(rg.interval_coverage_80_nonfloor)) ? pct(rg.interval_coverage_80_nonfloor, 1) : '–'}</dd>
-        ${Object.keys(m.thresholds || {}).map((k) => { const t = m.thresholds[k]; return t && typeof t === 'object' ? `<dt>thresholds (${esc(k)})</dt><dd>P(crit) ${esc(pct(t.p_critical))} · P(elev) ${esc(pct(t.p_elevated))}</dd>` : ''; }).join('')}</dl>
-        ${rg.note ? `<p class="hint">${esc(rg.note)}</p>` : ''}</div>
+        <dt>Caught by the model</dt><dd>${esc(fmtNum(pe.caught_by_model, 0))}</dd>
+        <dt>Caught by the distance rule</dt><dd>${esc(fmtNum(pe.caught_by_distance_rule, 0))}</dd></dl></div>
+      <div class="panel"><div class="panel-head"><h3 title="${esc(rg.note || '')}">Pc estimate and thresholds</h3></div><dl class="kv">
+        <dt>Mean error, log10 Pc</dt><dd>${f3(rg.test_mae_log_pc)}</dd>
+        <dt>Mean error, high risk</dt><dd>${f3(rg.test_mae_log_pc_high_risk)}</dd>
+        <dt>80% coverage, above floor</dt><dd>${isNum(num(rg.interval_coverage_80_nonfloor)) ? pct(rg.interval_coverage_80_nonfloor, 1) : '–'}</dd>
+        ${Object.keys(m.thresholds || {}).map((k) => { const t = m.thresholds[k]; return t && typeof t === 'object' ? `<dt>Thresholds (${esc(k)})</dt><dd>Critical ${esc(pct(t.p_critical))}, Elevated ${esc(pct(t.p_elevated))}</dd>` : ''; }).join('')}</dl></div>
     </div>`;
-    // event forecast + screening
     const ef = m.event_forecast;
     const sm = m.screening_model;
-    const blockRows = (obj) => Object.keys(obj || {}).filter((k) => isMetricBlock(obj[k])).map((k) => { const b = obj[k]; return `<tr><td class="l">${esc(k.replace(/_/g, ' '))}</td><td>${f3(b.macro_f1)}</td><td>${f3(b.f2_critical)}</td><td>${isNum(num(get(b, 'recall.2'))) ? pct(get(b, 'recall.2'), 1) : '–'}</td><td>${esc(fmtNum(b.missed_critical, 0))}</td><td>${esc(fmtNum(b.false_alarms_critical, 0))}</td><td>${esc(fmtNum(b.n, 0))}</td></tr>`; }).join('');
-    html += `<div class="grid2" style="margin-bottom:12px">
-      <div class="panel"><div class="panel-head"><h3>Event forecast (tier at TCA)</h3></div>${ef ? `<p class="hint">${esc(ef.description || '')}</p>
-        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>method</th><th>macro F1</th><th>F2 Crit</th><th>Crit recall</th><th>missed Crit</th><th>false Crit</th><th>n events</th></tr></thead><tbody>${blockRows(ef) || '<tr><td colspan="7" class="l hint">no scored blocks</td></tr>'}</tbody></table></div>${ef.note ? `<p class="hint">${esc(ef.note)}</p>` : ''}` : '<div class="state">Not in metrics.json yet.</div>'}</div>
-      <div class="panel"><div class="panel-head"><h3>Screening model (live SOCRATES inputs)</h3></div>${sm ? `<p class="hint">${esc(sm.description || '')}</p>
-        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>split</th><th>macro F1</th><th>F2 Crit</th><th>Crit recall</th><th>missed Crit</th><th>false Crit</th><th>n</th></tr></thead><tbody>${blockRows(sm) || '<tr><td colspan="7" class="l hint">no scored blocks</td></tr>'}</tbody></table></div>` : '<div class="state">Not in metrics.json yet.</div>'}</div>
+    const blockRows = (obj) => Object.keys(obj || {}).filter((k) => isMetricBlock(obj[k])).map((k) => { const b = obj[k]; return `<tr><td class="l">${esc(sentenceCase(k.replace(/_/g, ' ')))}</td><td>${f3(b.macro_f1)}</td><td>${f3(b.f2_critical)}</td><td>${isNum(num(get(b, 'recall.2'))) ? pct(get(b, 'recall.2'), 1) : '–'}</td><td>${esc(fmtNum(b.missed_critical, 0))}</td><td>${esc(fmtNum(b.false_alarms_critical, 0))}</td><td>${esc(fmtNum(b.n, 0))}</td></tr>`; }).join('');
+    const blockHead = (first) => `<thead><tr><th>${first}</th><th>Macro F1</th><th>F2 Critical</th><th>Critical recall</th><th>Missed Critical</th><th>False Critical</th><th>N</th></tr></thead>`;
+    html += `<div class="grid2">
+      <div class="panel"><div class="panel-head"><h3 title="${esc(ef ? [ef.description, ef.note].filter(Boolean).join(' ') : '')}">Event forecast: tier at TCA</h3></div>${ef ? `
+        <div class="tbl-wrap"><table class="tbl">${blockHead('Method')}<tbody>${blockRows(ef) || '<tr><td colspan="7" class="l hint">No scored blocks.</td></tr>'}</tbody></table></div>` : '<div class="state">Not in metrics.json yet.</div>'}</div>
+      <div class="panel"><div class="panel-head"><h3 title="${esc(sm ? sm.description || '' : '')}">Screening model for live data</h3></div>${sm ? `
+        <div class="tbl-wrap"><table class="tbl">${blockHead('Split')}<tbody>${blockRows(sm) || '<tr><td colspan="7" class="l hint">No scored blocks.</td></tr>'}</tbody></table></div>` : '<div class="state">Not in metrics.json yet.</div>'}</div>
     </div>`;
-    // feature importance + failure cases
     const fcases = Array.isArray(m.failure_cases) ? m.failure_cases : [];
-    html += `<div class="grid2" style="margin-bottom:12px">
-      <div class="panel"><div class="panel-head"><h3>Feature importance</h3><span class="hint">share of total split gain</span></div><div id="fi" class="chart"></div></div>
-      <div class="panel"><div class="panel-head"><h3>Where it fails</h3><span class="hint">click a row to open the event in the evaluator</span></div>
-        ${fcases.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>event</th><th>days</th><th>miss</th><th>truth</th><th>pred</th><th>est. Pc</th><th>true Pc</th><th class="l">why</th></tr></thead><tbody>
-        ${fcases.map((f) => `<tr class="click" data-goto="${esc(f.event_id)}" tabindex="0"><td><a href="#evaluator/${esc(f.event_id)}">#${esc(f.event_id)}</a></td><td>${esc(fixed(f.time_to_tca, 2))}</td><td>${esc(fmtDist(f.miss_distance))}</td><td>${tierPill(num(f.true_tier))}</td><td>${tierPill(num(f.pred_tier))}</td><td>${esc(pcText(f.log_pc))}</td><td>${esc(pcText(f.true_log_pc))}</td><td class="l">${esc(f.why || '')}</td></tr>`).join('')}
+    html += `<div class="grid2">
+      <div class="panel"><div class="panel-head"><h3>Feature importance</h3><span class="hint">Share of total split gain</span></div><div id="fi" class="chart"></div></div>
+      <div class="panel"><div class="panel-head"><h3>Where it fails</h3><span class="hint">Select a row to open it in the evaluator</span></div>
+        ${fcases.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Event</th><th>Days</th><th>Miss</th><th>Truth</th><th>Predicted</th><th>Est. Pc</th><th>True Pc</th><th class="l">Why</th></tr></thead><tbody>
+        ${fcases.map((f) => `<tr class="click" data-goto="${esc(f.event_id)}" tabindex="0"><td><a href="#evaluator/${esc(f.event_id)}">${esc(f.event_id)}</a></td><td>${esc(fixed(f.time_to_tca, 2))}</td><td>${esc(fmtDist(f.miss_distance))}</td><td>${tierPill(num(f.true_tier))}</td><td>${tierPill(num(f.pred_tier))}</td><td>${esc(pcText(f.log_pc))}</td><td>${esc(pcText(f.true_log_pc))}</td><td class="l">${esc(f.why || '')}</td></tr>`).join('')}
         </tbody></table></div>` : '<div class="state">No failure cases listed.</div>'}</div>
     </div>`;
-    if (Array.isArray(m.notes) && m.notes.length) html += `<div class="panel" style="margin-bottom:12px"><div class="panel-head"><h3>Notes</h3></div><ul class="notes">${m.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul></div>`;
+    if (Array.isArray(m.notes) && m.notes.length) html += `<div class="panel mb"><div class="panel-head"><h3>Notes</h3></div><ul class="notes">${m.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul></div>`;
     if (extra.length) html += `<div class="panel"><details class="raw"><summary>Other keys in metrics.json (${extra.map(esc).join(', ')})</summary><pre>${esc(JSON.stringify(extra.reduce((o, k) => { o[k] = m[k]; return o; }, {}), null, 2))}</pre></details></div>`;
     el.innerHTML = html;
     renderMetricCharts(methods, chosen, base, split);
   }
-  function confusionChart(el, block, title) {
+  function confusionChart(el, block) {
     const cm = block && Array.isArray(block.confusion) ? block.confusion : null;
-    if (!cm) { el.innerHTML = '<div class="state">No confusion matrix for this method / split.</div>'; return; }
+    if (!cm) { el.innerHTML = '<div class="state">No confusion matrix for this method and split.</div>'; return; }
     const rowsum = cm.map((r) => r.reduce((a, b) => a + (num(b) || 0), 0) || 1);
     const z = cm.map((r, i) => r.map((v) => (num(v) || 0) / rowsum[i]));
     const text = cm.map((r, i) => r.map((v) => `${(num(v) || 0).toLocaleString('en-US')}<br>${pct((num(v) || 0) / rowsum[i])}`));
-    plotReact(el, [{ type: 'heatmap', z, x: TIERS.map((t) => `pred ${t}`), y: TIERS.map((t) => `true ${t}`), text, texttemplate: '%{text}', textfont: { size: 11, color: COLORS.text },
-      colorscale: [[0, '#1D2732'], [1, '#1A73E8']], zmin: 0, zmax: 1, showscale: false, xgap: 2, ygap: 2,
-      hovertemplate: '%{y} → %{x}<br>%{text}<extra></extra>' }],
-    plotlyBase({ margin: { l: 86, r: 8, t: 8, b: 40 }, yaxis: { autorange: 'reversed', gridcolor: 'rgba(0,0,0,0)' }, xaxis: { side: 'bottom', gridcolor: 'rgba(0,0,0,0)' } }), PCFG);
+    plotReact(el, [{ type: 'heatmap', z, x: TIERS, y: TIERS, text, texttemplate: '%{text}', textfont: { size: 12, color: COLORS.text },
+      colorscale: [[0, '#222E3B'], [1, '#2F6A9A']], zmin: 0, zmax: 1, showscale: false, xgap: 2, ygap: 2,
+      hovertemplate: 'True %{y}, predicted %{x}<br>%{text}<extra></extra>' }],
+    plotlyBase({ margin: { l: 78, r: 8, t: 8, b: 44 }, yaxis: { autorange: 'reversed', gridcolor: 'rgba(0,0,0,0)', title: { text: 'True', font: { size: 12 } } }, xaxis: { side: 'bottom', gridcolor: 'rgba(0,0,0,0)', title: { text: 'Predicted', font: { size: 12 } } } }), PCFG);
   }
   function renderMetricCharts(methods, chosen, base, split) {
     if (!window.Plotly) { $$('#cm-a,#cm-b,#calib,#fi').forEach(noPlotly); return; }
     const sel = $('#cm-method');
-    const draw = () => { const mth = methods[Number(sel.value)] || chosen; confusionChart($('#cm-a'), get(mth, split), mth && mth.name); };
+    const draw = () => { const mth = methods[Number(sel.value)] || chosen; confusionChart($('#cm-a'), get(mth, split)); };
     if (sel) { sel.onchange = draw; draw(); }
-    confusionChart($('#cm-b'), get(base, split), base && base.name);
+    confusionChart($('#cm-b'), get(base, split));
     const cal = Array.isArray(S.metrics.calibration) ? S.metrics.calibration : [];
     const cal2 = Array.isArray(S.metrics.calibration_elevated) ? S.metrics.calibration_elevated : [];
     const calEl = $('#calib');
     if (!cal.length && !cal2.length) calEl.innerHTML = '<div class="state">No calibration data.</div>';
     else {
       const tr = (arr, name, col) => ({ x: arr.map((c) => num(c.p_pred)), y: arr.map((c) => num(c.p_obs)), mode: 'lines+markers', name, line: { color: col, width: 2 },
-        marker: { color: col, size: arr.map((c) => clamp(6 + Math.log10((num(c.n) || 1) + 1) * 2.5, 6, 16)), line: { color: COLORS.panel, width: 2 } },
-        customdata: arr.map((c) => c.n), hovertemplate: `${name}<br>predicted %{x:.3f} · observed %{y:.3f}<br>n = %{customdata}<extra></extra>` });
-      const data = [{ x: [0, 1], y: [0, 1], mode: 'lines', name: 'perfect', line: { color: COLORS.muted, dash: 'dot', width: 1 }, hoverinfo: 'skip' }];
+        marker: { color: col, size: arr.map((c) => clamp(6 + Math.log10((num(c.n) || 1) + 1) * 2.5, 6, 16)), line: { color: COLORS.panel, width: 1 } },
+        customdata: arr.map((c) => c.n), hovertemplate: `${name}<br>Predicted %{x:.3f}, observed %{y:.3f}<br>N = %{customdata}<extra></extra>` });
+      const data = [{ x: [0, 1], y: [0, 1], mode: 'lines', name: 'Perfect', line: { color: COLORS.muted, dash: 'dot', width: 1 }, hoverinfo: 'skip' }];
       if (cal.length) data.push(tr(cal, 'P(Pc ≥ 1e-4)', COLORS.crit));
       if (cal2.length) data.push(tr(cal2, 'P(Pc ≥ 1e-6)', COLORS.elev));
-      plotReact(calEl, data, plotlyBase({ margin: { l: 44, r: 10, t: 26, b: 40 }, xaxis: { title: { text: 'predicted probability', font: { size: 10.5 } }, range: [0, 1], gridcolor: COLORS.grid }, yaxis: { title: { text: 'observed frequency', font: { size: 10.5 } }, range: [0, 1], gridcolor: COLORS.grid } }), PCFG);
+      plotReact(calEl, data, plotlyBase({ margin: { l: 46, r: 10, t: 28, b: 40 }, xaxis: { title: { text: 'Predicted probability', font: { size: 12 } }, range: [0, 1], gridcolor: COLORS.grid }, yaxis: { title: { text: 'Observed frequency', font: { size: 12 } }, range: [0, 1], gridcolor: COLORS.grid } }), PCFG);
     }
     const fi = (Array.isArray(S.metrics.feature_importance) ? S.metrics.feature_importance : []).slice(0, 15).reverse();
     const fiEl = $('#fi');
     if (!fi.length) fiEl.innerHTML = '<div class="state">No feature importance.</div>';
     else {
-      plotReact(fiEl, [{ type: 'bar', orientation: 'h', y: fi.map((f) => f.feature), x: fi.map((f) => num(f.gain_pct)), marker: { color: COLORS.primaryText },
-        hovertemplate: '%{y}: %{x:.1f}% of gain<extra></extra>', text: fi.map((f) => `${fixed(f.gain_pct, 1)}%`), textposition: 'outside', cliponaxis: false, textfont: { size: 10, color: COLORS.text2 } }],
-      plotlyBase({ margin: { l: 140, r: 40, t: 6, b: 30 }, xaxis: { ticksuffix: '%', gridcolor: COLORS.grid }, yaxis: { gridcolor: 'rgba(0,0,0,0)', tickfont: { size: 10.5 } } }), PCFG);
+      plotReact(fiEl, [{ type: 'bar', orientation: 'h', y: fi.map((f) => f.feature), x: fi.map((f) => num(f.gain_pct)), marker: { color: COLORS.focus },
+        hovertemplate: '%{y}: %{x:.1f}% of gain<extra></extra>', text: fi.map((f) => `${fixed(f.gain_pct, 1)}%`), textposition: 'outside', cliponaxis: false, textfont: { size: 11, color: COLORS.muted } }],
+      plotlyBase({ margin: { l: 150, r: 44, t: 6, b: 30 }, xaxis: { ticksuffix: '%', gridcolor: COLORS.grid }, yaxis: { gridcolor: 'rgba(0,0,0,0)', tickfont: { size: 12, color: COLORS.text } } }), PCFG);
     }
   }
 
   // ================================================================ Assess one CDM
+  // label = what the analyst reads; k = the API column (shown as the field tooltip)
   const FIELDS = [
-    { k: 'event_id', label: 'event_id', u: 'id', step: 1, help: 'any integer; groups CDM history' },
-    { k: 'time_to_tca', label: 'time_to_tca', u: 'days', step: 'any', min: 0 },
-    { k: 'miss_distance', label: 'miss_distance', u: 'm', step: 'any', min: 0 },
-    { k: 'relative_speed', label: 'relative_speed', u: 'm/s', step: 'any', min: 0 },
-    { k: 'relative_position_r', label: 'relative_position_r', u: 'm (radial)', step: 'any' },
-    { k: 'relative_position_t', label: 'relative_position_t', u: 'm (along-track)', step: 'any' },
-    { k: 'relative_position_n', label: 'relative_position_n', u: 'm (cross-track)', step: 'any' },
-    { k: 'c_object_type', label: 'c_object_type', u: 'secondary', type: 'select' },
-    { k: 'c_sigma_r', label: 'c_sigma_r', u: 'm', step: 'any', min: 0, help: '6e7 = covariance unavailable' },
-    { k: 't_sigma_r', label: 't_sigma_r', u: 'm', step: 'any', min: 0 },
-    { k: 'max_risk_estimate', label: 'max_risk_estimate', u: 'log10 Pc bound', step: 'any', max: 0 },
-    { k: 'F10', label: 'F10', u: 'sfu', step: 'any', min: 0 },
-    { k: 'AP', label: 'AP', u: 'index', step: 'any', min: 0 },
+    { k: 'event_id', label: 'Event id', u: '', step: 1, help: 'Any whole number; groups the CDM history' },
+    { k: 'time_to_tca', label: 'Time to TCA', u: 'days', step: 'any', min: 0 },
+    { k: 'miss_distance', label: 'Miss distance', u: 'm', step: 'any', min: 0 },
+    { k: 'relative_speed', label: 'Relative speed', u: 'm/s', step: 'any', min: 0 },
+    { k: 'relative_position_r', label: 'Radial offset', u: 'm', step: 'any' },
+    { k: 'relative_position_t', label: 'Along-track offset', u: 'm', step: 'any' },
+    { k: 'relative_position_n', label: 'Cross-track offset', u: 'm', step: 'any' },
+    { k: 'c_object_type', label: 'Secondary object type', u: '', type: 'select' },
+    { k: 'c_sigma_r', label: 'Secondary radial sigma', u: 'm', step: 'any', min: 0, help: '6e7 means no covariance' },
+    { k: 't_sigma_r', label: 'Primary radial sigma', u: 'm', step: 'any', min: 0 },
+    { k: 'max_risk_estimate', label: 'Max Pc bound', u: 'log10', step: 'any', max: 0 },
+    { k: 'F10', label: 'F10.7 solar flux', u: 'sfu', step: 'any', min: 0 },
+    { k: 'AP', label: 'Ap index', u: '', step: 'any', min: 0 },
   ];
-  // Real CDMs from data/test_data.csv (true tier computed from `risk`, shown only as a note).
+  // Real CDMs from data/test_data.csv (the true tier comes from `risk` and is shown only as a note).
   const PRESETS = {
-    safe: { note: 'test_data.csv event 0: miss 32.9 km, ground-truth Pc 4.6e-8 (Safe).', v: { event_id: 0, time_to_tca: 5.922, miss_distance: 32878, relative_speed: 7929, relative_position_r: -376.3, relative_position_t: 27867.5, relative_position_n: 17443.8, c_object_type: 'UNKNOWN', c_sigma_r: 212.79, t_sigma_r: 7.354, max_risk_estimate: -7.2287, F10: 75, AP: 9 } },
-    elevated: { note: 'test_data.csv event 2: miss 21.2 km (distance rule says Safe) but ground-truth Pc 2.3e-5 (Elevated) – a Pc-driven case.', v: { event_id: 2, time_to_tca: 6.852, miss_distance: 21175, relative_speed: 9279, relative_position_r: 14.7, relative_position_t: -16644.3, relative_position_n: -13090.9, c_object_type: 'UNKNOWN', c_sigma_r: 84.015, t_sigma_r: 2.385, max_risk_estimate: -4.4988, F10: 66, AP: 3 } },
-    critical: { note: 'test_data.csv event 87: miss 1.03 km (distance rule says Elevated) but ground-truth Pc 8.4e-4 (Critical).', v: { event_id: 87, time_to_tca: 3.376, miss_distance: 1032, relative_speed: 14861, relative_position_r: 63.0, relative_position_t: -123.5, relative_position_n: 1023.5, c_object_type: 'DEBRIS', c_sigma_r: 33.218, t_sigma_r: 4.373, max_risk_estimate: -2.9172, F10: 78, AP: 3 } },
+    safe: { note: 'Test-set event 0: miss 32.9 km, true Pc 4.6e-8 (Safe).', v: { event_id: 0, time_to_tca: 5.922, miss_distance: 32878, relative_speed: 7929, relative_position_r: -376.3, relative_position_t: 27867.5, relative_position_n: 17443.8, c_object_type: 'UNKNOWN', c_sigma_r: 212.79, t_sigma_r: 7.354, max_risk_estimate: -7.2287, F10: 75, AP: 9 } },
+    elevated: { note: 'Test-set event 2: miss 21.2 km, so distance alone says Safe, but the true Pc is 2.3e-5 (Elevated).', v: { event_id: 2, time_to_tca: 6.852, miss_distance: 21175, relative_speed: 9279, relative_position_r: 14.7, relative_position_t: -16644.3, relative_position_n: -13090.9, c_object_type: 'UNKNOWN', c_sigma_r: 84.015, t_sigma_r: 2.385, max_risk_estimate: -4.4988, F10: 66, AP: 3 } },
+    critical: { note: 'Test-set event 87: miss 1.03 km, so distance alone says Elevated, but the true Pc is 8.4e-4 (Critical).', v: { event_id: 87, time_to_tca: 3.376, miss_distance: 1032, relative_speed: 14861, relative_position_r: 63.0, relative_position_t: -123.5, relative_position_n: 1023.5, c_object_type: 'DEBRIS', c_sigma_r: 33.218, t_sigma_r: 4.373, max_risk_estimate: -2.9172, F10: 78, AP: 3 } },
   };
   let assessBuilt = false;
   function ensureAssessForm() {
     if (assessBuilt) return;
     assessBuilt = true;
-    $('#assess-fields').innerHTML = FIELDS.map((f) => `<div class="fld" data-k="${f.k}">
-      <label for="f-${f.k}">${esc(f.label)} <span class="u">(${esc(f.u)})</span></label>
-      ${f.type === 'select' ? `<select id="f-${f.k}" name="${f.k}">${OBJECT_TYPES.map((o) => `<option>${o}</option>`).join('')}</select>` :
+    $('#assess-fields').innerHTML = FIELDS.map((f) => `<div class="fld" data-k="${f.k}" title="API field: ${f.k}">
+      <label for="f-${f.k}">${esc(f.label)}${f.u ? ` <span class="u">(${esc(f.u)})</span>` : ''}</label>
+      ${f.type === 'select' ? `<select id="f-${f.k}" name="${f.k}">${OBJECT_TYPES.map((o) => `<option value="${o}">${o === 'TBA' ? 'To be assigned' : sentenceCase(o)}</option>`).join('')}</select>` :
         `<input id="f-${f.k}" name="${f.k}" type="number" inputmode="decimal" step="${f.step}"${f.min != null ? ` min="${f.min}"` : ''}${f.max != null ? ` max="${f.max}"` : ''} required>`}
       ${f.help ? `<span class="fh">${esc(f.help)}</span>` : ''}</div>`).join('');
     $('#assess-fields').addEventListener('input', checkAssessGeometry);
     const draft = lsGet('cw.assess.draft', null);
-    applyPreset(draft && typeof draft === 'object' ? { v: draft, note: 'Restored your last input.' } : PRESETS.elevated);
+    applyPreset(draft && typeof draft === 'object' ? { v: draft, note: 'Your last input, restored.' } : PRESETS.elevated);
   }
   function applyPreset(p) {
     FIELDS.forEach((f) => { const el = $(`#f-${f.k}`); if (el && p.v[f.k] != null) el.value = p.v[f.k]; });
@@ -2065,65 +1992,72 @@
     if (!out) return;
     if (Number.isFinite(md) && md > 0 && Number.isFinite(r) && r > 0) {
       const rel = Math.abs(r - md) / md;
-      out.innerHTML = rel > 0.05 ? `<span style="color:var(--stale)">|r,t,n| = ${esc(fmtDist(r))} differs from miss_distance ${esc(fmtDist(md))} by ${esc(pct(rel))} – check the inputs.</span>` :
-        `Geometry check: |r,t,n| = ${esc(fmtDist(r))} matches miss_distance.`;
+      out.innerHTML = rel > 0.05 ? `<span class="warn">The offsets add up to ${esc(fmtDist(r))}, not the ${esc(fmtDist(md))} miss distance (${esc(pct(rel))} apart). Check the inputs.</span>` :
+        `The offsets add up to the miss distance (${esc(fmtDist(r))}).`;
     } else out.textContent = '';
   }
   async function submitAssess(ev) {
     ev.preventDefault();
     const { body, bad } = readAssessForm();
     const err = $('#assess-err');
-    if (bad.length) { err.textContent = `Check ${bad.join(', ')}`; return; }
+    if (bad.length) { err.textContent = `Check ${bad.map((k) => (FIELDS.find((f) => f.k === k) || {}).label || k).join(', ').toLowerCase()}.`; return; }
     err.textContent = '';
     lsSet('cw.assess.draft', body);
     const out = $('#assess-result');
     const btn = $('#assess-go');
     btn.disabled = true;
-    out.innerHTML = '<div class="loading" style="padding:16px">Scoring the CDM…</div>';
+    out.innerHTML = '<div class="loading">Assessing…</div>';
     try {
       const a = await api('/api/assess', {}, { method: 'POST', body });
       renderAssessResult(a, body);
     } catch (e) {
-      out.innerHTML = `<div class="err-box"><b>Assessment failed.</b> ${esc(e.message)}</div>`;
+      out.innerHTML = `<p class="err-box"><b>Assessment failed.</b> ${esc(e.message)}. Check the inputs and try again.</p>`;
     } finally { btn.disabled = false; }
   }
   function pcScale(a) {
     const pos = (lp) => clamp(((num(lp) == null ? -30 : num(lp)) + 30) / 30 * 100, 0, 100);
     const lo = pos(a.log_pc_lo); const hi = pos(a.log_pc_hi); const md = pos(a.log_pc);
-    return `<div class="pc-scale" role="img" aria-label="Estimated log10 Pc ${fixed(a.log_pc, 2)} with 80% interval ${fixed(a.log_pc_lo, 2)} to ${fixed(a.log_pc_hi, 2)}">
-      <div class="pc-axis"></div>
+    return `<div class="pc-scale" role="img" aria-label="Estimated Pc ${esc(pcText(a.log_pc))}, 80% interval ${esc(pcText(a.log_pc_lo))} to ${esc(pcText(a.log_pc_hi))}">
+      <div class="pc-axis"></div><div class="pc-zone z1"></div><div class="pc-zone z2"></div>
       <div class="pc-band" style="left:${lo}%;width:${Math.max(0.6, hi - lo)}%"></div>
       <div class="pc-med" style="left:${md}%"></div>
       <div class="pc-top" style="left:${clamp(md, 6, 94)}%">${esc(pcText(a.log_pc))}</div>
-      <div class="pc-thr" style="left:80%"></div><div class="pc-thr" style="left:86.67%"></div>
       <div class="pc-lbl" style="left:0%;transform:none">1e-30</div><div class="pc-lbl" style="left:50%">1e-15</div>
-      <div class="pc-lbl" style="left:80%">1e-6</div><div class="pc-lbl" style="left:86.67%">1e-4</div><div class="pc-lbl" style="left:100%;transform:translateX(-100%)">1</div>
+      <div class="pc-lbl" style="left:80%">1e-6</div><div class="pc-lbl" style="left:100%;transform:translateX(-100%)">1</div>
     </div>`;
+  }
+  function assessVerdict(a, body) {
+    const t = num(a.tier); const md = num(body.miss_distance); const mdt = num(a.md_tier);
+    if (t === 2) return mdt === 2 ? `Critical: the objects pass ${fmtDist(md)} apart, under the 1\u00a0km limit.` : `Critical: the estimated collision probability is likely 1e-4 or more (P = ${pct(a.p_pc_critical)}).`;
+    if (t === 1) return mdt === 1 ? `Elevated: the objects pass ${fmtDist(md)} apart, inside the 5\u00a0km warning distance.` : `Elevated: the estimated collision probability is likely 1e-6 or more (P = ${pct(a.p_pc_elevated)}).`;
+    if (t === 0) return `Safe: the objects pass ${fmtDist(md)} apart and the collision probability is likely under 1e-6.`;
+    return 'No tier returned.';
   }
   function renderAssessResult(a, body) {
     const out = $('#assess-result');
-    if (!a || typeof a !== 'object') { out.innerHTML = '<div class="err-box"><b>Unexpected response.</b></div>'; return; }
+    if (!a || typeof a !== 'object') { out.innerHTML = '<p class="err-box"><b>Unexpected response from the API.</b></p>'; return; }
     const t = num(a.tier);
     out.innerHTML = `
-      <div class="panel-head"><h3>Assessment</h3><span class="hint">${esc(fmtUTC(new Date().toISOString()))}</span></div>
-      ${a._mock_note ? `<div class="screen-warn" style="margin:0 0 10px">${esc(a._mock_note)}</div>` : ''}
-      <div class="dt-badges" style="margin:0 0 12px">${tierPill(t, 'Recommended').replace('class="pill', 'class="pill lg')}${a.needs_review ? reviewPill().replace('class="pill', 'class="pill lg') : ''}<span class="pill nt">Distance rule: ${esc(TIERS[num(a.md_tier)] || '?')}</span></div>
-      <h4>Tier probabilities</h4>${stackBar(a.p_tier)}
-      <h4>Estimated Pc with 80% interval</h4>${pcScale(a)}
-      <dl class="kv" style="margin-top:6px">
-        <dt>Median est. Pc</dt><dd>${pcHtml(a.log_pc)} <small>log10 ${esc(fixed(a.log_pc, 2))}</small></dd>
-        <dt>80% interval</dt><dd>${esc(pcText(a.log_pc_lo))} – ${esc(pcText(a.log_pc_hi))}</dd>
-        <dt>P(Pc ≥ 1e-6)</dt><dd>${esc(pct(a.p_pc_elevated, 1))}</dd>
-        <dt>P(Pc ≥ 1e-4)</dt><dd>${esc(pct(a.p_pc_critical, 1))}</dd>
+      <div class="panel-head"><h3>Result</h3><span class="hint">${esc(fmtUTC(new Date().toISOString()))}</span></div>
+      ${a._mock_note ? `<p class="warn-line">${esc(a._mock_note)}</p>` : ''}
+      <p class="verdict ${TIER_CSS[t] || 'nt'}" style="padding:0 0 12px">${esc(assessVerdict(a, body))}${a.needs_review ? '<span class="verdict-sub">Needs review: the uncertainty spans a tier boundary.</span>' : ''}</p>
+      <div class="page-head" style="margin-bottom:8px">${lv('Recommended', tierPill(t))}${lv('Distance rule', tierPill(num(a.md_tier)))}</div>
+      <h4 class="sub-h">Tier probabilities</h4>${stackBar(a.p_tier)}
+      <h4 class="sub-h">Estimated Pc with 80% interval</h4>${pcScale(a)}
+      <dl class="kv" style="margin-top:10px">
+        <dt>Estimated Pc</dt><dd>${pcHtml(a.log_pc)}</dd>
+        <dt>80% interval</dt><dd>${esc(pcText(a.log_pc_lo))} to ${esc(pcText(a.log_pc_hi))}</dd>
+        <dt>Chance Pc ≥ 1e-6</dt><dd>${esc(pct(a.p_pc_elevated, 1))}</dd>
+        <dt>Chance Pc ≥ 1e-4</dt><dd>${esc(pct(a.p_pc_critical, 1))}</dd>
         ${a.forecast_tier != null ? `<dt>Forecast tier at TCA</dt><dd>${tierPill(num(a.forecast_tier))}</dd>` : ''}
-        ${a.forecast && a.forecast.tier != null ? `<dt>Event forecast (tier at final CDM)</dt><dd>${tierPill(num(a.forecast.tier))}${Array.isArray(a.forecast.p_tier) ? ` <small>P(Critical) ${esc(pct(a.forecast.p_tier[2]))}</small>` : ''}</dd>` : ''}
+        ${a.forecast && a.forecast.tier != null ? `<dt>Forecast at the final CDM</dt><dd>${tierPill(num(a.forecast.tier))}${Array.isArray(a.forecast.p_tier) ? ` <small>P(Critical) ${esc(pct(a.forecast.p_tier[2]))}</small>` : ''}</dd>` : ''}
         ${a.model ? `<dt>Model</dt><dd><small>${esc(a.model.set || (a.model.trained ? 'trained' : 'fallback'))}</small></dd>` : ''}
       </dl>
-      ${Array.isArray(a.input_warnings) && a.input_warnings.length ? `<div class="screen-warn">${a.input_warnings.map(esc).join('<br>')}</div>` : ''}
-      ${Array.isArray(a.ignored_fields) && a.ignored_fields.length ? `<p class="hint">Ignored fields (not allowed inputs): ${a.ignored_fields.map(esc).join(', ')}</p>` : ''}
-      <h4>Why (verbatim)</h4>${reasonsHtml(a.reasons)}
-      <div class="form-actions"><button type="button" class="btn sm" data-act="log-assess">Log this assessment</button><span class="hint">Decision support only – the analyst makes the call.</span></div>
-      <details class="raw" style="margin-top:10px"><summary>Request sent to /api/assess</summary><pre>${esc(JSON.stringify(body, null, 2))}</pre></details>`;
+      ${Array.isArray(a.input_warnings) && a.input_warnings.length ? `<p class="warn-line" style="margin-top:10px">${a.input_warnings.map(esc).join('<br>')}</p>` : ''}
+      ${Array.isArray(a.ignored_fields) && a.ignored_fields.length ? `<p class="hint">Ignored fields (not model inputs): ${a.ignored_fields.map(esc).join(', ')}</p>` : ''}
+      <h4 class="sub-h">Why</h4>${reasonsHtml(a.reasons)}
+      <div class="form-actions"><button type="button" class="btn sm" data-act="log-assess">Log this assessment</button></div>
+      <details class="raw" style="margin-top:12px"><summary>Request sent</summary><pre>${esc(JSON.stringify(body, null, 2))}</pre></details>`;
     S.lastAssess = { a, body };
   }
 
@@ -2149,6 +2083,11 @@
     i = i < 0 ? 0 : clamp(i + dir, 0, rows.length - 1);
     selectEvent(rows[i].id, { fly: true });
   }
+  function clearSearch() {
+    $('#q').value = ''; S.search = '';
+    renderFeed(); updatePoints();
+    if (S.view === 'evaluator') renderTestQueue();
+  }
   const isTyping = (el) => el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
 
   function wire() {
@@ -2166,7 +2105,7 @@
     });
     q.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') { const { rows } = feedRows(); if (S.view === 'live' && rows.length) selectEvent(rows[0].id, { fly: true }); }
-      if (e.key === 'Escape') { q.value = ''; S.search = ''; renderFeed(); updatePoints(); q.blur(); }
+      if (e.key === 'Escape') { clearSearch(); q.blur(); }
     });
     // window chips
     $('#win-chips').addEventListener('click', (e) => {
@@ -2177,41 +2116,29 @@
       S.hourFilter = null;
       if (S.view !== 'live') location.hash = '#live';
       loadLive();
+      renderWarnings();
     });
     // sidebar
-    $('#side-toggle').addEventListener('click', () => {
-      const sb = $('#sidebar'); const c = !sb.classList.contains('collapsed');
-      sb.classList.toggle('collapsed', c);
-      $('#side-toggle').setAttribute('aria-expanded', c ? 'false' : 'true');
-      $('#side-toggle').title = c ? 'Expand sidebar' : 'Collapse sidebar';
-      lsSet('cw.sideCollapsed', c);
-      setTimeout(() => { if (G.viewer) G.viewer.resize(); resizePlots(); }, 220);
-    });
     $('#feed-filter').addEventListener('click', (e) => { const b = e.target.closest('button[data-f]'); if (!b) return; setFeedFilter(b.dataset.f); renderFeed(); });
     $('#feed-sort').addEventListener('change', (e) => { S.feedSort = e.target.value; renderFeed(); });
-    $('#feed-points').addEventListener('change', (e) => { S.onlyPoints = e.target.checked; renderFeed(); });
     $('#tq-pred').addEventListener('click', (e) => { const b = e.target.closest('button[data-t]'); if (!b) return; S.test.pred = b.dataset.t; setSeg('#tq-pred', 't', b.dataset.t); renderTestQueue(); });
     $('#tq-review').addEventListener('change', (e) => { S.test.review = e.target.checked; renderTestQueue(); });
     $('#tq-dis').addEventListener('change', (e) => { S.test.dis = e.target.checked; renderTestQueue(); });
     $('#tq-under').addEventListener('change', (e) => { S.test.under = e.target.checked; renderTestQueue(); });
     $('#tq-sort').addEventListener('change', (e) => { S.test.sort = e.target.value; renderTestQueue(); });
-    // overlay
-    $('#layer-grid').addEventListener('click', (e) => {
-      const b = e.target.closest('button[data-l]'); if (!b) return;
-      const k = b.dataset.l; S.layers[k] = !S.layers[k];
-      b.classList.toggle('on', S.layers[k]); b.setAttribute('aria-pressed', S.layers[k] ? 'true' : 'false');
-      applyLayerVisibility();
+    // hour strip: arrow keys move between bars (one tab stop for the whole strip)
+    $('#hours').addEventListener('keydown', (e) => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+      const bars = $$('#hours button');
+      const i = bars.indexOf(document.activeElement);
+      if (i < 0) return;
+      e.preventDefault();
+      const j = e.key === 'Home' ? 0 : (e.key === 'End' ? bars.length - 1 : clamp(i + (e.key === 'ArrowRight' ? 1 : -1), 0, bars.length - 1));
+      bars[i].tabIndex = -1; bars[j].tabIndex = 0; bars[j].focus();
     });
-    $('#min-sev').addEventListener('click', (e) => { const b = e.target.closest('button[data-s]'); if (!b) return; S.minSev = Number(b.dataset.s); setSeg('#min-sev', 's', b.dataset.s); updatePoints(); });
-    const collapser = (btnSel, boxSel) => $(btnSel).addEventListener('click', () => {
-      const box = $(boxSel); const c = !box.classList.contains('collapsed');
-      box.classList.toggle('collapsed', c);
-      $(btnSel).innerHTML = c ? '+' : '&minus;';
-      $(btnSel).setAttribute('aria-expanded', c ? 'false' : 'true');
-      if (!c) setTimeout(resizePlots, 30);
-    });
-    collapser('#ovl-toggle', '#overlay');
-    collapser('#kpi-toggle', '#kpi-card');
+    // legend options
+    $('#lg-elev').addEventListener('change', (e) => { S.layers.elev = e.target.checked; lsSet('cw.layers', S.layers); updatePoints(); });
+    $('#lg-labels').addEventListener('change', (e) => { S.layers.labels = e.target.checked; lsSet('cw.layers', S.layers); applyLayerVisibility(); });
     // play bar
     $('#pb-play').addEventListener('click', () => { if (!G.viewer) return; G.viewer.clock.shouldAnimate = !G.viewer.clock.shouldAnimate; updatePlaybar(true); });
     $('#pb-speed').addEventListener('click', () => {
@@ -2250,10 +2177,10 @@
     $('#assess-sw').addEventListener('click', async () => {
       if (!S.sw) await loadSpaceWeather();
       const f = get(S.sw, 'f107.latest'); const a = get(S.sw, 'ap.latest');
-      if (f == null && a == null) { toast('Space weather unavailable right now.', true); return; }
+      if (f == null && a == null) { toast('Space weather is unavailable right now. Enter F10.7 and Ap by hand.', true); return; }
       if (f != null) $('#f-F10').value = f;
       if (a != null) $('#f-AP').value = a;
-      $('#preset-note').textContent = `F10 / AP set from ${get(S.sw, 'f107.source', 'NOAA SWPC')} (fetched ${fmtUTC(S.sw.fetched_at)}).`;
+      $('#preset-note').textContent = `F10.7 and Ap set from ${get(S.sw, 'f107.source', 'NOAA SWPC')}, fetched ${fmtUTC(S.sw.fetched_at)}.`;
     });
 
     // delegated clicks
@@ -2269,7 +2196,9 @@
         return;
       }
       const qBtn = e.target.closest('[data-q]');
-      if (qBtn) { $('#q').value = qBtn.dataset.q; S.search = qBtn.dataset.q; setFeedFilter('all'); renderFeed(); updatePoints(); return; }
+      if (qBtn) { e.preventDefault(); $('#q').value = qBtn.dataset.q; S.search = qBtn.dataset.q; setFeedFilter('all'); renderFeed(); updatePoints(); return; }
+      const hourEl = e.target.closest('[data-hour]');
+      if (hourEl) { e.preventDefault(); setHourFilter(Number(hourEl.dataset.hour)); return; }
       const cdmRow = e.target.closest('[data-cdm]');
       if (cdmRow) { S.test.cdmIdx = Number(cdmRow.dataset.cdm); renderTestDetail(); return; }
       const go = e.target.closest('[data-goto]');
@@ -2285,19 +2214,20 @@
       else if (a === 'retry-test') ensureTestEvents(true);
       else if (a === 'retry-test-detail' && S.test.selected != null) selectTestEvent(S.test.selected);
       else if (a === 'retry-metrics') ensureMetrics(true);
-      else if (a === 'clear-hour') { S.hourFilter = null; renderFeed(); }
+      else if (a === 'clear-hour') setHourFilter(null);
+      else if (a === 'clear-search') clearSearch();
       else if (a === 'feed-all') { setFeedFilter('all'); renderFeed(); }
       else if (a === 'log-assess' && S.lastAssess) {
-        if (!S.analyst) { openLog(); $('#analyst').focus(); toast('Enter your initials in the decision log first.', true); return; }
+        if (!S.analyst) { openLog(); $('#analyst').focus(); toast('Add your initials in the decision log first.', true); return; }
         const { a: as, body } = S.lastAssess;
-        S.log.push({ ts: new Date().toISOString(), analyst: S.analyst, view: 'assess', event_id: body.event_id, pair: `manual CDM (event_id ${body.event_id})`, action: 'acknowledge',
+        S.log.push({ ts: new Date().toISOString(), analyst: S.analyst, view: 'assess', event_id: body.event_id, pair: `Manual CDM, event ${body.event_id}`, action: 'acknowledge',
           note: 'Manual assessment logged', model_tier: TIERS[num(as.tier)], needs_review: !!as.needs_review, log_pc: as.log_pc, miss_distance_m: body.miss_distance, time_to_tca_d: body.time_to_tca, source: 'Assess form' });
         saveLog(); toast('Assessment logged.');
       }
     });
     document.addEventListener('input', (e) => { if (e.target.classList && e.target.classList.contains('analyst-inline')) setAnalyst(e.target.value); });
     document.addEventListener('keydown', (e) => {
-      const card = e.target.closest && e.target.closest('.card[role="button"]');
+      const card = e.target.closest && e.target.closest('.item[role="button"]');
       if (card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); card.click(); return; }
       if (e.key === 'Escape') {
         if ($('#logdrawer').classList.contains('open')) { closeLog(); return; }
@@ -2324,15 +2254,19 @@
       S.windowH = w;
       $$('#win-chips button').forEach((x) => { const on = Number(x.dataset.w) === w; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     }
-    if (window.innerWidth <= 900 || window.innerHeight < 640) {
-      $('#overlay').classList.add('collapsed'); $('#ovl-toggle').innerHTML = '+'; $('#ovl-toggle').setAttribute('aria-expanded', 'false');
+    const layers = lsGet('cw.layers', null);
+    if (window.innerWidth <= 900) S.layers.labels = false;   // labels crowd a phone-sized globe
+    if (layers && typeof layers === 'object') {
+      if (typeof layers.elev === 'boolean') S.layers.elev = layers.elev;
+      if (typeof layers.labels === 'boolean') S.layers.labels = layers.labels;
     }
-    if (lsGet('cw.sideCollapsed', false) && window.innerWidth > 900) { $('#sidebar').classList.add('collapsed'); $('#side-toggle').setAttribute('aria-expanded', 'false'); }
+    $('#lg-elev').checked = S.layers.elev;
+    $('#lg-labels').checked = S.layers.labels;
     wire();
     tickClock();
     setInterval(tickClock, 1000);
     setInterval(refreshCountdowns, 15000);
-    renderFeed(); renderKpiCard(); renderLivePill(); renderSpaceWeather();
+    renderFeed(); renderWarnings(); renderInsights(); renderStatus();
     route();
     initGlobe();
     loadLive();

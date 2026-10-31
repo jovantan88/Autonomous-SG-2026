@@ -41,8 +41,18 @@ def screening_features(df):
     return f
 
 
+DISAGREE_PREFIX = "Model parts disagree"
+
+
 def _fmt_pc(log_pc):
-    return f"{10 ** log_pc:.1e}" if log_pc > -29.9 else "~0"
+    if log_pc <= -29.9:
+        return "~0"
+    mant, exp = f"{10 ** log_pc:.1e}".split("e")
+    return f"{mant}e{int(exp)}"  # 1.2e-5, not 1.2e-05
+
+
+def _fmt_distance(metres):
+    return f"{metres:,.0f} m" if metres < 1000 else f"{metres / 1000:.1f} km"
 
 
 def combine(log_pc, lo, hi, p_elev, p_crit, miss_distance, thresholds, max_pc_bound=None):
@@ -78,30 +88,34 @@ def combine(log_pc, lo, hi, p_elev, p_crit, miss_distance, thresholds, max_pc_bo
     reasons = []
     for i in range(len(tier)):
         r = []
-        md = float(miss_distance[i])
+        md = _fmt_distance(float(miss_distance[i]))
         if m[i] == 2:
-            r.append(f"Miss distance {md / 1000:.2f} km < {MD_CRITICAL / 1000:.0f} km -> Critical (hard rule)")
+            r.append(f"Miss distance {md} is under 1 km, so the event is Critical whatever the probability.")
         elif m[i] == 1:
-            r.append(f"Miss distance {md / 1000:.2f} km within {MD_CRITICAL / 1000:.0f}-{MD_ELEVATED / 1000:.0f} km -> at least Elevated (hard rule)")
+            r.append(f"Miss distance {md} is between 1 and 5 km, so the event is at least Elevated.")
         else:
-            r.append(f"Miss distance {md / 1000:.2f} km > {MD_ELEVATED / 1000:.0f} km (rule satisfied)")
-        r.append(f"Estimated Pc {_fmt_pc(log_pc[i])} (80% interval {_fmt_pc(lo[i])} to {_fmt_pc(hi[i])})")
+            r.append(f"Miss distance {md} is more than 5 km.")
+        r.append(f"Estimated collision probability {_fmt_pc(log_pc[i])} "
+                 f"(80% range {_fmt_pc(lo[i])} to {_fmt_pc(hi[i])}).")
         if pc_dec[i] == 2:
-            r.append(f"P(Pc >= 1e-4) = {p_crit[i]:.0%} >= decision threshold {thresholds['p_critical']:.0%} -> Critical")
+            r.append(f"{p_crit[i]:.0%} chance the probability reaches 1e-4, above the "
+                     f"{thresholds['p_critical']:.0%} escalation threshold: Critical.")
         elif pc_dec[i] == 1:
-            r.append(f"P(Pc >= 1e-6) = {p_elev[i]:.0%} >= decision threshold {thresholds['p_elevated']:.0%} -> Elevated")
+            r.append(f"{p_elev[i]:.0%} chance the probability reaches 1e-6, above the "
+                     f"{thresholds['p_elevated']:.0%} threshold: Elevated.")
         else:
-            r.append(f"P(Pc >= 1e-6) = {p_elev[i]:.0%} below decision threshold -> Pc rule says Safe")
+            r.append(f"{p_elev[i]:.0%} chance the probability reaches 1e-6, below the "
+                     f"{thresholds['p_elevated']:.0%} threshold.")
         if heads_disagree[i]:
             lim, p = ("1e-4", p_crit[i]) if crit_contra[i] else ("1e-6", p_elev[i])
-            r.append(f"Model components disagree: median Pc estimate {_fmt_pc(log_pc[i])} vs classifier "
-                     f"P(Pc >= {lim}) = {p:.0%} -> analyst review required")
+            r.append(f"{DISAGREE_PREFIX}: the estimate is {_fmt_pc(log_pc[i])} but the classifier gives "
+                     f"a {p:.0%} chance of {lim}. Review needed.")
         if bound_alarm[i]:
-            r.append(f"Worst-case Pc bound {_fmt_pc(float(max_pc_bound[i]))} >= 1e-4: Critical cannot be ruled out "
-                     "-> analyst review required")
+            r.append(f"Worst-case probability {_fmt_pc(float(max_pc_bound[i]))} is above 1e-4, "
+                     "so Critical cannot be ruled out. Review needed.")
         elif needs_review[i] and not heads_disagree[i]:
-            r.append("Uncertainty interval straddles a tier boundary -> analyst review required")
-        r.append(f"Decision: {TIERS[tier[i]]}")
+            r.append("The 80% range crosses a tier limit. Review needed.")
+        r.append(f"Result: {TIERS[tier[i]]}.")
         reasons.append(r)
 
     return pd.DataFrame({

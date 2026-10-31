@@ -1,0 +1,1235 @@
+{
+  "generated_at": "2026-10-31T06:34:22+00:00",
+  "task": "Predict each event's final tier (last CDM before TCA) from CDMs with time_to_tca >= 2 days.",
+  "split": {
+    "usable_events": 11942,
+    "train_events": 9553,
+    "holdout_events": 2389,
+    "holdout_final_tiers": [
+      1790,
+      432,
+      167
+    ],
+    "holdout_forecast_needed_events": 1781,
+    "unusable_events": 1212,
+    "file": "outputs/event_split.csv"
+  },
+  "chosen": "all",
+  "decision_rule": "hybrid",
+  "decision_thresholds": {
+    "p_critical": 0.375,
+    "p_elevated": 0.25
+  },
+  "models": {
+    "all": {
+      "features": [
+        "time_to_tca",
+        "risk",
+        "log_md",
+        "tier_now",
+        "md_tier_now",
+        "risk_margin_crit",
+        "risk_margin_elev",
+        "md_margin_1km",
+        "md_margin_5km",
+        "max_risk_estimate",
+        "gap_to_max",
+        "log_max_risk_scaling",
+        "log_mahal",
+        "relative_speed",
+        "abs_pos_r",
+        "log_abs_pos_t",
+        "log_abs_pos_n",
+        "log_t_sigma_r",
+        "log_t_sigma_t",
+        "log_t_sigma_n",
+        "log_c_sigma_r",
+        "log_c_sigma_t",
+        "log_c_sigma_n",
+        "log_c_cov_det",
+        "log_t_cov_det",
+        "c_obs_used",
+        "c_time_lastob_start",
+        "c_recommended_od_span",
+        "c_actual_od_span",
+        "c_rcs_estimate",
+        "t_span",
+        "c_span",
+        "F10",
+        "AP",
+        "SSN",
+        "c_object_type",
+        "n_cdms",
+        "days_observed",
+        "risk_max",
+        "risk_min",
+        "risk_mean",
+        "risk_d_prev",
+        "risk_d_first",
+        "risk_slope",
+        "risk_proj_tca",
+        "log_md_max",
+        "log_md_min",
+        "log_md_mean",
+        "log_md_d_prev",
+        "log_md_d_first",
+        "log_md_slope",
+        "log_md_proj_tca",
+        "c_sigma_t_shrink"
+      ],
+      "thresholds": {
+        "p_critical": 0.19,
+        "p_elevated": 0.19
+      },
+      "best_iterations": {
+        "crit": 182,
+        "elev": 254
+      },
+      "cv": {
+        "macro_f1": 0.855,
+        "f2_critical": 0.8532,
+        "critical_recall": 0.8921,
+        "critical_precision": 0.7265,
+        "accuracy": 0.9218,
+        "recall": [
+          0.9483,
+          0.8237,
+          0.8921
+        ],
+        "precision": [
+          0.9843,
+          0.7745,
+          0.7265
+        ],
+        "missed_critical": 72,
+        "critical_called_safe": 9,
+        "false_alarms_critical": 224,
+        "confusion": [
+          [
+            6786,
+            352,
+            18
+          ],
+          [
+            99,
+            1425,
+            206
+          ],
+          [
+            9,
+            63,
+            595
+          ]
+        ],
+        "n": 9553
+      },
+      "hybrid": {
+        "thresholds": {
+          "p_critical": 0.375,
+          "p_elevated": 0.25
+        },
+        "cv": {
+          "macro_f1": 0.8812,
+          "f2_critical": 0.8656,
+          "critical_recall": 0.8861,
+          "critical_precision": 0.7922,
+          "accuracy": 0.9357,
+          "recall": [
+            0.9579,
+            0.863,
+            0.8861
+          ],
+          "precision": [
+            0.9841,
+            0.811,
+            0.7922
+          ],
+          "missed_critical": 76,
+          "critical_called_safe": 12,
+          "false_alarms_critical": 155,
+          "confusion": [
+            [
+              6855,
+              284,
+              17
+            ],
+            [
+              99,
+              1493,
+              138
+            ],
+            [
+              12,
+              64,
+              591
+            ]
+          ],
+          "n": 9553
+        },
+        "holdout": {
+          "macro_f1": 0.8781,
+          "f2_critical": 0.8786,
+          "critical_recall": 0.9102,
+          "critical_precision": 0.7716,
+          "accuracy": 0.9343,
+          "recall": [
+            0.9575,
+            0.8472,
+            0.9102
+          ],
+          "precision": [
+            0.9851,
+            0.8097,
+            0.7716
+          ],
+          "missed_critical": 15,
+          "critical_called_safe": 1,
+          "false_alarms_critical": 45,
+          "confusion": [
+            [
+              1714,
+              72,
+              4
+            ],
+            [
+              25,
+              366,
+              41
+            ],
+            [
+              1,
+              14,
+              152
+            ]
+          ],
+          "n": 2389
+        },
+        "holdout_forecast_needed": {
+          "macro_f1": 0.8611,
+          "f2_critical": 0.8459,
+          "critical_recall": 0.8707,
+          "critical_precision": 0.7594,
+          "accuracy": 0.9225,
+          "recall": [
+            0.9474,
+            0.8413,
+            0.8707
+          ],
+          "precision": [
+            0.9798,
+            0.7784,
+            0.7594
+          ],
+          "missed_critical": 15,
+          "critical_called_safe": 1,
+          "false_alarms_critical": 32,
+          "confusion": [
+            [
+              1261,
+              66,
+              4
+            ],
+            [
+              25,
+              281,
+              28
+            ],
+            [
+              1,
+              14,
+              101
+            ]
+          ],
+          "n": 1781
+        }
+      },
+      "cv_status_quo": {
+        "macro_f1": 0.8966,
+        "f2_critical": 0.8573,
+        "critical_recall": 0.8591,
+        "critical_precision": 0.8501,
+        "accuracy": 0.9455,
+        "recall": [
+          0.9701,
+          0.8769,
+          0.8591
+        ],
+        "precision": [
+          0.9802,
+          0.8442,
+          0.8501
+        ],
+        "missed_critical": 94,
+        "critical_called_safe": 12,
+        "false_alarms_critical": 101,
+        "confusion": [
+          [
+            6942,
+            198,
+            16
+          ],
+          [
+            128,
+            1517,
+            85
+          ],
+          [
+            12,
+            82,
+            573
+          ]
+        ],
+        "n": 9553
+      },
+      "matched_false_alarm_point": {
+        "thresholds": {
+          "p_critical": 0.425,
+          "p_elevated": 0.19
+        },
+        "cv": {
+          "macro_f1": 0.8686,
+          "f2_critical": 0.8096,
+          "critical_recall": 0.8021,
+          "critical_precision": 0.8412,
+          "accuracy": 0.9271,
+          "recall": [
+            0.9483,
+            0.8879,
+            0.8021
+          ],
+          "precision": [
+            0.9843,
+            0.7593,
+            0.8412
+          ],
+          "missed_critical": 132,
+          "critical_called_safe": 9,
+          "false_alarms_critical": 101,
+          "confusion": [
+            [
+              6786,
+              364,
+              6
+            ],
+            [
+              99,
+              1536,
+              95
+            ],
+            [
+              9,
+              123,
+              535
+            ]
+          ],
+          "n": 9553
+        },
+        "holdout": {
+          "macro_f1": 0.876,
+          "f2_critical": 0.8393,
+          "critical_recall": 0.8383,
+          "critical_precision": 0.8434,
+          "accuracy": 0.9293,
+          "recall": [
+            0.9492,
+            0.8819,
+            0.8383
+          ],
+          "precision": [
+            0.9838,
+            0.7681,
+            0.8434
+          ],
+          "missed_critical": 27,
+          "critical_called_safe": 1,
+          "false_alarms_critical": 26,
+          "confusion": [
+            [
+              1699,
+              89,
+              2
+            ],
+            [
+              27,
+              381,
+              24
+            ],
+            [
+              1,
+              26,
+              140
+            ]
+          ],
+          "n": 2389
+        },
+        "holdout_forecast_needed": {
+          "macro_f1": 0.8773,
+          "f2_critical": 0.8362,
+          "critical_recall": 0.8276,
+          "critical_precision": 0.8727,
+          "accuracy": 0.9253,
+          "recall": [
+            0.9414,
+            0.8952,
+            0.8276
+          ],
+          "precision": [
+            0.9812,
+            0.7589,
+            0.8727
+          ],
+          "missed_critical": 20,
+          "critical_called_safe": 1,
+          "false_alarms_critical": 14,
+          "confusion": [
+            [
+              1253,
+              76,
+              2
+            ],
+            [
+              23,
+              299,
+              12
+            ],
+            [
+              1,
+              19,
+              96
+            ]
+          ],
+          "n": 1781
+        }
+      },
+      "holdout": {
+        "macro_f1": 0.8527,
+        "f2_critical": 0.8673,
+        "critical_recall": 0.9162,
+        "critical_precision": 0.715,
+        "accuracy": 0.9205,
+        "recall": [
+          0.9492,
+          0.8032,
+          0.9162
+        ],
+        "precision": [
+          0.9838,
+          0.7746,
+          0.715
+        ],
+        "missed_critical": 14,
+        "critical_called_safe": 1,
+        "false_alarms_critical": 61,
+        "confusion": [
+          [
+            1699,
+            88,
+            3
+          ],
+          [
+            27,
+            347,
+            58
+          ],
+          [
+            1,
+            13,
+            153
+          ]
+        ],
+        "n": 2389
+      },
+      "holdout_forecast_needed": {
+        "macro_f1": 0.8473,
+        "f2_critical": 0.8578,
+        "critical_recall": 0.9052,
+        "critical_precision": 0.7095,
+        "accuracy": 0.9147,
+        "recall": [
+          0.9414,
+          0.8114,
+          0.9052
+        ],
+        "precision": [
+          0.9812,
+          0.7612,
+          0.7095
+        ],
+        "missed_critical": 11,
+        "critical_called_safe": 1,
+        "false_alarms_critical": 43,
+        "confusion": [
+          [
+            1253,
+            75,
+            3
+          ],
+          [
+            23,
+            271,
+            40
+          ],
+          [
+            1,
+            10,
+            105
+          ]
+        ],
+        "n": 1781
+      },
+      "holdout_brier_critical": 0.01769,
+      "holdout_brier_critical_calibrated": 0.01747
+    },
+    "suggested_13": {
+      "features": [
+        "time_to_tca",
+        "log_md",
+        "md_tier_now",
+        "md_margin_1km",
+        "md_margin_5km",
+        "max_risk_estimate",
+        "relative_speed",
+        "abs_pos_r",
+        "log_abs_pos_t",
+        "log_abs_pos_n",
+        "log_t_sigma_r",
+        "log_c_sigma_r",
+        "F10",
+        "AP",
+        "c_object_type",
+        "n_cdms",
+        "days_observed",
+        "log_md_max",
+        "log_md_min",
+        "log_md_mean",
+        "log_md_d_prev",
+        "log_md_d_first",
+        "log_md_slope",
+        "log_md_proj_tca"
+      ],
+      "thresholds": {
+        "p_critical": 0.13,
+        "p_elevated": 0.2
+      },
+      "best_iterations": {
+        "crit": 170,
+        "elev": 234
+      },
+      "cv": {
+        "macro_f1": 0.837,
+        "f2_critical": 0.8604,
+        "critical_recall": 0.922,
+        "critical_precision": 0.6788,
+        "accuracy": 0.9129,
+        "recall": [
+          0.9497,
+          0.7572,
+          0.922
+        ],
+        "precision": [
+          0.977,
+          0.7747,
+          0.6788
+        ],
+        "missed_critical": 52,
+        "critical_called_safe": 10,
+        "false_alarms_critical": 291,
+        "confusion": [
+          [
+            6796,
+            339,
+            21
+          ],
+          [
+            150,
+            1310,
+            270
+          ],
+          [
+            10,
+            42,
+            615
+          ]
+        ],
+        "n": 9553
+      },
+      "hybrid": {
+        "thresholds": {
+          "p_critical": 0.2,
+          "p_elevated": 0.225
+        },
+        "cv": {
+          "macro_f1": 0.8656,
+          "f2_critical": 0.8715,
+          "critical_recall": 0.913,
+          "critical_precision": 0.7373,
+          "accuracy": 0.9272,
+          "recall": [
+            0.9512,
+            0.8335,
+            0.913
+          ],
+          "precision": [
+            0.9851,
+            0.7936,
+            0.7373
+          ],
+          "missed_critical": 58,
+          "critical_called_safe": 10,
+          "false_alarms_critical": 217,
+          "confusion": [
+            [
+              6807,
+              327,
+              22
+            ],
+            [
+              93,
+              1442,
+              195
+            ],
+            [
+              10,
+              48,
+              609
+            ]
+          ],
+          "n": 9553
+        },
+        "holdout": {
+          "macro_f1": 0.8583,
+          "f2_critical": 0.887,
+          "critical_recall": 0.9401,
+          "critical_precision": 0.7235,
+          "accuracy": 0.9213,
+          "recall": [
+            0.9469,
+            0.8079,
+            0.9401
+          ],
+          "precision": [
+            0.9837,
+            0.7773,
+            0.7235
+          ],
+          "missed_critical": 10,
+          "critical_called_safe": 1,
+          "false_alarms_critical": 60,
+          "confusion": [
+            [
+              1695,
+              91,
+              4
+            ],
+            [
+              27,
+              349,
+              56
+            ],
+            [
+              1,
+              9,
+              157
+            ]
+          ],
+          "n": 2389
+        },
+        "holdout_forecast_needed": {
+          "macro_f1": 0.8411,
+          "f2_critical": 0.8618,
+          "critical_recall": 0.9138,
+          "critical_precision": 0.702,
+          "accuracy": 0.909,
+          "recall": [
+            0.9369,
+            0.7964,
+            0.9138
+          ],
+          "precision": [
+            0.978,
+            0.7493,
+            0.702
+          ],
+          "missed_critical": 10,
+          "critical_called_safe": 1,
+          "false_alarms_critical": 45,
+          "confusion": [
+            [
+              1247,
+              80,
+              4
+            ],
+            [
+              27,
+              266,
+              41
+            ],
+            [
+              1,
+              9,
+              106
+            ]
+          ],
+          "n": 1781
+        }
+      },
+      "cv_status_quo": {
+        "macro_f1": 0.8966,
+        "f2_critical": 0.8573,
+        "critical_recall": 0.8591,
+        "critical_precision": 0.8501,
+        "accuracy": 0.9455,
+        "recall": [
+          0.9701,
+          0.8769,
+          0.8591
+        ],
+        "precision": [
+          0.9802,
+          0.8442,
+          0.8501
+        ],
+        "missed_critical": 94,
+        "critical_called_safe": 12,
+        "false_alarms_critical": 101,
+        "confusion": [
+          [
+            6942,
+            198,
+            16
+          ],
+          [
+            128,
+            1517,
+            85
+          ],
+          [
+            12,
+            82,
+            573
+          ]
+        ],
+        "n": 9553
+      },
+      "matched_false_alarm_point": {
+        "thresholds": {
+          "p_critical": 0.39,
+          "p_elevated": 0.2
+        },
+        "cv": {
+          "macro_f1": 0.8691,
+          "f2_critical": 0.8298,
+          "critical_recall": 0.8261,
+          "critical_precision": 0.8451,
+          "accuracy": 0.9246,
+          "recall": [
+            0.9497,
+            0.859,
+            0.8261
+          ],
+          "precision": [
+            0.977,
+            0.764,
+            0.8451
+          ],
+          "missed_critical": 116,
+          "critical_called_safe": 10,
+          "false_alarms_critical": 101,
+          "confusion": [
+            [
+              6796,
+              353,
+              7
+            ],
+            [
+              150,
+              1486,
+              94
+            ],
+            [
+              10,
+              106,
+              551
+            ]
+          ],
+          "n": 9553
+        },
+        "holdout": {
+          "macro_f1": 0.8589,
+          "f2_critical": 0.8323,
+          "critical_recall": 0.8383,
+          "critical_precision": 0.8092,
+          "accuracy": 0.9201,
+          "recall": [
+            0.9508,
+            0.8241,
+            0.8383
+          ],
+          "precision": [
+            0.9737,
+            0.7607,
+            0.8092
+          ],
+          "missed_critical": 27,
+          "critical_called_safe": 1,
+          "false_alarms_critical": 33,
+          "confusion": [
+            [
+              1702,
+              86,
+              2
+            ],
+            [
+              45,
+              356,
+              31
+            ],
+            [
+              1,
+              26,
+              140
+            ]
+          ],
+          "n": 2389
+        },
+        "holdout_forecast_needed": {
+          "macro_f1": 0.8564,
+          "f2_critical": 0.8148,
+          "critical_recall": 0.819,
+          "critical_precision": 0.7983,
+          "accuracy": 0.9186,
+          "recall": [
+            0.9444,
+            0.8503,
+            0.819
+          ],
+          "precision": [
+            0.9774,
+            0.7553,
+            0.7983
+          ],
+          "missed_critical": 21,
+          "critical_called_safe": 1,
+          "false_alarms_critical": 24,
+          "confusion": [
+            [
+              1257,
+              72,
+              2
+            ],
+            [
+              28,
+              284,
+              22
+            ],
+            [
+              1,
+              20,
+              95
+            ]
+          ],
+          "n": 1781
+        }
+      },
+      "holdout": {
+        "macro_f1": 0.8278,
+        "f2_critical": 0.8736,
+        "critical_recall": 0.9521,
+        "critical_precision": 0.657,
+        "accuracy": 0.9083,
+        "recall": [
+          0.9508,
+          0.7153,
+          0.9521
+        ],
+        "precision": [
+          0.9737,
+          0.7744,
+          0.657
+        ],
+        "missed_critical": 8,
+        "critical_called_safe": 1,
+        "false_alarms_critical": 83,
+        "confusion": [
+          [
+            1702,
+            83,
+            5
+          ],
+          [
+            45,
+            309,
+            78
+          ],
+          [
+            1,
+            7,
+            159
+          ]
+        ],
+        "n": 2389
+      },
+      "holdout_forecast_needed": {
+        "macro_f1": 0.8257,
+        "f2_critical": 0.8583,
+        "critical_recall": 0.9397,
+        "critical_precision": 0.6374,
+        "accuracy": 0.9068,
+        "recall": [
+          0.9444,
+          0.7455,
+          0.9397
+        ],
+        "precision": [
+          0.9774,
+          0.7685,
+          0.6374
+        ],
+        "missed_critical": 7,
+        "critical_called_safe": 1,
+        "false_alarms_critical": 62,
+        "confusion": [
+          [
+            1257,
+            69,
+            5
+          ],
+          [
+            28,
+            249,
+            57
+          ],
+          [
+            1,
+            6,
+            109
+          ]
+        ],
+        "n": 1781
+      },
+      "holdout_brier_critical": 0.01778,
+      "holdout_brier_critical_calibrated": 0.01768
+    }
+  },
+  "baselines": {
+    "Latest message tier (persistence, operational status quo)": {
+      "holdout": {
+        "macro_f1": 0.9036,
+        "f2_critical": 0.8848,
+        "critical_recall": 0.8922,
+        "critical_precision": 0.8563,
+        "accuracy": 0.9468,
+        "recall": [
+          0.9676,
+          0.8819,
+          0.8922
+        ],
+        "precision": [
+          0.9824,
+          0.8429,
+          0.8563
+        ],
+        "missed_critical": 18,
+        "critical_called_safe": 1,
+        "false_alarms_critical": 25,
+        "confusion": [
+          [
+            1732,
+            54,
+            4
+          ],
+          [
+            30,
+            381,
+            21
+          ],
+          [
+            1,
+            17,
+            149
+          ]
+        ],
+        "n": 2389
+      },
+      "holdout_forecast_needed": {
+        "macro_f1": 0.8697,
+        "f2_critical": 0.8348,
+        "critical_recall": 0.8448,
+        "critical_precision": 0.7967,
+        "accuracy": 0.9287,
+        "recall": [
+          0.9564,
+          0.8473,
+          0.8448
+        ],
+        "precision": [
+          0.9762,
+          0.7994,
+          0.7967
+        ],
+        "missed_critical": 18,
+        "critical_called_safe": 1,
+        "false_alarms_critical": 25,
+        "confusion": [
+          [
+            1273,
+            54,
+            4
+          ],
+          [
+            30,
+            283,
+            21
+          ],
+          [
+            1,
+            17,
+            98
+          ]
+        ],
+        "n": 1781
+      }
+    },
+    "Latest tier with 0.5-decade safety margin": {
+      "holdout": {
+        "macro_f1": 0.8817,
+        "f2_critical": 0.8844,
+        "critical_recall": 0.8982,
+        "critical_precision": 0.8333,
+        "accuracy": 0.9272,
+        "recall": [
+          0.9419,
+          0.8773,
+          0.8982
+        ],
+        "precision": [
+          0.9831,
+          0.7672,
+          0.8333
+        ],
+        "missed_critical": 17,
+        "critical_called_safe": 1,
+        "false_alarms_critical": 30,
+        "confusion": [
+          [
+            1686,
+            99,
+            5
+          ],
+          [
+            28,
+            379,
+            25
+          ],
+          [
+            1,
+            16,
+            150
+          ]
+        ],
+        "n": 2389
+      },
+      "holdout_forecast_needed": {
+        "macro_f1": 0.8536,
+        "f2_critical": 0.8347,
+        "critical_recall": 0.8534,
+        "critical_precision": 0.7674,
+        "accuracy": 0.9152,
+        "recall": [
+          0.9391,
+          0.8413,
+          0.8534
+        ],
+        "precision": [
+          0.9773,
+          0.7534,
+          0.7674
+        ],
+        "missed_critical": 17,
+        "critical_called_safe": 1,
+        "false_alarms_critical": 30,
+        "confusion": [
+          [
+            1250,
+            76,
+            5
+          ],
+          [
+            28,
+            281,
+            25
+          ],
+          [
+            1,
+            16,
+            99
+          ]
+        ],
+        "n": 1781
+      }
+    },
+    "Latest miss distance only (no Pc)": {
+      "holdout": {
+        "macro_f1": 0.8919,
+        "f2_critical": 0.8848,
+        "critical_recall": 0.8922,
+        "critical_precision": 0.8563,
+        "accuracy": 0.9393,
+        "recall": [
+          0.9777,
+          0.7986,
+          0.8922
+        ],
+        "precision": [
+          0.9631,
+          0.8668,
+          0.8563
+        ],
+        "missed_critical": 18,
+        "critical_called_safe": 1,
+        "false_alarms_critical": 25,
+        "confusion": [
+          [
+            1750,
+            36,
+            4
+          ],
+          [
+            66,
+            345,
+            21
+          ],
+          [
+            1,
+            17,
+            149
+          ]
+        ],
+        "n": 2389
+      },
+      "holdout_forecast_needed": {
+        "macro_f1": 0.8744,
+        "f2_critical": 0.8348,
+        "critical_recall": 0.8448,
+        "critical_precision": 0.7967,
+        "accuracy": 0.9349,
+        "recall": [
+          0.9699,
+          0.8263,
+          0.8448
+        ],
+        "precision": [
+          0.9714,
+          0.8389,
+          0.7967
+        ],
+        "missed_critical": 18,
+        "critical_called_safe": 1,
+        "false_alarms_critical": 25,
+        "confusion": [
+          [
+            1291,
+            36,
+            4
+          ],
+          [
+            37,
+            276,
+            21
+          ],
+          [
+            1,
+            17,
+            98
+          ]
+        ],
+        "n": 1781
+      }
+    }
+  },
+  "feature_importance_critical": [
+    {
+      "feature": "md_margin_1km",
+      "gain_pct": 35.12
+    },
+    {
+      "feature": "log_md",
+      "gain_pct": 30.56
+    },
+    {
+      "feature": "md_margin_5km",
+      "gain_pct": 10.09
+    },
+    {
+      "feature": "log_md_min",
+      "gain_pct": 2.31
+    },
+    {
+      "feature": "relative_speed",
+      "gain_pct": 1.84
+    },
+    {
+      "feature": "log_md_max",
+      "gain_pct": 1.56
+    },
+    {
+      "feature": "abs_pos_r",
+      "gain_pct": 1.48
+    },
+    {
+      "feature": "c_rcs_estimate",
+      "gain_pct": 1.17
+    },
+    {
+      "feature": "log_c_sigma_t",
+      "gain_pct": 1.15
+    },
+    {
+      "feature": "log_md_mean",
+      "gain_pct": 1.14
+    },
+    {
+      "feature": "log_mahal",
+      "gain_pct": 1.06
+    },
+    {
+      "feature": "t_span",
+      "gain_pct": 0.91
+    },
+    {
+      "feature": "c_actual_od_span",
+      "gain_pct": 0.85
+    },
+    {
+      "feature": "log_c_sigma_r",
+      "gain_pct": 0.8
+    },
+    {
+      "feature": "risk_max",
+      "gain_pct": 0.69
+    }
+  ],
+  "column_notes": {
+    "risk": "Pc of each early CDM. The brief notes the tier can be read from risk, so the task is to forecast the final tier from early CDMs; the latest early risk is the operational baseline (Uriot et al.).",
+    "max_risk_scaling, mahalanobis_distance": "How far the covariance is from the worst case, and the miss distance in sigmas: they say how much Pc can still move.",
+    "t/c_sigma_t, t/c_sigma_n, covariance determinants": "Along-track and cross-track uncertainty; the paper's hard cases had large uncertainties (Sec. 5.4).",
+    "c_obs_used, c_time_lastob_start, c_recommended/actual_od_span": "Quality of the chaser's orbit determination: sparse tracking makes late jumps more likely.",
+    "c_rcs_estimate, t_span, c_span": "Object sizes, which set the hard-body radius in Pc.",
+    "SSN": "Sunspot number, a drag proxy alongside F10.7 and Ap (ranked 18th in the paper's feature study)."
+  },
+  "test_predictions": {
+    "events": 2167,
+    "forecast_tier_counts": {
+      "Safe": 1452,
+      "Elevated": 516,
+      "Critical": 199
+    },
+    "tier_now_counts": {
+      "Safe": 1481,
+      "Elevated": 500,
+      "Critical": 186
+    },
+    "file": "outputs/test_event_predictions.csv"
+  },
+  "runtime_s": 225.2
+}

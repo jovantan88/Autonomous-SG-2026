@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Conjunction Watch</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%2349EFA4' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='3.5' fill='%23FF5D6C'/%3E%3C/svg%3E">
-  <meta name="description" content="Operator console for satellite conjunctions: live collision points, flight paths around TCA, CDM risk evaluation, model evidence and an analyst decision log.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231F2A36'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23FF5C5C'/%3E%3C/svg%3E">
+  <meta name="description" content="Satellite conjunction screening: warnings for the next 24 hours, collision points, flight paths, risk scores and an analyst decision log.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.119.0/Build/Cesium/Widgets/widgets.css">
   <link rel="stylesheet" href="styles.css">
   <script>window.CESIUM_BASE_URL = 'https://cdn.jsdelivr.net/npm/cesium@1.119.0/Build/Cesium/';</script>
@@ -19,199 +19,174 @@
 <body>
 <div id="app" class="app" data-view="live">
 
-  <!-- ======================================================= HEADER -->
+  <!-- ======================================================= HEADER (one row) -->
   <header class="hdr">
-    <div class="hdr-row">
-      <a class="logo" href="#live" aria-label="Conjunction Watch - live map">
-        <span class="logo-dot" aria-hidden="true"></span>
-        <span class="logo-text">Conjunction<b>Watch</b></span>
-      </a>
+    <a class="brand" href="#live">Conjunction Watch</a>
 
-      <label class="search" for="q">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.6 10.6L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-        <input id="q" type="search" placeholder="NORAD id or object name" autocomplete="off" spellcheck="false" aria-label="Search by NORAD id or object name">
-        <kbd aria-hidden="true">/</kbd>
-      </label>
+    <label class="search" for="q">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.6 10.6L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input id="q" type="search" placeholder="Search NORAD id or name" autocomplete="off" spellcheck="false" aria-label="Search by NORAD id or object name">
+      <kbd aria-hidden="true">/</kbd>
+    </label>
 
-      <div class="win-chips" id="win-chips" role="group" aria-label="Look-ahead window">
-        <button type="button" data-w="6">6H</button>
-        <button type="button" data-w="12">12H</button>
-        <button type="button" data-w="24" class="on" aria-pressed="true">24H</button>
-        <button type="button" data-w="48">48H</button>
-        <button type="button" data-w="72">72H</button>
+    <div class="win" role="group" aria-labelledby="win-label">
+      <span id="win-label" class="win-label">Next</span>
+      <div class="seg" id="win-chips">
+        <button type="button" data-w="6">6h</button>
+        <button type="button" data-w="12">12h</button>
+        <button type="button" data-w="24" class="on" aria-pressed="true">24h</button>
+        <button type="button" data-w="48">48h</button>
+        <button type="button" data-w="72">72h</button>
       </div>
-
-      <span id="live-pill" class="live-pill is-wait" tabindex="0" role="status" title="Connecting to the live feed">
-        <span class="lp-dot" aria-hidden="true"></span><span class="lp-text">CONNECTING</span>
-      </span>
-
-      <span class="hdr-spacer"></span>
-
-      <nav class="nav" aria-label="Views">
-        <a href="#live" data-view="live" aria-current="page">Live map</a>
-        <a href="#evaluator" data-view="evaluator">CDM evaluator</a>
-        <a href="#model" data-view="model">Model</a>
-        <a href="#assess" data-view="assess">Assess</a>
-      </nav>
-
-      <button type="button" id="log-btn" class="hdr-btn" aria-controls="logdrawer" aria-expanded="false" title="Analyst decision log">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5h10v11H3z M5.5 5.5h5 M5.5 8h5 M5.5 10.5h3" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
-        <span class="hdr-btn-text">Decisions</span> <span id="log-count" class="count">0</span>
-      </button>
-
-      <div class="clock" id="clock" aria-label="Current UTC time"><span id="clock-t">--:--:--</span><small>UTC</small></div>
     </div>
 
-    <div class="tick-row">
-      <span class="tick-label" aria-hidden="true">MOST SEVERE</span>
-      <div class="ticker" id="ticker" aria-label="Most severe upcoming conjunctions">
-        <div class="ticker-track" id="ticker-track"><span class="tick-empty">Waiting for live conjunctions&hellip;</span></div>
-      </div>
-      <span id="sw-chip" class="sw-chip" tabindex="0" title="Space weather (NOAA SWPC)">F10.7 &ndash; <i>|</i> Ap &ndash; <i>|</i> Kp &ndash;</span>
-      <span class="hitl-note" role="note"><span aria-hidden="true">&#9670;</span> Decision support only &ndash; the analyst makes the call</span>
+    <div id="status" class="status is-wait" tabindex="0" role="status" aria-describedby="status-pop">
+      <span class="status-dot" aria-hidden="true"></span>
+      <span class="status-label">Connecting</span>
+      <span class="status-time"></span>
+      <div id="status-pop" class="status-pop" role="tooltip"></div>
     </div>
+
+    <span class="hdr-spacer"></span>
+
+    <nav class="nav" aria-label="Views">
+      <a href="#live" data-view="live" aria-current="page">Map</a>
+      <a href="#evaluator" data-view="evaluator">Evaluator</a>
+      <a href="#model" data-view="model">Model</a>
+      <a href="#assess" data-view="assess">Assess</a>
+    </nav>
+
+    <button type="button" id="log-btn" class="hdr-btn" aria-controls="logdrawer" aria-expanded="false" aria-label="Decision log" title="Decision log">
+      <span class="hdr-btn-text">Decisions</span> <span id="log-count" class="count">0</span>
+    </button>
+
+    <div class="clock" aria-label="Current UTC time"><span id="clock-t">--:--:--</span> <span class="muted">UTC</span></div>
   </header>
 
   <div id="mock-banner" class="mock-banner" role="note" hidden>
-    <b>MOCK MODE</b> &ndash; reading fixtures from <code>dashboard/mock/</code> instead of <code>/api</code>; timestamps are re-based to now and tracks are re-projected from one fixture. Remove <code>?mock=1</code> for live data.
+    Mock data: reading fixtures from dashboard/mock/ instead of the API, with times shifted to now. Remove ?mock=1 for live data.
   </div>
 
   <main class="main">
     <!-- ======================================================= SIDEBAR -->
-    <aside id="sidebar" class="sidebar" aria-label="Event feed">
-      <button type="button" id="side-toggle" class="side-toggle" aria-controls="sidebar" aria-expanded="true" title="Collapse sidebar">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="side-rail" aria-hidden="true"><span id="rail-count">0</span><span class="rail-label">EVENTS</span></div>
+    <aside id="sidebar" class="sidebar" aria-label="Warnings and conjunctions">
 
-      <!-- live feed -->
-      <section id="side-live" class="side-pane">
-        <div class="side-head">
-          <h2><span id="feed-title">Critical events</span> <span id="feed-count" class="count count-crit">0</span></h2>
-        </div>
-        <div class="seg seg-full" id="feed-filter" role="group" aria-label="Filter feed">
-          <button type="button" data-f="critical" class="on" aria-pressed="true">Critical <span>0</span></button>
-          <button type="button" data-f="elevated">Elevated <span>0</span></button>
-          <button type="button" data-f="review">Needs review <span>0</span></button>
-          <button type="button" data-f="all">All <span>0</span></button>
-        </div>
-        <div class="side-tools wrap">
-          <label class="sel">Sort
-            <select id="feed-sort" aria-label="Sort feed">
-              <option value="risk">Risk</option>
-              <option value="tca">TCA (soonest)</option>
-              <option value="md">Miss distance</option>
-            </select>
-          </label>
-          <label class="chk" title="Only list conjunctions whose collision point is drawn on the globe (both element sets resolved)"><input type="checkbox" id="feed-points"> With point</label>
-          <span id="feed-hour" class="chip-x" hidden></span>
-          <span id="feed-meta" class="side-meta"></span>
-        </div>
-        <p id="feed-note" class="feed-note" hidden></p>
-        <ol id="feed" class="feed" aria-label="Conjunctions"></ol>
-        <div id="side-foot" class="side-foot"></div>
-      </section>
+      <div id="side-live" class="side-pane">
+        <div id="live-err" class="live-err" role="alert" hidden></div>
 
-      <!-- test-set queue -->
-      <section id="side-test" class="side-pane" hidden>
-        <div class="side-head">
-          <h2>Test-set events <span id="tq-count" class="count">0</span></h2>
-        </div>
-        <div class="seg seg-full" id="tq-pred" role="group" aria-label="Filter by predicted tier">
-          <button type="button" data-t="all" class="on" aria-pressed="true">All</button>
-          <button type="button" data-t="2">Critical</button>
-          <button type="button" data-t="1">Elevated</button>
-          <button type="button" data-t="0">Safe</button>
-        </div>
-        <div class="side-tools wrap">
-          <label class="chk"><input type="checkbox" id="tq-review"> Needs review</label>
-          <label class="chk"><input type="checkbox" id="tq-dis"> Disagrees with truth</label>
-          <label class="chk"><input type="checkbox" id="tq-under"> Under-called</label>
-          <label class="sel">Sort
-            <select id="tq-sort" aria-label="Sort test events">
-              <option value="risk">Predicted risk</option>
-              <option value="error">Errors first</option>
-              <option value="ttca">Time to TCA</option>
-              <option value="id">Event id</option>
-            </select>
-          </label>
-        </div>
-        <ol id="tq" class="feed" aria-label="Test-set events"></ol>
-        <div id="tq-foot" class="side-foot"></div>
-      </section>
+        <!-- 1. Warning: the selected window -->
+        <section class="sec warn" aria-labelledby="warn-head">
+          <p id="warn-head" class="warn-head">Loading conjunctions&hellip;</p>
+          <dl id="warn-stats" class="stats"></dl>
+          <div class="hours-head"><span>Critical per hour</span><span id="hours-peak"></span></div>
+          <div id="hours" class="hours" role="group" aria-label="Critical conjunctions per hour. Select an hour to filter the list."></div>
+          <div id="hours-axis" class="hours-axis" aria-hidden="true"></div>
+        </section>
+
+        <!-- 2. Insights -->
+        <section class="sec" aria-labelledby="ins-head">
+          <h2 id="ins-head">Insights</h2>
+          <ul id="insights" class="insights"></ul>
+        </section>
+
+        <!-- 3. Risk list -->
+        <section class="sec risk" aria-labelledby="feed-head">
+          <div class="risk-head">
+            <h2 id="feed-head">Highest risk <span id="feed-count" class="count-txt"></span></h2>
+            <label class="sort">Sort
+              <select id="feed-sort" aria-label="Sort list">
+                <option value="risk">Risk</option>
+                <option value="tca">Time</option>
+                <option value="md">Distance</option>
+              </select>
+            </label>
+          </div>
+          <div class="seg seg-full" id="feed-filter" role="group" aria-label="Filter by tier">
+            <button type="button" data-f="critical" class="on" aria-pressed="true">Critical</button>
+            <button type="button" data-f="elevated">Elevated</button>
+            <button type="button" data-f="review">Needs review</button>
+            <button type="button" data-f="all">All</button>
+          </div>
+          <div id="feed-meta" class="risk-meta"></div>
+          <ol id="feed" class="feed" aria-label="Conjunctions"></ol>
+        </section>
+      </div>
+
+      <!-- evaluator: test-set queue -->
+      <div id="side-test" class="side-pane" hidden>
+        <section class="sec risk" aria-labelledby="tq-head">
+          <div class="risk-head">
+            <h2 id="tq-head">Test events <span id="tq-count" class="count-txt"></span></h2>
+            <label class="sort">Sort
+              <select id="tq-sort" aria-label="Sort test events">
+                <option value="risk">Risk</option>
+                <option value="error">Errors first</option>
+                <option value="ttca">Time to TCA</option>
+                <option value="id">Event id</option>
+              </select>
+            </label>
+          </div>
+          <div class="seg seg-full" id="tq-pred" role="group" aria-label="Filter by predicted tier">
+            <button type="button" data-t="all" class="on" aria-pressed="true">All</button>
+            <button type="button" data-t="2">Critical</button>
+            <button type="button" data-t="1">Elevated</button>
+            <button type="button" data-t="0">Safe</button>
+          </div>
+          <div class="chk-row">
+            <label class="chk"><input type="checkbox" id="tq-review"> Needs review</label>
+            <label class="chk"><input type="checkbox" id="tq-dis"> Wrong tier</label>
+            <label class="chk"><input type="checkbox" id="tq-under"> Under-called</label>
+          </div>
+          <p id="tq-foot" class="risk-meta"></p>
+          <ol id="tq" class="feed" aria-label="Test-set events"></ol>
+        </section>
+      </div>
     </aside>
 
     <!-- ======================================================= STAGE -->
     <section id="stage" class="stage">
 
-      <!-- LIVE MAP -->
+      <!-- MAP -->
       <div id="view-live" class="view view-map" data-view="live">
         <div id="globe" class="globe" aria-label="Globe with collision points"></div>
         <div id="globe-fallback" class="globe-fallback" hidden></div>
         <div id="map-tip" class="map-tip" role="tooltip" hidden></div>
+
+        <div id="legend" class="legend" aria-label="Map legend">
+          <ul class="lg-list">
+            <li><i class="dot t2"></i>Critical</li>
+            <li><i class="dot t1"></i>Elevated</li>
+            <li id="lg-safe" hidden><i class="dot t0"></i>Safe</li>
+            <li><i class="ln a"></i>Object A path</li>
+            <li><i class="ln b"></i>Object B path</li>
+          </ul>
+          <p class="lg-faded"><i class="dot t2 faded"></i>Faded dot = orbit data disagrees with the screening</p>
+          <div class="lg-opts">
+            <label class="chk"><input type="checkbox" id="lg-elev" checked> Elevated dots</label>
+            <label class="chk"><input type="checkbox" id="lg-labels" checked> Labels</label>
+          </div>
+          <p id="lg-count" class="lg-count"></p>
+        </div>
+
         <div id="credits" class="credits"></div>
 
-        <!-- floating overlay panel -->
-        <div id="overlay" class="ovl card-float">
-          <div class="ovl-head">
-            <h3>Layers</h3>
-            <button type="button" class="mini-btn" id="ovl-toggle" aria-expanded="true" aria-controls="ovl-body" title="Collapse panel">&minus;</button>
-          </div>
-          <div id="ovl-body" class="ovl-body">
-            <div class="layer-grid" id="layer-grid">
-              <button type="button" class="lyr on" data-l="crit" aria-pressed="true"><i class="dot t2"></i>Critical <span data-c="2">0</span></button>
-              <button type="button" class="lyr on" data-l="elev" aria-pressed="true"><i class="dot t1"></i>Elevated <span data-c="1">0</span></button>
-              <button type="button" class="lyr on" data-l="safe" aria-pressed="true"><i class="dot t0"></i>Safe <span data-c="0">0</span></button>
-              <button type="button" class="lyr on" data-l="review" aria-pressed="true" title="Purple outline on events flagged for analyst review"><i class="dot ring"></i>Needs review <span data-c="r">0</span></button>
-              <button type="button" class="lyr on" data-l="points" aria-pressed="true"><i class="ico">&#9673;</i>Collision points</button>
-              <button type="button" class="lyr on" data-l="paths" aria-pressed="true"><i class="ico path"></i>Flight paths</button>
-              <button type="button" class="lyr on" data-l="labels" aria-pressed="true"><i class="ico">Aa</i>Labels</button>
-            </div>
-            <div class="ovl-sub">Min severity</div>
-            <div class="seg" id="min-sev" role="group" aria-label="Minimum severity on the map">
-              <button type="button" data-s="0" class="on" aria-pressed="true">All</button>
-              <button type="button" data-s="1">Elevated+</button>
-              <button type="button" data-s="2">Critical</button>
-            </div>
-            <div class="ovl-legend">
-              <span><i class="sz s1"></i><i class="sz s2"></i><i class="sz s3"></i> size = est. Pc</span>
-              <span><i class="sw-a"></i>primary <i class="sw-b"></i>secondary</span>
-            </div>
-            <div id="pts-status" class="ovl-status">Collision points: waiting for data</div>
-          </div>
-        </div>
-
-        <!-- bottom-left KPI card -->
-        <div id="kpi-card" class="kpi-card card-float">
-          <div class="ovl-head">
-            <h3 id="kpi-title">Next 24 h</h3>
-            <span id="kpi-sub" class="hint"></span>
-            <button type="button" class="mini-btn" id="kpi-toggle" aria-expanded="true" aria-controls="kpi-body" title="Collapse panel">&minus;</button>
-          </div>
-          <div id="kpi-body">
-            <div id="kpi-tiles" class="kpi-tiles"></div>
-            <div id="kpi-hours" class="kpi-hours" aria-label="Conjunctions per hour"></div>
-            <div id="kpi-insights" class="insights"></div>
-          </div>
-        </div>
-
-        <!-- play bar (shown with a selection) -->
-        <div id="playbar" class="playbar card-float" hidden>
-          <button type="button" id="pb-play" class="mini-btn" aria-label="Pause">&#10074;&#10074;</button>
-          <input type="range" id="pb-scrub" min="0" max="1000" value="0" aria-label="Scrub time around TCA">
+        <!-- playback (docked under the drawer while an event is open) -->
+        <div id="playbar" class="playbar" hidden>
+          <button type="button" id="pb-play" class="icon-btn" aria-label="Pause">&#10074;&#10074;</button>
+          <input type="range" id="pb-scrub" min="0" max="1000" value="0" aria-label="Scrub time around closest approach">
           <span id="pb-time" class="pb-time">T&minus;00:00</span>
-          <button type="button" id="pb-speed" class="mini-btn wide" title="Playback speed">60&times;</button>
-          <button type="button" id="pb-tca" class="mini-btn wide" title="Jump to closest approach">TCA</button>
-          <button type="button" id="pb-fit" class="mini-btn wide" title="Fit both flight paths">Fit</button>
+          <button type="button" id="pb-speed" class="text-btn" title="Playback speed">60&times;</button>
+          <button type="button" id="pb-tca" class="text-btn" title="Jump to closest approach">TCA</button>
+          <button type="button" id="pb-fit" class="text-btn" title="Fit both flight paths">Fit</button>
         </div>
 
         <!-- right detail drawer -->
         <aside id="detail" class="detail" aria-hidden="true" aria-label="Conjunction detail" tabindex="-1"></aside>
       </div>
 
-      <!-- CDM EVALUATOR -->
+      <!-- EVALUATOR -->
       <div id="view-evaluator" class="view view-scroll" data-view="evaluator" hidden>
-        <div id="ev-main" class="ev-main"><div class="state">Loading test-set events&hellip;</div></div>
+        <div id="ev-main" class="page"><div class="state">Loading test events&hellip;</div></div>
       </div>
 
       <!-- MODEL -->
@@ -223,28 +198,25 @@
       <div id="view-assess" class="view view-scroll" data-view="assess" hidden>
         <div class="page assess-grid">
           <form id="assess-form" class="panel" novalidate>
-            <div class="panel-head">
-              <h3>Assess one CDM</h3>
-              <span class="hint">Allowed columns only &ndash; the model never sees <code>risk</code></span>
-            </div>
+            <div class="panel-head"><h3>Assess one CDM</h3></div>
             <div class="presets">
-              <span class="hint">Presets from test_data.csv</span>
-              <button type="button" class="btn sm" data-preset="safe"><i class="dot t0"></i>Safe</button>
-              <button type="button" class="btn sm" data-preset="elevated"><i class="dot t1"></i>Elevated</button>
-              <button type="button" class="btn sm" data-preset="critical"><i class="dot t2"></i>Critical</button>
-              <button type="button" class="btn sm ghost" id="assess-sw" title="Fill F10 and AP from NOAA SWPC (live)">Use live F10.7 / Ap</button>
+              <span class="muted">Load an example</span>
+              <button type="button" class="btn sm" data-preset="safe">Safe</button>
+              <button type="button" class="btn sm" data-preset="elevated">Elevated</button>
+              <button type="button" class="btn sm" data-preset="critical">Critical</button>
+              <button type="button" class="btn sm ghost" id="assess-sw" title="Fill F10.7 and Ap from NOAA SWPC">Use live F10.7 and Ap</button>
             </div>
-            <p id="preset-note" class="hint preset-note"></p>
+            <p id="preset-note" class="preset-note"></p>
             <div id="assess-fields" class="form-grid"></div>
-            <p id="assess-check" class="hint"></p>
+            <p id="assess-check" class="form-check"></p>
             <div class="form-actions">
-              <button type="submit" class="btn primary" id="assess-go">Assess CDM</button>
+              <button type="submit" class="btn primary" id="assess-go">Assess</button>
               <button type="button" class="btn ghost" id="assess-reset">Clear</button>
               <span id="assess-err" class="err" role="alert"></span>
             </div>
           </form>
           <div id="assess-result" class="panel">
-            <div class="state">Pick a preset or fill the form, then press <b>Assess CDM</b>. The result shows the recommended tier, the probabilities behind it and every rule that fired.</div>
+            <div class="state">Load an example or fill in the form, then press Assess to get a recommended tier and the reasons behind it.</div>
           </div>
         </div>
       </div>
@@ -254,18 +226,18 @@
   <!-- ======================================================= DECISION LOG -->
   <aside id="logdrawer" class="logdrawer" aria-hidden="true" aria-label="Decision log" tabindex="-1">
     <div class="ld-head">
-      <h3>Analyst decision log</h3>
-      <button type="button" class="mini-btn" id="ld-close" aria-label="Close decision log">&times;</button>
+      <h3>Decision log</h3>
+      <button type="button" class="icon-btn" id="ld-close" aria-label="Close decision log">&times;</button>
     </div>
-    <label class="analyst">Analyst initials
+    <label class="analyst">Your initials
       <input id="analyst" maxlength="24" autocomplete="off" placeholder="e.g. GW">
     </label>
-    <p class="hint" id="ld-storage"></p>
+    <p class="ld-storage" id="ld-storage"></p>
     <div class="ld-tools">
       <select id="ld-filter" aria-label="Filter log">
         <option value="all">All views</option>
-        <option value="live">Live map</option>
-        <option value="evaluator">CDM evaluator</option>
+        <option value="live">Map</option>
+        <option value="evaluator">Evaluator</option>
         <option value="assess">Assess</option>
       </select>
       <button type="button" class="btn sm" id="ld-export">Export CSV</button>

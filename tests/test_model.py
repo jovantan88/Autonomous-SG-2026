@@ -53,7 +53,7 @@ def test_probabilities_sum_to_one_and_respect_distance_rule():
 
 def test_model_cannot_override_hard_distance_rule():
     out = _combine([0.0], [0.0], [800])
-    assert out.tier[0] == 2 and "hard rule" in out.reasons[0][0]
+    assert out.tier[0] == 2 and "under 1 km" in out.reasons[0][0]
 
 
 def test_thresholds_drive_pc_escalation():
@@ -65,7 +65,7 @@ def test_max_pc_bound_forces_review_but_not_tier():
     out = _combine([0.05, 0.05], [0.01, 0.01], [20000, 20000], bound=[-3.5, -8.0])
     assert list(out.tier) == [0, 0]
     assert list(out.needs_review) == [True, False]
-    assert any("Worst-case Pc bound" in r for r in out.reasons[0])
+    assert any(r.startswith("Worst-case probability") for r in out.reasons[0])
 
 
 def test_head_disagreement_is_flagged_not_hidden():
@@ -77,7 +77,7 @@ def test_head_disagreement_is_flagged_not_hidden():
                 np.array([3000.0]), THR)
     for out in (a, b):
         assert out.heads_disagree[0] and out.needs_review[0]
-        assert any(r.startswith("Model components disagree") for r in out.reasons[0])
+        assert any(r.startswith("Model parts disagree") for r in out.reasons[0])
     assert a.tier[0] == 2  # decision unchanged, only flagged
 
 
