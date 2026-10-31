@@ -28,12 +28,13 @@ OBJECT_TYPES = ["DEBRIS", "PAYLOAD", "ROCKET BODY", "UNKNOWN", "TBA"]
 def load(path, with_label=True):
     cols = ALLOWED_COLUMNS + ([LABEL] if with_label else [])
     df = pd.read_csv(path, usecols=cols)
-    return df.sort_values(["event_id", "time_to_tca"], ascending=[True, False]).reset_index(drop=True)
+    return df.sort_values(["event_id", "time_to_tca"], ascending=[True, False], kind="mergesort").reset_index(drop=True)
 
 
 def md_tier(miss_distance):
+    """Brief: Critical < 1.0 km; Elevated 1.0-5.0 km (inclusive); Safe > 5.0 km."""
     md = np.asarray(miss_distance)
-    return np.select([md < MD_CRITICAL, md < MD_ELEVATED], [2, 1], 0)
+    return np.select([md < MD_CRITICAL, md <= MD_ELEVATED], [2, 1], 0)
 
 
 def pc_tier(log_pc):

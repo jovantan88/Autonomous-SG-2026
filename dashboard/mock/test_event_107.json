@@ -1,0 +1,565 @@
+{
+ "event_id": 107,
+ "cdms": [
+  {
+   "time_to_tca": 6.700398,
+   "miss_distance": 1356.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 156.4,
+   "relative_position_t": 334.8,
+   "relative_position_n": 1305.2,
+   "relative_velocity_r": 49.5,
+   "relative_velocity_t": -13947.1,
+   "relative_velocity_n": 3609.5,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 191.732089,
+   "t_sigma_r": 1.851879,
+   "max_risk_estimate": -3.749092,
+   "F10": 69.0,
+   "AP": 5.0,
+   "true_log_pc": -3.797512,
+   "assessment": {
+    "log_pc": -4.128714,
+    "log_pc_lo": -8.304749,
+    "log_pc_hi": -3.854664,
+    "p_pc_elevated": 0.976219,
+    "p_pc_critical": 0.149901,
+    "p_tier": [
+     0.0,
+     0.850099,
+     0.149901
+    ],
+    "md_tier": 1,
+    "tier": 2,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.36 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 7.4e-05 (80% interval 5.0e-09 to 1.4e-04)",
+     "P(Pc >= 1e-4) = 15% >= decision threshold 6% -> Critical",
+     "Uncertainty interval straddles a tier boundary -> analyst review required",
+     "Decision: Critical"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 6.347586,
+   "miss_distance": 1069.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 156.6,
+   "relative_position_t": 267.9,
+   "relative_position_n": 1023.2,
+   "relative_velocity_r": 49.6,
+   "relative_velocity_t": -13947.1,
+   "relative_velocity_n": 3609.5,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 191.546043,
+   "t_sigma_r": 2.11099,
+   "max_risk_estimate": -3.673459,
+   "F10": 69.0,
+   "AP": 5.0,
+   "true_log_pc": -3.750313,
+   "assessment": {
+    "log_pc": -4.189136,
+    "log_pc_lo": -8.233625,
+    "log_pc_hi": -3.836614,
+    "p_pc_elevated": 0.968611,
+    "p_pc_critical": 0.128775,
+    "p_tier": [
+     0.0,
+     0.871225,
+     0.128775
+    ],
+    "md_tier": 1,
+    "tier": 2,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.07 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 6.5e-05 (80% interval 5.8e-09 to 1.5e-04)",
+     "P(Pc >= 1e-4) = 13% >= decision threshold 6% -> Critical",
+     "Uncertainty interval straddles a tier boundary -> analyst review required",
+     "Decision: Critical"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 6.008049,
+   "miss_distance": 1069.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 157.1,
+   "relative_position_t": 263.9,
+   "relative_position_n": 1024.7,
+   "relative_velocity_r": 49.6,
+   "relative_velocity_t": -13947.1,
+   "relative_velocity_n": 3609.5,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 191.580929,
+   "t_sigma_r": 1.964026,
+   "max_risk_estimate": -3.675718,
+   "F10": 70.0,
+   "AP": 3.0,
+   "true_log_pc": -3.752272,
+   "assessment": {
+    "log_pc": -4.19952,
+    "log_pc_lo": -7.596622,
+    "log_pc_hi": -3.846204,
+    "p_pc_elevated": 0.971858,
+    "p_pc_critical": 0.132101,
+    "p_tier": [
+     0.0,
+     0.867899,
+     0.132101
+    ],
+    "md_tier": 1,
+    "tier": 2,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.07 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 6.3e-05 (80% interval 2.5e-08 to 1.4e-04)",
+     "P(Pc >= 1e-4) = 13% >= decision threshold 6% -> Critical",
+     "Uncertainty interval straddles a tier boundary -> analyst review required",
+     "Decision: Critical"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 5.71879,
+   "miss_distance": 1017.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 156.8,
+   "relative_position_t": 254.1,
+   "relative_position_n": 972.7,
+   "relative_velocity_r": 49.6,
+   "relative_velocity_t": -13947.1,
+   "relative_velocity_n": 3609.5,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 191.533292,
+   "t_sigma_r": 1.966326,
+   "max_risk_estimate": -3.661344,
+   "F10": 70.0,
+   "AP": 3.0,
+   "true_log_pc": -3.743763,
+   "assessment": {
+    "log_pc": -4.14351,
+    "log_pc_lo": -7.663308,
+    "log_pc_hi": -3.873463,
+    "p_pc_elevated": 0.967094,
+    "p_pc_critical": 0.122037,
+    "p_tier": [
+     0.0,
+     0.877963,
+     0.122037
+    ],
+    "md_tier": 1,
+    "tier": 2,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.02 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 7.2e-05 (80% interval 2.2e-08 to 1.3e-04)",
+     "P(Pc >= 1e-4) = 12% >= decision threshold 6% -> Critical",
+     "Uncertainty interval straddles a tier boundary -> analyst review required",
+     "Decision: Critical"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 5.433444,
+   "miss_distance": 1305.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 70.5,
+   "relative_position_t": 328.4,
+   "relative_position_n": 1261.6,
+   "relative_velocity_r": 49.5,
+   "relative_velocity_t": -13947.2,
+   "relative_velocity_n": 3609.6,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 125.801887,
+   "t_sigma_r": 1.719864,
+   "max_risk_estimate": -3.517412,
+   "F10": 70.0,
+   "AP": 3.0,
+   "true_log_pc": -3.517412,
+   "assessment": {
+    "log_pc": -3.699095,
+    "log_pc_lo": -10.300397,
+    "log_pc_hi": -3.699095,
+    "p_pc_elevated": 0.977709,
+    "p_pc_critical": 0.195874,
+    "p_tier": [
+     0.0,
+     0.804126,
+     0.195874
+    ],
+    "md_tier": 1,
+    "tier": 2,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.30 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.0e-04 (80% interval 5.0e-11 to 2.0e-04)",
+     "P(Pc >= 1e-4) = 20% >= decision threshold 6% -> Critical",
+     "Uncertainty interval straddles a tier boundary -> analyst review required",
+     "Decision: Critical"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 5.063281,
+   "miss_distance": 1308.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 71.5,
+   "relative_position_t": 326.4,
+   "relative_position_n": 1264.6,
+   "relative_velocity_r": 49.4,
+   "relative_velocity_t": -13947.2,
+   "relative_velocity_n": 3609.6,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 125.816093,
+   "t_sigma_r": 1.827117,
+   "max_risk_estimate": -3.520569,
+   "F10": 70.0,
+   "AP": 4.0,
+   "true_log_pc": -3.520569,
+   "assessment": {
+    "log_pc": -3.678772,
+    "log_pc_lo": -11.511248,
+    "log_pc_hi": -3.678772,
+    "p_pc_elevated": 0.978694,
+    "p_pc_critical": 0.195874,
+    "p_tier": [
+     0.0,
+     0.804126,
+     0.195874
+    ],
+    "md_tier": 1,
+    "tier": 2,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.31 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.1e-04 (80% interval 3.1e-12 to 2.1e-04)",
+     "P(Pc >= 1e-4) = 20% >= decision threshold 6% -> Critical",
+     "Uncertainty interval straddles a tier boundary -> analyst review required",
+     "Decision: Critical"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 4.680573,
+   "miss_distance": 1302.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 71.7,
+   "relative_position_t": 329.8,
+   "relative_position_n": 1258.0,
+   "relative_velocity_r": 49.5,
+   "relative_velocity_t": -13947.2,
+   "relative_velocity_n": 3609.6,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 125.811761,
+   "t_sigma_r": 1.890526,
+   "max_risk_estimate": -3.518414,
+   "F10": 70.0,
+   "AP": 4.0,
+   "true_log_pc": -3.518414,
+   "assessment": {
+    "log_pc": -3.658313,
+    "log_pc_lo": -11.970796,
+    "log_pc_hi": -3.658313,
+    "p_pc_elevated": 0.979627,
+    "p_pc_critical": 0.195874,
+    "p_tier": [
+     0.0,
+     0.804126,
+     0.195874
+    ],
+    "md_tier": 1,
+    "tier": 2,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.30 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.2e-04 (80% interval 1.1e-12 to 2.2e-04)",
+     "P(Pc >= 1e-4) = 20% >= decision threshold 6% -> Critical",
+     "Uncertainty interval straddles a tier boundary -> analyst review required",
+     "Decision: Critical"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 4.336707,
+   "miss_distance": 1387.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 70.6,
+   "relative_position_t": 350.3,
+   "relative_position_n": 1341.1,
+   "relative_velocity_r": 49.4,
+   "relative_velocity_t": -13947.2,
+   "relative_velocity_n": 3609.6,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 125.84649,
+   "t_sigma_r": 1.858642,
+   "max_risk_estimate": -3.556581,
+   "F10": 70.0,
+   "AP": 4.0,
+   "true_log_pc": -3.558148,
+   "assessment": {
+    "log_pc": -3.852711,
+    "log_pc_lo": -11.877519,
+    "log_pc_hi": -3.852711,
+    "p_pc_elevated": 0.973608,
+    "p_pc_critical": 0.158736,
+    "p_tier": [
+     0.0,
+     0.841264,
+     0.158736
+    ],
+    "md_tier": 1,
+    "tier": 2,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.39 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 1.4e-04 (80% interval 1.3e-12 to 1.4e-04)",
+     "P(Pc >= 1e-4) = 16% >= decision threshold 6% -> Critical",
+     "Uncertainty interval straddles a tier boundary -> analyst review required",
+     "Decision: Critical"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 4.032691,
+   "miss_distance": 1377.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 70.8,
+   "relative_position_t": 344.1,
+   "relative_position_n": 1331.7,
+   "relative_velocity_r": 49.4,
+   "relative_velocity_t": -13947.2,
+   "relative_velocity_n": 3609.6,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 125.83656,
+   "t_sigma_r": 1.743416,
+   "max_risk_estimate": -3.552532,
+   "F10": 70.0,
+   "AP": 4.0,
+   "true_log_pc": -3.553774,
+   "assessment": {
+    "log_pc": -4.124864,
+    "log_pc_lo": -13.820736,
+    "log_pc_hi": -3.884166,
+    "p_pc_elevated": 0.972485,
+    "p_pc_critical": 0.115655,
+    "p_tier": [
+     0.0,
+     0.884345,
+     0.115655
+    ],
+    "md_tier": 1,
+    "tier": 2,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.38 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 7.5e-05 (80% interval 1.5e-14 to 1.3e-04)",
+     "P(Pc >= 1e-4) = 12% >= decision threshold 6% -> Critical",
+     "Uncertainty interval straddles a tier boundary -> analyst review required",
+     "Decision: Critical"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 3.730076,
+   "miss_distance": 1219.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 213.8,
+   "relative_position_t": 303.0,
+   "relative_position_n": 1162.0,
+   "relative_velocity_r": 49.4,
+   "relative_velocity_t": -13947.1,
+   "relative_velocity_n": 3609.6,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 295.975241,
+   "t_sigma_r": 1.648927,
+   "max_risk_estimate": -3.932557,
+   "F10": 70.0,
+   "AP": 4.0,
+   "true_log_pc": -3.935542,
+   "assessment": {
+    "log_pc": -4.302308,
+    "log_pc_lo": -9.671922,
+    "log_pc_hi": -4.17323,
+    "p_pc_elevated": 0.959775,
+    "p_pc_critical": 0.005877,
+    "p_tier": [
+     0.0,
+     0.994123,
+     0.005877
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.22 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 5.0e-05 (80% interval 2.1e-10 to 6.7e-05)",
+     "P(Pc >= 1e-6) = 96% >= decision threshold 11% -> Elevated",
+     "Worst-case Pc bound 1.2e-04 >= 1e-4: Critical cannot be ruled out -> analyst review required",
+     "Decision: Elevated"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 3.333189,
+   "miss_distance": 1215.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 214.4,
+   "relative_position_t": 304.1,
+   "relative_position_n": 1156.6,
+   "relative_velocity_r": 49.4,
+   "relative_velocity_t": -13947.1,
+   "relative_velocity_n": 3609.6,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 295.976518,
+   "t_sigma_r": 1.585025,
+   "max_risk_estimate": -3.931443,
+   "F10": 70.0,
+   "AP": 4.0,
+   "true_log_pc": -3.934794,
+   "assessment": {
+    "log_pc": -4.673657,
+    "log_pc_lo": -9.784094,
+    "log_pc_hi": -4.17323,
+    "p_pc_elevated": 0.956977,
+    "p_pc_critical": 0.005877,
+    "p_tier": [
+     0.0,
+     0.994123,
+     0.005877
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.22 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.1e-05 (80% interval 1.6e-10 to 6.7e-05)",
+     "P(Pc >= 1e-6) = 96% >= decision threshold 11% -> Elevated",
+     "Worst-case Pc bound 1.2e-04 >= 1e-4: Critical cannot be ruled out -> analyst review required",
+     "Decision: Elevated"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 3.014393,
+   "miss_distance": 1233.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 213.6,
+   "relative_position_t": 301.8,
+   "relative_position_n": 1176.3,
+   "relative_velocity_r": 49.4,
+   "relative_velocity_t": -13947.1,
+   "relative_velocity_n": 3609.6,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 295.982094,
+   "t_sigma_r": 1.643378,
+   "max_risk_estimate": -3.938171,
+   "F10": 70.0,
+   "AP": 7.0,
+   "true_log_pc": -3.941954,
+   "assessment": {
+    "log_pc": -4.89667,
+    "log_pc_lo": -9.114737,
+    "log_pc_hi": -4.201105,
+    "p_pc_elevated": 0.941099,
+    "p_pc_critical": 0.005788,
+    "p_tier": [
+     0.0,
+     0.994212,
+     0.005788
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.23 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 1.3e-05 (80% interval 7.7e-10 to 6.3e-05)",
+     "P(Pc >= 1e-6) = 94% >= decision threshold 11% -> Elevated",
+     "Worst-case Pc bound 1.2e-04 >= 1e-4: Critical cannot be ruled out -> analyst review required",
+     "Decision: Elevated"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 2.753849,
+   "miss_distance": 1220.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 213.7,
+   "relative_position_t": 302.2,
+   "relative_position_n": 1163.1,
+   "relative_velocity_r": 49.4,
+   "relative_velocity_t": -13947.1,
+   "relative_velocity_n": 3609.6,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 295.977624,
+   "t_sigma_r": 1.502029,
+   "max_risk_estimate": -3.932185,
+   "F10": 70.0,
+   "AP": 7.0,
+   "true_log_pc": -3.935542,
+   "assessment": {
+    "log_pc": -5.407774,
+    "log_pc_lo": -7.99503,
+    "log_pc_hi": -4.174926,
+    "p_pc_elevated": 0.943323,
+    "p_pc_critical": 0.005666,
+    "p_tier": [
+     0.0,
+     0.994334,
+     0.005666
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.22 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 3.9e-06 (80% interval 1.0e-08 to 6.7e-05)",
+     "P(Pc >= 1e-6) = 94% >= decision threshold 11% -> Elevated",
+     "Worst-case Pc bound 1.2e-04 >= 1e-4: Critical cannot be ruled out -> analyst review required",
+     "Decision: Elevated"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 2.329717,
+   "miss_distance": 1226.0,
+   "relative_speed": 14406.0,
+   "relative_position_r": 214.5,
+   "relative_position_t": 305.5,
+   "relative_position_n": 1168.2,
+   "relative_velocity_r": 49.4,
+   "relative_velocity_t": -13947.1,
+   "relative_velocity_n": 3609.6,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 295.97701,
+   "t_sigma_r": 1.364688,
+   "max_risk_estimate": -3.936291,
+   "F10": 70.0,
+   "AP": 7.0,
+   "true_log_pc": -3.93968,
+   "assessment": {
+    "log_pc": -5.47482,
+    "log_pc_lo": -7.757056,
+    "log_pc_hi": -4.170077,
+    "p_pc_elevated": 0.916074,
+    "p_pc_critical": 0.004205,
+    "p_tier": [
+     0.0,
+     0.995795,
+     0.004205
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.23 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 3.4e-06 (80% interval 1.7e-08 to 6.8e-05)",
+     "P(Pc >= 1e-6) = 92% >= decision threshold 11% -> Elevated",
+     "Worst-case Pc bound 1.2e-04 >= 1e-4: Critical cannot be ruled out -> analyst review required",
+     "Decision: Elevated"
+    ]
+   }
+  }
+ ]
+}

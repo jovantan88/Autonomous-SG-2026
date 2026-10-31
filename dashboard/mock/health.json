@@ -1,0 +1,12 @@
+{
+ "status": "ok",
+ "model_loaded": false,
+ "live_sources": {
+  "socrates": "ok",
+  "swpc": "ok",
+  "satcat": "ok",
+  "spacetrack": "disabled",
+  "gp": "ok"
+ },
+ "mock": true
+}

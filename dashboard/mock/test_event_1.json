@@ -1,0 +1,83 @@
+{
+ "event_id": 1,
+ "cdms": [
+  {
+   "time_to_tca": 2.578485,
+   "miss_distance": 953.0,
+   "relative_speed": 63.0,
+   "relative_position_r": 485.7,
+   "relative_position_t": -798.5,
+   "relative_position_n": 188.2,
+   "relative_velocity_r": -53.4,
+   "relative_velocity_t": -27.6,
+   "relative_velocity_n": 20.9,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 95.150033,
+   "t_sigma_r": 7.898797,
+   "max_risk_estimate": -5.514563,
+   "F10": 71.0,
+   "AP": 6.0,
+   "true_log_pc": -7.855737,
+   "assessment": {
+    "log_pc": -10.786637,
+    "log_pc_lo": -17.871007,
+    "log_pc_hi": -9.510468,
+    "p_pc_elevated": 0.002841,
+    "p_pc_critical": 0.000112,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.95 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.6e-11 (80% interval 1.3e-18 to 3.1e-10)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 2.129518,
+   "miss_distance": 935.0,
+   "relative_speed": 63.0,
+   "relative_position_r": 478.6,
+   "relative_position_t": -779.0,
+   "relative_position_n": 196.9,
+   "relative_velocity_r": -53.4,
+   "relative_velocity_t": -27.6,
+   "relative_velocity_n": 20.9,
+   "c_object_type": "UNKNOWN",
+   "c_sigma_r": 95.178865,
+   "t_sigma_r": 7.668534,
+   "max_risk_estimate": -5.528562,
+   "F10": 71.0,
+   "AP": 6.0,
+   "true_log_pc": -7.933674,
+   "assessment": {
+    "log_pc": -10.91294,
+    "log_pc_lo": -18.066306,
+    "log_pc_hi": -8.911508,
+    "p_pc_elevated": 0.002532,
+    "p_pc_critical": 0.000112,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.94 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.2e-11 (80% interval 8.6e-19 to 1.2e-09)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,21 @@
+{
+ "log_pc": -6.1066,
+ "log_pc_lo": -9.9567,
+ "log_pc_hi": -5.6124,
+ "p_pc_elevated": 0.2219,
+ "p_pc_critical": 0.0001,
+ "p_tier": [
+  0.0,
+  0.9999,
+  0.0001
+ ],
+ "md_tier": 1,
+ "tier": 1,
+ "needs_review": false,
+ "reasons": [
+  "Miss distance 3.18 km within 1-5 km -> at least Elevated (hard rule)",
+  "Estimated Pc 7.8e-07 (80% interval 1.1e-10 to 2.4e-06)",
+  "P(Pc >= 1e-6) = 22% >= decision threshold 11% -> Elevated",
+  "Decision: Elevated"
+ ]
+}

@@ -1,0 +1,954 @@
+{
+  "generated_at": "2026-10-31T03:20:54+00:00",
+  "eval_set": {
+    "name": "test_data.csv",
+    "n_rows": 4519,
+    "n_events": 400,
+    "true_tier_counts": [
+      2844,
+      1278,
+      397
+    ]
+  },
+  "cv_set": {
+    "name": "train_data.csv, 5-fold GroupKFold by event, scored on CDMs >= 2 days to TCA",
+    "n_rows": 21233,
+    "n_events": 2270,
+    "true_tier_counts": [
+      14821,
+      4785,
+      1627
+    ]
+  },
+  "chosen_method": "LightGBM, per-CDM physics features (chosen)",
+  "thresholds": {
+    "full": {
+      "p_critical": 0.06,
+      "p_elevated": 0.11
+    },
+    "screen": {
+      "p_critical": 0.2,
+      "p_elevated": 0.11
+    }
+  },
+  "methods": [
+    {
+      "name": "Miss-distance rule only",
+      "kind": "baseline",
+      "description": "Applies the 1 km / 5 km rule and assumes Pc is always safe (status quo triage on distance)",
+      "cv": {
+        "macro_f1": 0.9507,
+        "f2_critical": 0.9678,
+        "f2_elevated_or_worse": 0.8937,
+        "accuracy": 0.9581,
+        "recall": [
+          1.0,
+          0.8278,
+          0.96
+        ],
+        "precision": [
+          0.947,
+          0.9853,
+          1.0
+        ],
+        "missed_critical": 65,
+        "critical_called_safe": 6,
+        "false_alarms_critical": 0,
+        "confusion": [
+          [
+            14821,
+            0,
+            0
+          ],
+          [
+            824,
+            3961,
+            0
+          ],
+          [
+            6,
+            59,
+            1562
+          ]
+        ],
+        "n": 21233
+      },
+      "test": {
+        "macro_f1": 0.9522,
+        "f2_critical": 0.9634,
+        "f2_elevated_or_worse": 0.9066,
+        "accuracy": 0.9538,
+        "recall": [
+          1.0,
+          0.8505,
+          0.9547
+        ],
+        "precision": [
+          0.9371,
+          0.9837,
+          1.0
+        ],
+        "missed_critical": 18,
+        "critical_called_safe": 0,
+        "false_alarms_critical": 0,
+        "confusion": [
+          [
+            2844,
+            0,
+            0
+          ],
+          [
+            191,
+            1087,
+            0
+          ],
+          [
+            0,
+            18,
+            379
+          ]
+        ],
+        "n": 4519
+      }
+    },
+    {
+      "name": "Max-Pc bound as Pc",
+      "kind": "baseline",
+      "description": "Treats max_risk_estimate (worst-case Pc over covariance scaling) as the Pc",
+      "cv": {
+        "macro_f1": 0.8321,
+        "f2_critical": 0.9805,
+        "f2_elevated_or_worse": 0.8916,
+        "accuracy": 0.8088,
+        "recall": [
+          0.7369,
+          0.9666,
+          1.0
+        ],
+        "precision": [
+          1.0,
+          0.5427,
+          0.9094
+        ],
+        "missed_critical": 0,
+        "critical_called_safe": 0,
+        "false_alarms_critical": 162,
+        "confusion": [
+          [
+            10922,
+            3897,
+            2
+          ],
+          [
+            0,
+            4625,
+            160
+          ],
+          [
+            0,
+            0,
+            1627
+          ]
+        ],
+        "n": 21233
+      },
+      "test": {
+        "macro_f1": 0.8388,
+        "f2_critical": 0.9871,
+        "f2_elevated_or_worse": 0.9036,
+        "accuracy": 0.7977,
+        "recall": [
+          0.686,
+          0.9836,
+          1.0
+        ],
+        "precision": [
+          1.0,
+          0.586,
+          0.9385
+        ],
+        "missed_critical": 0,
+        "critical_called_safe": 0,
+        "false_alarms_critical": 26,
+        "confusion": [
+          [
+            1951,
+            888,
+            5
+          ],
+          [
+            0,
+            1257,
+            21
+          ],
+          [
+            0,
+            0,
+            397
+          ]
+        ],
+        "n": 4519
+      }
+    },
+    {
+      "name": "Isotropic Gaussian Pc (physics)",
+      "kind": "baseline",
+      "description": "2D Pc with combined radial sigma and hard-body radius implied by the max-Pc bound",
+      "cv": {
+        "macro_f1": 0.9502,
+        "f2_critical": 0.9677,
+        "f2_elevated_or_worse": 0.8938,
+        "accuracy": 0.9578,
+        "recall": [
+          0.9995,
+          0.8276,
+          0.96
+        ],
+        "precision": [
+          0.9471,
+          0.9831,
+          0.9994
+        ],
+        "missed_critical": 65,
+        "critical_called_safe": 4,
+        "false_alarms_critical": 1,
+        "confusion": [
+          [
+            14814,
+            7,
+            0
+          ],
+          [
+            824,
+            3960,
+            1
+          ],
+          [
+            4,
+            61,
+            1562
+          ]
+        ],
+        "n": 21233
+      },
+      "test": {
+        "macro_f1": 0.952,
+        "f2_critical": 0.9634,
+        "f2_elevated_or_worse": 0.9065,
+        "accuracy": 0.9535,
+        "recall": [
+          0.9996,
+          0.8505,
+          0.9547
+        ],
+        "precision": [
+          0.937,
+          0.9828,
+          1.0
+        ],
+        "missed_critical": 18,
+        "critical_called_safe": 0,
+        "false_alarms_critical": 0,
+        "confusion": [
+          [
+            2843,
+            1,
+            0
+          ],
+          [
+            191,
+            1087,
+            0
+          ],
+          [
+            0,
+            18,
+            379
+          ]
+        ],
+        "n": 4519
+      }
+    },
+    {
+      "name": "LightGBM, per-CDM physics features (chosen)",
+      "kind": "model",
+      "description": "quantile regression + binary classifiers, thresholds {'p_critical': 0.06, 'p_elevated': 0.11}",
+      "cv": {
+        "macro_f1": 0.9581,
+        "f2_critical": 0.9904,
+        "f2_elevated_or_worse": 0.967,
+        "accuracy": 0.9621,
+        "recall": [
+          0.9579,
+          0.9632,
+          0.9975
+        ],
+        "precision": [
+          0.9921,
+          0.8801,
+          0.9626
+        ],
+        "missed_critical": 4,
+        "critical_called_safe": 0,
+        "false_alarms_critical": 63,
+        "confusion": [
+          [
+            14197,
+            624,
+            0
+          ],
+          [
+            113,
+            4609,
+            63
+          ],
+          [
+            0,
+            4,
+            1623
+          ]
+        ],
+        "n": 21233
+      },
+      "test": {
+        "macro_f1": 0.9688,
+        "f2_critical": 0.9889,
+        "f2_elevated_or_worse": 0.977,
+        "accuracy": 0.9655,
+        "recall": [
+          0.9525,
+          0.9875,
+          0.9874
+        ],
+        "precision": [
+          0.9945,
+          0.9008,
+          0.9949
+        ],
+        "missed_critical": 5,
+        "critical_called_safe": 0,
+        "false_alarms_critical": 2,
+        "confusion": [
+          [
+            2709,
+            134,
+            1
+          ],
+          [
+            15,
+            1262,
+            1
+          ],
+          [
+            0,
+            5,
+            392
+          ]
+        ],
+        "n": 4519
+      }
+    },
+    {
+      "name": "LightGBM, + causal event-history features (ablation)",
+      "kind": "ablation",
+      "description": "quantile regression + binary classifiers, thresholds {'p_critical': 0.09, 'p_elevated': 0.12}",
+      "cv": {
+        "macro_f1": 0.9617,
+        "f2_critical": 0.9869,
+        "f2_elevated_or_worse": 0.9695,
+        "accuracy": 0.9659,
+        "recall": [
+          0.9629,
+          0.9664,
+          0.9914
+        ],
+        "precision": [
+          0.9924,
+          0.8913,
+          0.9694
+        ],
+        "missed_critical": 14,
+        "critical_called_safe": 0,
+        "false_alarms_critical": 51,
+        "confusion": [
+          [
+            14271,
+            550,
+            0
+          ],
+          [
+            110,
+            4624,
+            51
+          ],
+          [
+            0,
+            14,
+            1613
+          ]
+        ],
+        "n": 21233
+      },
+      "test": {
+        "macro_f1": 0.9771,
+        "f2_critical": 0.9889,
+        "f2_elevated_or_worse": 0.9816,
+        "accuracy": 0.9757,
+        "recall": [
+          0.9694,
+          0.9859,
+          0.9874
+        ],
+        "precision": [
+          0.9939,
+          0.9326,
+          0.9949
+        ],
+        "missed_critical": 5,
+        "critical_called_safe": 0,
+        "false_alarms_critical": 2,
+        "confusion": [
+          [
+            2757,
+            86,
+            1
+          ],
+          [
+            17,
+            1260,
+            1
+          ],
+          [
+            0,
+            5,
+            392
+          ]
+        ],
+        "n": 4519
+      }
+    },
+    {
+      "name": "LightGBM, screening inputs only (live SOCRATES mode)",
+      "kind": "model",
+      "description": "quantile regression + binary classifiers, thresholds {'p_critical': 0.2, 'p_elevated': 0.11}",
+      "cv": {
+        "macro_f1": 0.9353,
+        "f2_critical": 0.9874,
+        "f2_elevated_or_worse": 0.9384,
+        "accuracy": 0.9363,
+        "recall": [
+          0.9294,
+          0.9392,
+          0.9914
+        ],
+        "precision": [
+          0.9826,
+          0.809,
+          0.9717
+        ],
+        "missed_critical": 14,
+        "critical_called_safe": 0,
+        "false_alarms_critical": 47,
+        "confusion": [
+          [
+            13774,
+            1047,
+            0
+          ],
+          [
+            244,
+            4494,
+            47
+          ],
+          [
+            0,
+            14,
+            1613
+          ]
+        ],
+        "n": 21233
+      },
+      "test": {
+        "macro_f1": 0.9317,
+        "f2_critical": 0.9819,
+        "f2_elevated_or_worse": 0.9508,
+        "accuracy": 0.9239,
+        "recall": [
+          0.897,
+          0.9648,
+          0.9849
+        ],
+        "precision": [
+          0.9872,
+          0.8048,
+          0.9702
+        ],
+        "missed_critical": 6,
+        "critical_called_safe": 0,
+        "false_alarms_critical": 12,
+        "confusion": [
+          [
+            2551,
+            293,
+            0
+          ],
+          [
+            33,
+            1233,
+            12
+          ],
+          [
+            0,
+            6,
+            391
+          ]
+        ],
+        "n": 4519
+      }
+    }
+  ],
+  "regression": {
+    "test_mae_log_pc": 3.249,
+    "test_mae_log_pc_high_risk": 0.839,
+    "interval_coverage_80": 0.7064,
+    "interval_coverage_80_nonfloor": 0.711,
+    "note": "risk = -30 is the dataset floor for 'Pc effectively zero'; MAE is dominated by that mass"
+  },
+  "review_queue": {
+    "needs_review_rate": 0.0053,
+    "error_rate_in_review_queue": 0.0833,
+    "error_rate_auto_decided": 0.0343
+  },
+  "pc_driven_escalations": {
+    "n_rows_where_pc_raises_tier": 209,
+    "caught_by_model": 189,
+    "caught_by_distance_rule": 0
+  },
+  "calibration": [
+    {
+      "p_pred": 0.0001,
+      "p_obs": 0.0,
+      "n": 452
+    },
+    {
+      "p_pred": 0.0001,
+      "p_obs": 0.0,
+      "n": 451
+    },
+    {
+      "p_pred": 0.0001,
+      "p_obs": 0.0,
+      "n": 451
+    },
+    {
+      "p_pred": 0.0001,
+      "p_obs": 0.0,
+      "n": 454
+    },
+    {
+      "p_pred": 0.0001,
+      "p_obs": 0.0,
+      "n": 450
+    },
+    {
+      "p_pred": 0.0001,
+      "p_obs": 0.0,
+      "n": 451
+    },
+    {
+      "p_pred": 0.0001,
+      "p_obs": 0.0,
+      "n": 454
+    },
+    {
+      "p_pred": 0.0001,
+      "p_obs": 0.0,
+      "n": 452
+    },
+    {
+      "p_pred": 0.0001,
+      "p_obs": 0.0,
+      "n": 452
+    },
+    {
+      "p_pred": 0.0351,
+      "p_obs": 0.0442,
+      "n": 452
+    }
+  ],
+  "calibration_elevated": [
+    {
+      "p_pred": 0.0007,
+      "p_obs": 0.0,
+      "n": 439
+    },
+    {
+      "p_pred": 0.0008,
+      "p_obs": 0.0,
+      "n": 465
+    },
+    {
+      "p_pred": 0.0009,
+      "p_obs": 0.0,
+      "n": 451
+    },
+    {
+      "p_pred": 0.001,
+      "p_obs": 0.0,
+      "n": 453
+    },
+    {
+      "p_pred": 0.0012,
+      "p_obs": 0.0,
+      "n": 451
+    },
+    {
+      "p_pred": 0.0017,
+      "p_obs": 0.0,
+      "n": 450
+    },
+    {
+      "p_pred": 0.0033,
+      "p_obs": 0.0,
+      "n": 454
+    },
+    {
+      "p_pred": 0.0165,
+      "p_obs": 0.0155,
+      "n": 452
+    },
+    {
+      "p_pred": 0.2289,
+      "p_obs": 0.3451,
+      "n": 452
+    },
+    {
+      "p_pred": 0.8327,
+      "p_obs": 0.8606,
+      "n": 452
+    }
+  ],
+  "feature_importance": [
+    {
+      "feature": "max_risk_estimate",
+      "gain_pct": 61.45
+    },
+    {
+      "feature": "radial_mahal",
+      "gain_pct": 7.31
+    },
+    {
+      "feature": "pc_gap_to_max",
+      "gain_pct": 6.19
+    },
+    {
+      "feature": "log_c_sigma_r",
+      "gain_pct": 4.53
+    },
+    {
+      "feature": "pos_r",
+      "gain_pct": 3.63
+    },
+    {
+      "feature": "log_md",
+      "gain_pct": 3.0
+    },
+    {
+      "feature": "log_sigma_r_comb",
+      "gain_pct": 2.86
+    },
+    {
+      "feature": "log_pc_iso",
+      "gain_pct": 1.86
+    },
+    {
+      "feature": "log_hbr",
+      "gain_pct": 1.64
+    },
+    {
+      "feature": "time_to_tca",
+      "gain_pct": 1.4
+    },
+    {
+      "feature": "log_md_over_sigma",
+      "gain_pct": 1.35
+    },
+    {
+      "feature": "AP",
+      "gain_pct": 0.93
+    },
+    {
+      "feature": "log_t_sigma_r",
+      "gain_pct": 0.66
+    },
+    {
+      "feature": "F10",
+      "gain_pct": 0.66
+    },
+    {
+      "feature": "pos_n",
+      "gain_pct": 0.63
+    }
+  ],
+  "failure_cases": [
+    {
+      "event_id": 107,
+      "time_to_tca": 3.3331892593,
+      "miss_distance": 1215.0,
+      "true_tier": 2,
+      "pred_tier": 1,
+      "log_pc": -4.6736572567,
+      "true_log_pc": -3.9347938719,
+      "p_critical": 0.005877154,
+      "max_risk_estimate": -3.9314431049,
+      "c_sigma_r": 295.9765177508,
+      "t_sigma_r": 1.5850250131,
+      "c_object_type": "UNKNOWN",
+      "why": "Critical only because true Pc 1.2e-04 >= 1e-4 while miss distance 1.2 km looks benign"
+    },
+    {
+      "event_id": 107,
+      "time_to_tca": 3.7300757639,
+      "miss_distance": 1219.0,
+      "true_tier": 2,
+      "pred_tier": 1,
+      "log_pc": -4.3023076876,
+      "true_log_pc": -3.9355420108,
+      "p_critical": 0.005877154,
+      "max_risk_estimate": -3.9325571572,
+      "c_sigma_r": 295.9752413116,
+      "t_sigma_r": 1.6489267913,
+      "c_object_type": "UNKNOWN",
+      "why": "Critical only because true Pc 1.2e-04 >= 1e-4 while miss distance 1.2 km looks benign"
+    },
+    {
+      "event_id": 107,
+      "time_to_tca": 2.7538488426,
+      "miss_distance": 1220.0,
+      "true_tier": 2,
+      "pred_tier": 1,
+      "log_pc": -5.4077741366,
+      "true_log_pc": -3.9355420108,
+      "p_critical": 0.0056655713,
+      "max_risk_estimate": -3.9321854888,
+      "c_sigma_r": 295.9776235169,
+      "t_sigma_r": 1.5020293589,
+      "c_object_type": "UNKNOWN",
+      "why": "Critical only because true Pc 1.2e-04 >= 1e-4 while miss distance 1.2 km looks benign"
+    },
+    {
+      "event_id": 107,
+      "time_to_tca": 2.3297168981,
+      "miss_distance": 1226.0,
+      "true_tier": 2,
+      "pred_tier": 1,
+      "log_pc": -5.4748198109,
+      "true_log_pc": -3.9396799713,
+      "p_critical": 0.0042049276,
+      "max_risk_estimate": -3.9362914406,
+      "c_sigma_r": 295.9770099268,
+      "t_sigma_r": 1.3646883952,
+      "c_object_type": "UNKNOWN",
+      "why": "Critical only because true Pc 1.1e-04 >= 1e-4 while miss distance 1.2 km looks benign"
+    },
+    {
+      "event_id": 107,
+      "time_to_tca": 3.0143928588,
+      "miss_distance": 1233.0,
+      "true_tier": 2,
+      "pred_tier": 1,
+      "log_pc": -4.8966699364,
+      "true_log_pc": -3.9419537696,
+      "p_critical": 0.0057884206,
+      "max_risk_estimate": -3.9381706927,
+      "c_sigma_r": 295.9820937418,
+      "t_sigma_r": 1.6433782559,
+      "c_object_type": "UNKNOWN",
+      "why": "Critical only because true Pc 1.1e-04 >= 1e-4 while miss distance 1.2 km looks benign"
+    },
+    {
+      "event_id": 220,
+      "time_to_tca": 6.6639989468,
+      "miss_distance": 5148.0,
+      "true_tier": 0,
+      "pred_tier": 2,
+      "log_pc": -10.9636808439,
+      "true_log_pc": -7.6441655041,
+      "p_critical": 0.1200019498,
+      "max_risk_estimate": -3.7031155245,
+      "c_sigma_r": 13.5902558277,
+      "t_sigma_r": 3.294479449,
+      "c_object_type": "DEBRIS",
+      "why": "Pc depends on along-track / normal covariance terms that are outside the allowed columns (only sigma_r is available)"
+    }
+  ],
+  "event_forecast": {
+    "description": "Predict the tier at the final CDM (< 1 day to TCA) from the latest CDM issued >= 2 days before TCA (the moment a manoeuvre must be planned). Train events meeting the Kelvins test-set constraints; grouped 5-fold CV. test_data has no final CDMs so this cannot be scored on test.",
+    "n_events": 1600,
+    "final_tier_counts": [
+      1172,
+      319,
+      109
+    ],
+    "persistence_true_current_tier": {
+      "macro_f1": 0.8737,
+      "f2_critical": 0.8559,
+      "f2_elevated_or_worse": 0.916,
+      "accuracy": 0.9269,
+      "recall": [
+        0.9582,
+        0.8307,
+        0.8716
+      ],
+      "precision": [
+        0.9715,
+        0.8154,
+        0.7983
+      ],
+      "missed_critical": 14,
+      "critical_called_safe": 2,
+      "false_alarms_critical": 24,
+      "confusion": [
+        [
+          1123,
+          48,
+          1
+        ],
+        [
+          31,
+          265,
+          23
+        ],
+        [
+          2,
+          12,
+          95
+        ]
+      ],
+      "n": 1600
+    },
+    "persistence_model_current_tier": {
+      "macro_f1": 0.8726,
+      "f2_critical": 0.8559,
+      "f2_elevated_or_worse": 0.9112,
+      "accuracy": 0.9263,
+      "recall": [
+        0.9599,
+        0.8213,
+        0.8716
+      ],
+      "precision": [
+        0.969,
+        0.8187,
+        0.7983
+      ],
+      "missed_critical": 14,
+      "critical_called_safe": 2,
+      "false_alarms_critical": 24,
+      "confusion": [
+        [
+          1125,
+          46,
+          1
+        ],
+        [
+          34,
+          262,
+          23
+        ],
+        [
+          2,
+          12,
+          95
+        ]
+      ],
+      "n": 1600
+    },
+    "forecast_model": {
+      "macro_f1": 0.8602,
+      "f2_critical": 0.8152,
+      "f2_elevated_or_worse": 0.9194,
+      "accuracy": 0.9231,
+      "recall": [
+        0.9573,
+        0.8307,
+        0.8257
+      ],
+      "precision": [
+        0.9731,
+        0.8006,
+        0.7759
+      ],
+      "missed_critical": 19,
+      "critical_called_safe": 2,
+      "false_alarms_critical": 26,
+      "confusion": [
+        [
+          1122,
+          49,
+          1
+        ],
+        [
+          29,
+          265,
+          25
+        ],
+        [
+          2,
+          17,
+          90
+        ]
+      ],
+      "n": 1600
+    },
+    "note": "persistence_true_current_tier uses the CDM's own Pc (the Latest Risk Prediction baseline of Uriot et al.) and is shown as a reference only: it needs the `risk` column the brief excludes."
+  },
+  "screening_model": {
+    "description": "Trained on the CDM data restricted to inputs a TLE screening feed (CelesTrak SOCRATES) provides: miss distance, relative speed, max Pc, time to TCA, object type, F10.7, Ap.",
+    "test": {
+      "macro_f1": 0.9317,
+      "f2_critical": 0.9819,
+      "f2_elevated_or_worse": 0.9508,
+      "accuracy": 0.9239,
+      "recall": [
+        0.897,
+        0.9648,
+        0.9849
+      ],
+      "precision": [
+        0.9872,
+        0.8048,
+        0.9702
+      ],
+      "missed_critical": 6,
+      "critical_called_safe": 0,
+      "false_alarms_critical": 12,
+      "confusion": [
+        [
+          2551,
+          293,
+          0
+        ],
+        [
+          33,
+          1233,
+          12
+        ],
+        [
+          0,
+          6,
+          391
+        ]
+      ],
+      "n": 4519
+    }
+  },
+  "notes": [
+    "Ground truth tier = worst of Pc rule and miss-distance rule, computed from the CDM's own risk column.",
+    "The model never sees `risk`; it uses only the 13 allowed columns from the brief.",
+    "Thresholds are tuned on cross-validation (never on test) to maximise F2, i.e. recall-weighted.",
+    "Train/test differ by mission mix (Uriot et al. 2022, Sec. 4.5); CV-to-test gaps are expected.",
+    "Live SOCRATES conjunctions are TLE-based screening products without covariance: the live tier is screening-grade and must be confirmed with CSpOC CDMs before any manoeuvre decision."
+  ],
+  "runtime_s": 69.3
+}

@@ -1,0 +1,551 @@
+{
+ "event_id": 48,
+ "cdms": [
+  {
+   "time_to_tca": 6.756054,
+   "miss_distance": 16338.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -239.4,
+   "relative_position_t": -6436.1,
+   "relative_position_n": -15015.8,
+   "relative_velocity_r": 8.6,
+   "relative_velocity_t": -12678.7,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 78.059349,
+   "t_sigma_r": 4.249201,
+   "max_risk_estimate": -6.282912,
+   "F10": 84.0,
+   "AP": 8.0,
+   "true_log_pc": -7.550367,
+   "assessment": {
+    "log_pc": -11.576991,
+    "log_pc_lo": -16.208697,
+    "log_pc_hi": -7.888722,
+    "p_pc_elevated": 0.000825,
+    "p_pc_critical": 8.2e-05,
+    "p_tier": [
+     0.999175,
+     0.000743,
+     8.2e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 16.34 km >= 5 km (rule satisfied)",
+     "Estimated Pc 2.6e-12 (80% interval 6.2e-17 to 1.3e-08)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 6.389797,
+   "miss_distance": 6060.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -286.9,
+   "relative_position_t": -2381.5,
+   "relative_position_n": -5565.4,
+   "relative_velocity_r": 4.4,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 76.618314,
+   "t_sigma_r": 10.229829,
+   "max_risk_estimate": -5.978811,
+   "F10": 79.0,
+   "AP": 3.0,
+   "true_log_pc": -8.615826,
+   "assessment": {
+    "log_pc": -9.157448,
+    "log_pc_lo": -13.788042,
+    "log_pc_hi": -8.568637,
+    "p_pc_elevated": 0.003485,
+    "p_pc_critical": 7.7e-05,
+    "p_tier": [
+     0.996515,
+     0.003407,
+     7.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 6.06 km >= 5 km (rule satisfied)",
+     "Estimated Pc 7.0e-10 (80% interval 1.6e-14 to 2.7e-09)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 6.164275,
+   "miss_distance": 4484.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -282.5,
+   "relative_position_t": -1763.8,
+   "relative_position_n": -4113.8,
+   "relative_velocity_r": 3.8,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 76.606397,
+   "t_sigma_r": 6.466136,
+   "max_risk_estimate": -5.943095,
+   "F10": 79.0,
+   "AP": 3.0,
+   "true_log_pc": -8.093288,
+   "assessment": {
+    "log_pc": -9.058047,
+    "log_pc_lo": -14.857875,
+    "log_pc_hi": -8.317295,
+    "p_pc_elevated": 0.003999,
+    "p_pc_critical": 8.1e-05,
+    "p_tier": [
+     0.0,
+     0.999919,
+     8.1e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 4.48 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 8.7e-10 (80% interval 1.4e-15 to 4.8e-09)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 5.784322,
+   "miss_distance": 4744.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -284.3,
+   "relative_position_t": -1862.9,
+   "relative_position_n": -4353.8,
+   "relative_velocity_r": 3.9,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 76.595783,
+   "t_sigma_r": 2.617555,
+   "max_risk_estimate": -5.950007,
+   "F10": 79.0,
+   "AP": 3.0,
+   "true_log_pc": -8.205582,
+   "assessment": {
+    "log_pc": -12.304297,
+    "log_pc_lo": -20.113178,
+    "log_pc_hi": -8.848681,
+    "p_pc_elevated": 0.002263,
+    "p_pc_critical": 8.2e-05,
+    "p_tier": [
+     0.0,
+     0.999918,
+     8.2e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 4.74 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 5.0e-13 (80% interval 7.7e-21 to 1.4e-09)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 5.020051,
+   "miss_distance": 4675.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -286.3,
+   "relative_position_t": -1840.2,
+   "relative_position_n": -4289.1,
+   "relative_velocity_r": 3.9,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 76.635312,
+   "t_sigma_r": 1.766965,
+   "max_risk_estimate": -5.957031,
+   "F10": 76.0,
+   "AP": 3.0,
+   "true_log_pc": -8.247567,
+   "assessment": {
+    "log_pc": -12.164852,
+    "log_pc_lo": -24.331269,
+    "log_pc_hi": -9.009941,
+    "p_pc_elevated": 0.001896,
+    "p_pc_critical": 8.2e-05,
+    "p_tier": [
+     0.0,
+     0.999918,
+     8.2e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 4.67 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 6.8e-13 (80% interval 4.7e-25 to 9.8e-10)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 4.704796,
+   "miss_distance": 4636.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -286.5,
+   "relative_position_t": -1821.0,
+   "relative_position_n": -4254.6,
+   "relative_velocity_r": 3.9,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 76.643004,
+   "t_sigma_r": 1.645308,
+   "max_risk_estimate": -5.957424,
+   "F10": 76.0,
+   "AP": 3.0,
+   "true_log_pc": -8.244735,
+   "assessment": {
+    "log_pc": -12.499008,
+    "log_pc_lo": -25.236753,
+    "log_pc_hi": -9.004885,
+    "p_pc_elevated": 0.001852,
+    "p_pc_critical": 8.2e-05,
+    "p_tier": [
+     0.0,
+     0.999918,
+     8.2e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 4.64 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 3.2e-13 (80% interval 5.8e-26 to 9.9e-10)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 4.475826,
+   "miss_distance": 4712.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -286.4,
+   "relative_position_t": -1855.8,
+   "relative_position_n": -4322.4,
+   "relative_velocity_r": 3.9,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 76.635579,
+   "t_sigma_r": 1.643369,
+   "max_risk_estimate": -5.957818,
+   "F10": 76.0,
+   "AP": 3.0,
+   "true_log_pc": -8.259479,
+   "assessment": {
+    "log_pc": -12.573182,
+    "log_pc_lo": -26.326007,
+    "log_pc_hi": -9.004885,
+    "p_pc_elevated": 0.001852,
+    "p_pc_critical": 8.2e-05,
+    "p_tier": [
+     0.0,
+     0.999918,
+     8.2e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 4.71 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.7e-13 (80% interval 4.7e-27 to 9.9e-10)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 4.05438,
+   "miss_distance": 5087.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -271.6,
+   "relative_position_t": -2003.2,
+   "relative_position_n": -4668.6,
+   "relative_velocity_r": 4.0,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 62.175815,
+   "t_sigma_r": 1.551554,
+   "max_risk_estimate": -5.837734,
+   "F10": 72.0,
+   "AP": 1.0,
+   "true_log_pc": -11.275806,
+   "assessment": {
+    "log_pc": -18.170164,
+    "log_pc_lo": -29.483458,
+    "log_pc_hi": -10.305374,
+    "p_pc_elevated": 0.002531,
+    "p_pc_critical": 7.7e-05,
+    "p_tier": [
+     0.997469,
+     0.002454,
+     7.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 5.09 km >= 5 km (rule satisfied)",
+     "Estimated Pc 6.8e-19 (80% interval 3.3e-30 to 5.0e-11)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 3.663164,
+   "miss_distance": 5237.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -272.0,
+   "relative_position_t": -2062.9,
+   "relative_position_n": -4806.5,
+   "relative_velocity_r": 4.1,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 62.179764,
+   "t_sigma_r": 3.377724,
+   "max_risk_estimate": -5.84863,
+   "F10": 72.0,
+   "AP": 1.0,
+   "true_log_pc": -11.398918,
+   "assessment": {
+    "log_pc": -18.499828,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -10.315259,
+    "p_pc_elevated": 0.002128,
+    "p_pc_critical": 7.7e-05,
+    "p_tier": [
+     0.997872,
+     0.002051,
+     7.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 5.24 km >= 5 km (rule satisfied)",
+     "Estimated Pc 3.2e-19 (80% interval ~0 to 4.8e-11)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 3.42379,
+   "miss_distance": 5397.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -270.8,
+   "relative_position_t": -2123.1,
+   "relative_position_n": -4955.4,
+   "relative_velocity_r": 4.2,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 62.157453,
+   "t_sigma_r": 3.312039,
+   "max_risk_estimate": -5.852942,
+   "F10": 71.0,
+   "AP": 2.0,
+   "true_log_pc": -11.620151,
+   "assessment": {
+    "log_pc": -20.976111,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -10.351366,
+    "p_pc_elevated": 0.001956,
+    "p_pc_critical": 7.7e-05,
+    "p_tier": [
+     0.998044,
+     0.001878,
+     7.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 5.40 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.1e-21 (80% interval ~0 to 4.5e-11)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 3.090885,
+   "miss_distance": 5464.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -270.7,
+   "relative_position_t": -2145.6,
+   "relative_position_n": -5017.9,
+   "relative_velocity_r": 4.2,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 62.209798,
+   "t_sigma_r": 2.918161,
+   "max_risk_estimate": -5.858864,
+   "F10": 71.0,
+   "AP": 2.0,
+   "true_log_pc": -11.785686,
+   "assessment": {
+    "log_pc": -21.933794,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -10.417581,
+    "p_pc_elevated": 0.00188,
+    "p_pc_critical": 7.7e-05,
+    "p_tier": [
+     0.99812,
+     0.001803,
+     7.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 5.46 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.2e-22 (80% interval ~0 to 3.8e-11)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 2.796348,
+   "miss_distance": 5583.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -270.9,
+   "relative_position_t": -2196.8,
+   "relative_position_n": -5125.8,
+   "relative_velocity_r": 4.2,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 62.194566,
+   "t_sigma_r": 2.735566,
+   "max_risk_estimate": -5.864549,
+   "F10": 71.0,
+   "AP": 2.0,
+   "true_log_pc": -12.004935,
+   "assessment": {
+    "log_pc": -22.862035,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -10.995821,
+    "p_pc_elevated": 0.001841,
+    "p_pc_critical": 7.7e-05,
+    "p_tier": [
+     0.998159,
+     0.001763,
+     7.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 5.58 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.4e-23 (80% interval ~0 to 1.0e-11)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 2.448119,
+   "miss_distance": 5726.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -271.7,
+   "relative_position_t": -2251.2,
+   "relative_position_n": -5258.0,
+   "relative_velocity_r": 4.3,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 62.167202,
+   "t_sigma_r": 2.956768,
+   "max_risk_estimate": -5.872895,
+   "F10": 69.0,
+   "AP": 28.0,
+   "true_log_pc": -12.319846,
+   "assessment": {
+    "log_pc": -24.508655,
+    "log_pc_lo": -29.995379,
+    "log_pc_hi": -11.017063,
+    "p_pc_elevated": 0.001775,
+    "p_pc_critical": 8e-05,
+    "p_tier": [
+     0.998225,
+     0.001695,
+     8e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 5.73 km >= 5 km (rule satisfied)",
+     "Estimated Pc 3.1e-25 (80% interval ~0 to 9.6e-12)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   }
+  },
+  {
+   "time_to_tca": 2.132633,
+   "miss_distance": 5868.0,
+   "relative_speed": 13793.0,
+   "relative_position_r": -271.4,
+   "relative_position_t": -2308.8,
+   "relative_position_n": -5388.6,
+   "relative_velocity_r": 4.4,
+   "relative_velocity_t": -12678.8,
+   "relative_velocity_n": 5431.6,
+   "c_object_type": "DEBRIS",
+   "c_sigma_r": 62.141838,
+   "t_sigma_r": 2.703113,
+   "max_risk_estimate": -5.879097,
+   "F10": 69.0,
+   "AP": 28.0,
+   "true_log_pc": -12.610834,
+   "assessment": {
+    "log_pc": -26.986401,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -11.418034,
+    "p_pc_elevated": 0.001605,
+    "p_pc_critical": 8e-05,
+    "p_tier": [
+     0.998395,
+     0.001525,
+     8e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 5.87 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.0e-27 (80% interval ~0 to 3.8e-12)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,5466 @@
+{
+ "events": [
+  {
+   "event_id": 1,
+   "n_cdms": 2,
+   "time_to_tca": 2.129518,
+   "miss_distance": 935.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -10.91294,
+    "log_pc_lo": -18.066306,
+    "log_pc_hi": -8.911508,
+    "p_pc_elevated": 0.002532,
+    "p_pc_critical": 0.000112,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.94 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.2e-11 (80% interval 8.6e-19 to 1.2e-09)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -7.933674,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 8,
+   "n_cdms": 5,
+   "time_to_tca": 2.222298,
+   "miss_distance": 5891.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -5.777507,
+    "log_pc_lo": -16.596647,
+    "log_pc_hi": -4.985401,
+    "p_pc_elevated": 0.892897,
+    "p_pc_critical": 8.3e-05,
+    "p_tier": [
+     0.107103,
+     0.892814,
+     8.3e-05
+    ],
+    "md_tier": 0,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 5.89 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.7e-06 (80% interval 2.5e-17 to 1.0e-05)",
+     "P(Pc >= 1e-6) = 89% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -6.375718,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.107103,
+     0.892814,
+     8.3e-05
+    ]
+   }
+  },
+  {
+   "event_id": 38,
+   "n_cdms": 6,
+   "time_to_tca": 2.224508,
+   "miss_distance": 6325.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -15.093831,
+    "log_pc_lo": -21.884693,
+    "log_pc_hi": -7.257759,
+    "p_pc_elevated": 0.531017,
+    "p_pc_critical": 0.000105,
+    "p_tier": [
+     0.468983,
+     0.530912,
+     0.000105
+    ],
+    "md_tier": 0,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 6.33 km >= 5 km (rule satisfied)",
+     "Estimated Pc 8.1e-16 (80% interval 1.3e-22 to 5.5e-08)",
+     "P(Pc >= 1e-6) = 53% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -7.427361,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.468983,
+     0.530912,
+     0.000105
+    ]
+   }
+  },
+  {
+   "event_id": 48,
+   "n_cdms": 14,
+   "time_to_tca": 2.132633,
+   "miss_distance": 5868.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -26.986401,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -11.418034,
+    "p_pc_elevated": 0.001605,
+    "p_pc_critical": 8e-05,
+    "p_tier": [
+     0.998395,
+     0.001525,
+     8e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 5.87 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.0e-27 (80% interval ~0 to 3.8e-12)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -12.610834,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.998395,
+     0.001525,
+     8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 52,
+   "n_cdms": 5,
+   "time_to_tca": 2.693895,
+   "miss_distance": 10637.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -8.445359,
+    "log_pc_lo": -21.202756,
+    "log_pc_hi": -5.311614,
+    "p_pc_elevated": 0.704352,
+    "p_pc_critical": 8.4e-05,
+    "p_tier": [
+     0.295648,
+     0.704269,
+     8.4e-05
+    ],
+    "md_tier": 0,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 10.64 km >= 5 km (rule satisfied)",
+     "Estimated Pc 3.6e-09 (80% interval 6.3e-22 to 4.9e-06)",
+     "P(Pc >= 1e-6) = 70% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -7.957424,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.295648,
+     0.704269,
+     8.4e-05
+    ]
+   }
+  },
+  {
+   "event_id": 59,
+   "n_cdms": 15,
+   "time_to_tca": 2.08804,
+   "miss_distance": 16199.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -25.184792,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -15.079412,
+    "p_pc_elevated": 0.000738,
+    "p_pc_critical": 7.7e-05,
+    "p_tier": [
+     0.999262,
+     0.000661,
+     7.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 16.20 km >= 5 km (rule satisfied)",
+     "Estimated Pc 6.5e-26 (80% interval ~0 to 8.3e-16)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999262,
+     0.000661,
+     7.7e-05
+    ]
+   }
+  },
+  {
+   "event_id": 78,
+   "n_cdms": 15,
+   "time_to_tca": 2.273503,
+   "miss_distance": 8242.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -27.38955,
+    "p_pc_elevated": 0.000968,
+    "p_pc_critical": 8.1e-05,
+    "p_tier": [
+     0.999032,
+     0.000888,
+     8.1e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 8.24 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 4.1e-28)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999032,
+     0.000888,
+     8.1e-05
+    ]
+   }
+  },
+  {
+   "event_id": 82,
+   "n_cdms": 14,
+   "time_to_tca": 2.191524,
+   "miss_distance": 5269.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -6.303251,
+    "log_pc_lo": -22.50705,
+    "log_pc_hi": -5.21726,
+    "p_pc_elevated": 0.694655,
+    "p_pc_critical": 8.2e-05,
+    "p_tier": [
+     0.305345,
+     0.694573,
+     8.2e-05
+    ],
+    "md_tier": 0,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 5.27 km >= 5 km (rule satisfied)",
+     "Estimated Pc 5.0e-07 (80% interval 3.1e-23 to 6.1e-06)",
+     "P(Pc >= 1e-6) = 69% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -11.235525,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.305345,
+     0.694573,
+     8.2e-05
+    ]
+   }
+  },
+  {
+   "event_id": 96,
+   "n_cdms": 4,
+   "time_to_tca": 3.964611,
+   "miss_distance": 2419.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -7.543932,
+    "log_pc_lo": -13.30659,
+    "log_pc_hi": -6.183831,
+    "p_pc_elevated": 0.468243,
+    "p_pc_critical": 0.000118,
+    "p_tier": [
+     0.0,
+     0.999882,
+     0.000118
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.42 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.9e-08 (80% interval 4.9e-14 to 6.5e-07)",
+     "P(Pc >= 1e-6) = 47% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -9.263524,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999882,
+     0.000118
+    ]
+   }
+  },
+  {
+   "event_id": 107,
+   "n_cdms": 14,
+   "time_to_tca": 2.329717,
+   "miss_distance": 1226.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -5.47482,
+    "log_pc_lo": -7.757056,
+    "log_pc_hi": -4.170077,
+    "p_pc_elevated": 0.916074,
+    "p_pc_critical": 0.004205,
+    "p_tier": [
+     0.0,
+     0.995795,
+     0.004205
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.23 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 3.4e-06 (80% interval 1.7e-08 to 6.8e-05)",
+     "P(Pc >= 1e-6) = 92% >= decision threshold 11% -> Elevated",
+     "Worst-case Pc bound 1.2e-04 >= 1e-4: Critical cannot be ruled out -> analyst review required",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -3.93968,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.995795,
+     0.004205
+    ]
+   }
+  },
+  {
+   "event_id": 109,
+   "n_cdms": 10,
+   "time_to_tca": 3.135289,
+   "miss_distance": 226.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -5.966756,
+    "log_pc_lo": -10.880826,
+    "log_pc_hi": -5.362536,
+    "p_pc_elevated": 0.83562,
+    "p_pc_critical": 0.0004,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.23 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.1e-06 (80% interval 1.3e-11 to 4.3e-06)",
+     "P(Pc >= 1e-6) = 84% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -5.575445,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 116,
+   "n_cdms": 13,
+   "time_to_tca": 2.229325,
+   "miss_distance": 11555.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -29.221825,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -24.818819,
+    "p_pc_elevated": 0.000743,
+    "p_pc_critical": 7.7e-05,
+    "p_tier": [
+     0.999257,
+     0.000666,
+     7.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 11.55 km >= 5 km (rule satisfied)",
+     "Estimated Pc 6.0e-30 (80% interval ~0 to 1.5e-25)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -29.316143,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999257,
+     0.000666,
+     7.7e-05
+    ]
+   }
+  },
+  {
+   "event_id": 121,
+   "n_cdms": 2,
+   "time_to_tca": 2.28611,
+   "miss_distance": 4281.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -18.125056,
+    "log_pc_lo": -28.928069,
+    "log_pc_hi": -7.462442,
+    "p_pc_elevated": 0.001396,
+    "p_pc_critical": 0.000102,
+    "p_tier": [
+     0.0,
+     0.999898,
+     0.000102
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 4.28 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 7.5e-19 (80% interval 1.2e-29 to 3.4e-08)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -8.91151,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999898,
+     0.000102
+    ]
+   }
+  },
+  {
+   "event_id": 123,
+   "n_cdms": 15,
+   "time_to_tca": 2.187236,
+   "miss_distance": 8268.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -30.0,
+    "p_pc_elevated": 0.000739,
+    "p_pc_critical": 7.9e-05,
+    "p_tier": [
+     0.999261,
+     0.00066,
+     7.9e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 8.27 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to ~0)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999261,
+     0.00066,
+     7.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 125,
+   "n_cdms": 6,
+   "time_to_tca": 2.100318,
+   "miss_distance": 10717.0,
+   "c_object_type": "PAYLOAD",
+   "assessment": {
+    "log_pc": -14.247785,
+    "log_pc_lo": -15.054097,
+    "log_pc_hi": -13.263603,
+    "p_pc_elevated": 0.000943,
+    "p_pc_critical": 8.9e-05,
+    "p_tier": [
+     0.999057,
+     0.000854,
+     8.9e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 10.72 km >= 5 km (rule satisfied)",
+     "Estimated Pc 5.7e-15 (80% interval 8.8e-16 to 5.5e-14)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -14.295592,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999057,
+     0.000854,
+     8.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 126,
+   "n_cdms": 15,
+   "time_to_tca": 2.317391,
+   "miss_distance": 13680.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -22.51701,
+    "log_pc_lo": -26.801488,
+    "log_pc_hi": -8.975724,
+    "p_pc_elevated": 0.19212,
+    "p_pc_critical": 9.1e-05,
+    "p_tier": [
+     0.80788,
+     0.192029,
+     9.1e-05
+    ],
+    "md_tier": 0,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 13.68 km >= 5 km (rule satisfied)",
+     "Estimated Pc 3.0e-23 (80% interval 1.6e-27 to 1.1e-09)",
+     "P(Pc >= 1e-6) = 19% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -27.241239,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.80788,
+     0.192029,
+     9.1e-05
+    ]
+   }
+  },
+  {
+   "event_id": 166,
+   "n_cdms": 12,
+   "time_to_tca": 2.171807,
+   "miss_distance": 19291.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -29.96323,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -26.118787,
+    "p_pc_elevated": 0.00086,
+    "p_pc_critical": 9.6e-05,
+    "p_tier": [
+     0.99914,
+     0.000764,
+     9.6e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 19.29 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 7.6e-27)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.99914,
+     0.000764,
+     9.6e-05
+    ]
+   }
+  },
+  {
+   "event_id": 185,
+   "n_cdms": 12,
+   "time_to_tca": 2.06086,
+   "miss_distance": 1025.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -12.578348,
+    "log_pc_lo": -18.949684,
+    "log_pc_hi": -12.017269,
+    "p_pc_elevated": 0.000944,
+    "p_pc_critical": 9e-05,
+    "p_tier": [
+     0.0,
+     0.99991,
+     9e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 1.02 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.6e-13 (80% interval 1.1e-19 to 9.6e-13)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -12.255707,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.99991,
+     9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 218,
+   "n_cdms": 14,
+   "time_to_tca": 2.140343,
+   "miss_distance": 1338.0,
+   "c_object_type": "PAYLOAD",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -26.715741,
+    "p_pc_elevated": 0.000793,
+    "p_pc_critical": 8.4e-05,
+    "p_tier": [
+     0.0,
+     0.999916,
+     8.4e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 1.34 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc ~0 (80% interval ~0 to 1.9e-27)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999916,
+     8.4e-05
+    ]
+   }
+  },
+  {
+   "event_id": 224,
+   "n_cdms": 14,
+   "time_to_tca": 2.041639,
+   "miss_distance": 18169.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -18.732735,
+    "log_pc_lo": -29.741133,
+    "log_pc_hi": -8.988365,
+    "p_pc_elevated": 0.012394,
+    "p_pc_critical": 8.6e-05,
+    "p_tier": [
+     0.987606,
+     0.012308,
+     8.6e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 18.17 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.9e-19 (80% interval 1.8e-30 to 1.0e-09)",
+     "P(Pc >= 1e-6) = 1% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -5.960586,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.987606,
+     0.012308,
+     8.6e-05
+    ]
+   }
+  },
+  {
+   "event_id": 226,
+   "n_cdms": 14,
+   "time_to_tca": 2.129059,
+   "miss_distance": 8593.0,
+   "c_object_type": "PAYLOAD",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -25.038213,
+    "p_pc_elevated": 0.001929,
+    "p_pc_critical": 8.3e-05,
+    "p_tier": [
+     0.998071,
+     0.001846,
+     8.3e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 8.59 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 9.2e-26)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.998071,
+     0.001846,
+     8.3e-05
+    ]
+   }
+  },
+  {
+   "event_id": 260,
+   "n_cdms": 12,
+   "time_to_tca": 2.178718,
+   "miss_distance": 634.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -26.392893,
+    "p_pc_elevated": 0.000848,
+    "p_pc_critical": 9e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.63 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc ~0 (80% interval ~0 to 4.0e-27)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 261,
+   "n_cdms": 15,
+   "time_to_tca": 2.0681,
+   "miss_distance": 302.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -5.879003,
+    "log_pc_lo": -8.020029,
+    "log_pc_hi": -5.603786,
+    "p_pc_elevated": 0.832244,
+    "p_pc_critical": 0.000102,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.30 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.3e-06 (80% interval 9.5e-09 to 2.5e-06)",
+     "P(Pc >= 1e-6) = 83% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -5.65189,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 268,
+   "n_cdms": 15,
+   "time_to_tca": 2.138256,
+   "miss_distance": 8225.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -25.209393,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -10.55013,
+    "p_pc_elevated": 0.010768,
+    "p_pc_critical": 8.5e-05,
+    "p_tier": [
+     0.989232,
+     0.010683,
+     8.5e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 8.22 km >= 5 km (rule satisfied)",
+     "Estimated Pc 6.2e-26 (80% interval ~0 to 2.8e-11)",
+     "P(Pc >= 1e-6) = 1% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.989232,
+     0.010683,
+     8.5e-05
+    ]
+   }
+  },
+  {
+   "event_id": 280,
+   "n_cdms": 15,
+   "time_to_tca": 2.084064,
+   "miss_distance": 2227.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -10.306226,
+    "log_pc_lo": -25.137945,
+    "log_pc_hi": -6.660051,
+    "p_pc_elevated": 0.002441,
+    "p_pc_critical": 8.4e-05,
+    "p_tier": [
+     0.0,
+     0.999916,
+     8.4e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.23 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 4.9e-11 (80% interval 7.3e-26 to 2.2e-07)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -7.155399,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999916,
+     8.4e-05
+    ]
+   }
+  },
+  {
+   "event_id": 294,
+   "n_cdms": 16,
+   "time_to_tca": 2.119022,
+   "miss_distance": 3624.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -12.601855,
+    "log_pc_lo": -27.820423,
+    "log_pc_hi": -8.451206,
+    "p_pc_elevated": 0.02146,
+    "p_pc_critical": 8e-05,
+    "p_tier": [
+     0.0,
+     0.99992,
+     8e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 3.62 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.5e-13 (80% interval 1.5e-28 to 3.5e-09)",
+     "P(Pc >= 1e-6) = 2% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -7.360912,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.99992,
+     8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 318,
+   "n_cdms": 14,
+   "time_to_tca": 2.22977,
+   "miss_distance": 13284.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -8.028024,
+    "log_pc_lo": -25.706461,
+    "log_pc_hi": -5.92741,
+    "p_pc_elevated": 0.240677,
+    "p_pc_critical": 8.1e-05,
+    "p_tier": [
+     0.759323,
+     0.240596,
+     8.1e-05
+    ],
+    "md_tier": 0,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 13.28 km >= 5 km (rule satisfied)",
+     "Estimated Pc 9.4e-09 (80% interval 2.0e-26 to 1.2e-06)",
+     "P(Pc >= 1e-6) = 24% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -8.478208,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.759323,
+     0.240596,
+     8.1e-05
+    ]
+   }
+  },
+  {
+   "event_id": 384,
+   "n_cdms": 14,
+   "time_to_tca": 2.321679,
+   "miss_distance": 336.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -6.788454,
+    "log_pc_lo": -7.806278,
+    "log_pc_hi": -5.831784,
+    "p_pc_elevated": 0.484021,
+    "p_pc_critical": 0.000228,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.34 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.6e-07 (80% interval 1.6e-08 to 1.5e-06)",
+     "P(Pc >= 1e-6) = 48% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -5.729787,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 392,
+   "n_cdms": 14,
+   "time_to_tca": 2.549073,
+   "miss_distance": 12100.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -7.195949,
+    "log_pc_lo": -22.701916,
+    "log_pc_hi": -4.883898,
+    "p_pc_elevated": 0.694315,
+    "p_pc_critical": 8e-05,
+    "p_tier": [
+     0.305685,
+     0.694235,
+     8e-05
+    ],
+    "md_tier": 0,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 12.10 km >= 5 km (rule satisfied)",
+     "Estimated Pc 6.4e-08 (80% interval 2.0e-23 to 1.3e-05)",
+     "P(Pc >= 1e-6) = 69% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -14.278849,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.305685,
+     0.694235,
+     8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 418,
+   "n_cdms": 1,
+   "time_to_tca": 2.565218,
+   "miss_distance": 872.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -10.402604,
+    "log_pc_lo": -23.583605,
+    "log_pc_hi": -4.743326,
+    "p_pc_elevated": 0.886639,
+    "p_pc_critical": 0.000192,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.87 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 4.0e-11 (80% interval 2.6e-24 to 1.8e-05)",
+     "P(Pc >= 1e-6) = 89% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -4.844968,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 449,
+   "n_cdms": 15,
+   "time_to_tca": 2.132755,
+   "miss_distance": 1855.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -6.402281,
+    "log_pc_lo": -8.57406,
+    "log_pc_hi": -6.128031,
+    "p_pc_elevated": 0.529155,
+    "p_pc_critical": 9.8e-05,
+    "p_tier": [
+     0.0,
+     0.999902,
+     9.8e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 1.85 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 4.0e-07 (80% interval 2.7e-09 to 7.4e-07)",
+     "P(Pc >= 1e-6) = 53% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -6.993962,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999902,
+     9.8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 457,
+   "n_cdms": 6,
+   "time_to_tca": 2.211948,
+   "miss_distance": 26637.0,
+   "c_object_type": "ROCKET BODY",
+   "assessment": {
+    "log_pc": -29.99631,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -29.873142,
+    "p_pc_elevated": 0.000739,
+    "p_pc_critical": 7.9e-05,
+    "p_tier": [
+     0.999261,
+     0.00066,
+     7.9e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 26.64 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 1.3e-30)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999261,
+     0.00066,
+     7.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 475,
+   "n_cdms": 15,
+   "time_to_tca": 2.208745,
+   "miss_distance": 3652.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -25.803082,
+    "p_pc_elevated": 0.000977,
+    "p_pc_critical": 8.1e-05,
+    "p_tier": [
+     0.0,
+     0.999919,
+     8.1e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 3.65 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc ~0 (80% interval ~0 to 1.6e-26)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999919,
+     8.1e-05
+    ]
+   }
+  },
+  {
+   "event_id": 482,
+   "n_cdms": 6,
+   "time_to_tca": 2.001545,
+   "miss_distance": 601.0,
+   "c_object_type": "PAYLOAD",
+   "assessment": {
+    "log_pc": -13.082783,
+    "log_pc_lo": -14.399358,
+    "log_pc_hi": -10.471124,
+    "p_pc_elevated": 0.077046,
+    "p_pc_critical": 0.000127,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.60 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 8.3e-14 (80% interval 4.0e-15 to 3.4e-11)",
+     "P(Pc >= 1e-6) = 8% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -14.295592,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 509,
+   "n_cdms": 13,
+   "time_to_tca": 2.352352,
+   "miss_distance": 13903.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -29.463949,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -22.182206,
+    "p_pc_elevated": 0.000969,
+    "p_pc_critical": 7.9e-05,
+    "p_tier": [
+     0.999031,
+     0.00089,
+     7.9e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 13.90 km >= 5 km (rule satisfied)",
+     "Estimated Pc 3.4e-30 (80% interval ~0 to 6.6e-23)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999031,
+     0.00089,
+     7.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 512,
+   "n_cdms": 15,
+   "time_to_tca": 2.163176,
+   "miss_distance": 110.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -6.294537,
+    "log_pc_lo": -16.413705,
+    "log_pc_hi": -4.833041,
+    "p_pc_elevated": 0.612174,
+    "p_pc_critical": 0.476318,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.11 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 5.1e-07 (80% interval 3.9e-17 to 1.5e-05)",
+     "P(Pc >= 1e-4) = 48% >= decision threshold 6% -> Critical",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -3.835053,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 526,
+   "n_cdms": 6,
+   "time_to_tca": 2.202646,
+   "miss_distance": 557.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -27.476502,
+    "p_pc_elevated": 0.000795,
+    "p_pc_critical": 8.1e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.56 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc ~0 (80% interval ~0 to 3.3e-28)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 539,
+   "n_cdms": 6,
+   "time_to_tca": 2.27349,
+   "miss_distance": 746.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -27.701477,
+    "log_pc_lo": -29.417731,
+    "log_pc_hi": -25.291553,
+    "p_pc_elevated": 0.002181,
+    "p_pc_critical": 0.000568,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.75 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 2.0e-28 (80% interval 3.8e-30 to 5.1e-26)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 591,
+   "n_cdms": 3,
+   "time_to_tca": 2.12913,
+   "miss_distance": 549.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -5.997706,
+    "log_pc_lo": -9.421468,
+    "log_pc_hi": -5.605409,
+    "p_pc_elevated": 0.800716,
+    "p_pc_critical": 0.000105,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.55 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.0e-06 (80% interval 3.8e-10 to 2.5e-06)",
+     "P(Pc >= 1e-6) = 80% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -5.727694,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 673,
+   "n_cdms": 15,
+   "time_to_tca": 2.031831,
+   "miss_distance": 7231.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -14.53211,
+    "log_pc_lo": -27.164246,
+    "log_pc_hi": -12.129593,
+    "p_pc_elevated": 0.000837,
+    "p_pc_critical": 8.3e-05,
+    "p_tier": [
+     0.999163,
+     0.000754,
+     8.3e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 7.23 km >= 5 km (rule satisfied)",
+     "Estimated Pc 2.9e-15 (80% interval 6.9e-28 to 7.4e-13)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -14.982549,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999163,
+     0.000754,
+     8.3e-05
+    ]
+   }
+  },
+  {
+   "event_id": 677,
+   "n_cdms": 16,
+   "time_to_tca": 2.059577,
+   "miss_distance": 7029.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -16.401308,
+    "log_pc_lo": -26.664183,
+    "log_pc_hi": -8.62202,
+    "p_pc_elevated": 0.014261,
+    "p_pc_critical": 8e-05,
+    "p_tier": [
+     0.985739,
+     0.01418,
+     8e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 7.03 km >= 5 km (rule satisfied)",
+     "Estimated Pc 4.0e-17 (80% interval 2.2e-27 to 2.4e-09)",
+     "P(Pc >= 1e-6) = 1% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -5.473273,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.985739,
+     0.01418,
+     8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 694,
+   "n_cdms": 2,
+   "time_to_tca": 3.621124,
+   "miss_distance": 4015.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -17.664286,
+    "log_pc_lo": -29.144884,
+    "log_pc_hi": -13.310531,
+    "p_pc_elevated": 0.000752,
+    "p_pc_critical": 8.1e-05,
+    "p_tier": [
+     0.0,
+     0.999919,
+     8.1e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 4.01 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.2e-18 (80% interval 7.2e-30 to 4.9e-14)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -14.420903,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999919,
+     8.1e-05
+    ]
+   }
+  },
+  {
+   "event_id": 708,
+   "n_cdms": 14,
+   "time_to_tca": 2.143539,
+   "miss_distance": 981.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -11.264535,
+    "log_pc_lo": -15.831658,
+    "log_pc_hi": -10.594692,
+    "p_pc_elevated": 0.00099,
+    "p_pc_critical": 8.7e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.98 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 5.4e-12 (80% interval 1.5e-16 to 2.5e-11)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -10.664141,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 736,
+   "n_cdms": 15,
+   "time_to_tca": 2.251087,
+   "miss_distance": 36017.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -29.055603,
+    "p_pc_elevated": 0.000739,
+    "p_pc_critical": 7.9e-05,
+    "p_tier": [
+     0.999261,
+     0.00066,
+     7.9e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 36.02 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 8.8e-30)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999261,
+     0.00066,
+     7.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 748,
+   "n_cdms": 3,
+   "time_to_tca": 4.870342,
+   "miss_distance": 926.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -13.079035,
+    "log_pc_lo": -25.187192,
+    "log_pc_hi": -8.085416,
+    "p_pc_elevated": 0.010251,
+    "p_pc_critical": 0.0001,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.93 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 8.3e-14 (80% interval 6.5e-26 to 8.2e-09)",
+     "P(Pc >= 1e-6) = 1% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -8.159455,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 755,
+   "n_cdms": 15,
+   "time_to_tca": 2.05517,
+   "miss_distance": 3460.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -25.360901,
+    "log_pc_lo": -29.86248,
+    "log_pc_hi": -18.079634,
+    "p_pc_elevated": 0.000745,
+    "p_pc_critical": 8.9e-05,
+    "p_tier": [
+     0.0,
+     0.999911,
+     8.9e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 3.46 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 4.4e-26 (80% interval 1.4e-30 to 8.3e-19)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -17.026272,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999911,
+     8.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 783,
+   "n_cdms": 15,
+   "time_to_tca": 2.028222,
+   "miss_distance": 43256.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -27.515465,
+    "p_pc_elevated": 0.000739,
+    "p_pc_critical": 7.9e-05,
+    "p_tier": [
+     0.999261,
+     0.00066,
+     7.9e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 43.26 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 3.1e-28)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999261,
+     0.00066,
+     7.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 785,
+   "n_cdms": 9,
+   "time_to_tca": 2.080348,
+   "miss_distance": 27342.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -10.325055,
+    "log_pc_lo": -28.853432,
+    "log_pc_hi": -7.324192,
+    "p_pc_elevated": 0.000811,
+    "p_pc_critical": 8.1e-05,
+    "p_tier": [
+     0.999189,
+     0.00073,
+     8.1e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 27.34 km >= 5 km (rule satisfied)",
+     "Estimated Pc 4.7e-11 (80% interval 1.4e-29 to 4.7e-08)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -7.614751,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999189,
+     0.00073,
+     8.1e-05
+    ]
+   }
+  },
+  {
+   "event_id": 786,
+   "n_cdms": 9,
+   "time_to_tca": 2.983987,
+   "miss_distance": 7684.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -9.284353,
+    "log_pc_lo": -19.239227,
+    "log_pc_hi": -7.502141,
+    "p_pc_elevated": 0.00137,
+    "p_pc_critical": 8.8e-05,
+    "p_tier": [
+     0.99863,
+     0.001283,
+     8.8e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 7.68 km >= 5 km (rule satisfied)",
+     "Estimated Pc 5.2e-10 (80% interval 5.8e-20 to 3.1e-08)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -8.315693,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.99863,
+     0.001283,
+     8.8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 807,
+   "n_cdms": 15,
+   "time_to_tca": 2.078726,
+   "miss_distance": 2185.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -6.603721,
+    "log_pc_lo": -9.563127,
+    "log_pc_hi": -5.716565,
+    "p_pc_elevated": 0.83589,
+    "p_pc_critical": 0.000133,
+    "p_tier": [
+     0.0,
+     0.999867,
+     0.000133
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.19 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.5e-07 (80% interval 2.7e-10 to 1.9e-06)",
+     "P(Pc >= 1e-6) = 84% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -6.097997,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999867,
+     0.000133
+    ]
+   }
+  },
+  {
+   "event_id": 810,
+   "n_cdms": 15,
+   "time_to_tca": 2.059621,
+   "miss_distance": 3026.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -26.64712,
+    "log_pc_lo": -29.803708,
+    "log_pc_hi": -16.164156,
+    "p_pc_elevated": 0.001616,
+    "p_pc_critical": 8.2e-05,
+    "p_tier": [
+     0.0,
+     0.999918,
+     8.2e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 3.03 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.3e-27 (80% interval 1.6e-30 to 6.9e-17)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999918,
+     8.2e-05
+    ]
+   }
+  },
+  {
+   "event_id": 830,
+   "n_cdms": 14,
+   "time_to_tca": 2.268489,
+   "miss_distance": 2552.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -21.877083,
+    "log_pc_lo": -29.430084,
+    "log_pc_hi": -10.996964,
+    "p_pc_elevated": 0.002524,
+    "p_pc_critical": 8.3e-05,
+    "p_tier": [
+     0.0,
+     0.999917,
+     8.3e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.55 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 1.3e-22 (80% interval 3.7e-30 to 1.0e-11)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -10.180654,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999917,
+     8.3e-05
+    ]
+   }
+  },
+  {
+   "event_id": 840,
+   "n_cdms": 14,
+   "time_to_tca": 2.337148,
+   "miss_distance": 2687.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -28.094297,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -20.25392,
+    "p_pc_elevated": 0.001483,
+    "p_pc_critical": 8.6e-05,
+    "p_tier": [
+     0.0,
+     0.999914,
+     8.6e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.69 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 8.0e-29 (80% interval ~0 to 5.6e-21)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999914,
+     8.6e-05
+    ]
+   }
+  },
+  {
+   "event_id": 868,
+   "n_cdms": 15,
+   "time_to_tca": 2.161659,
+   "miss_distance": 235.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -10.300446,
+    "log_pc_lo": -14.203007,
+    "log_pc_hi": -4.966082,
+    "p_pc_elevated": 0.607546,
+    "p_pc_critical": 0.29662,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.23 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 5.0e-11 (80% interval 6.3e-15 to 1.1e-05)",
+     "P(Pc >= 1e-4) = 30% >= decision threshold 6% -> Critical",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -3.511731,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 869,
+   "n_cdms": 15,
+   "time_to_tca": 2.162518,
+   "miss_distance": 27420.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -16.737836,
+    "p_pc_elevated": 0.00086,
+    "p_pc_critical": 8.2e-05,
+    "p_tier": [
+     0.99914,
+     0.000778,
+     8.2e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 27.42 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 1.8e-17)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.99914,
+     0.000778,
+     8.2e-05
+    ]
+   }
+  },
+  {
+   "event_id": 893,
+   "n_cdms": 4,
+   "time_to_tca": 2.150332,
+   "miss_distance": 8108.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -16.906158,
+    "log_pc_lo": -29.117701,
+    "log_pc_hi": -7.497223,
+    "p_pc_elevated": 0.002015,
+    "p_pc_critical": 8e-05,
+    "p_tier": [
+     0.997985,
+     0.001935,
+     8e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 8.11 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.2e-17 (80% interval 7.6e-30 to 3.2e-08)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -7.232177,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.997985,
+     0.001935,
+     8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 898,
+   "n_cdms": 14,
+   "time_to_tca": 2.355712,
+   "miss_distance": 129.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -7.407329,
+    "log_pc_lo": -8.098173,
+    "log_pc_hi": -5.756158,
+    "p_pc_elevated": 0.266079,
+    "p_pc_critical": 0.000328,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.13 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 3.9e-08 (80% interval 8.0e-09 to 1.8e-06)",
+     "P(Pc >= 1e-6) = 27% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -6.014978,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 924,
+   "n_cdms": 13,
+   "time_to_tca": 2.191565,
+   "miss_distance": 29529.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -24.431576,
+    "log_pc_lo": -29.838206,
+    "log_pc_hi": -10.940772,
+    "p_pc_elevated": 0.00097,
+    "p_pc_critical": 7.6e-05,
+    "p_tier": [
+     0.99903,
+     0.000894,
+     7.6e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 29.53 km >= 5 km (rule satisfied)",
+     "Estimated Pc 3.7e-25 (80% interval 1.5e-30 to 1.1e-11)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.99903,
+     0.000894,
+     7.6e-05
+    ]
+   }
+  },
+  {
+   "event_id": 927,
+   "n_cdms": 14,
+   "time_to_tca": 2.070549,
+   "miss_distance": 12296.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -7.737605,
+    "log_pc_lo": -16.788035,
+    "log_pc_hi": -5.24446,
+    "p_pc_elevated": 0.811803,
+    "p_pc_critical": 9.8e-05,
+    "p_tier": [
+     0.188197,
+     0.811705,
+     9.8e-05
+    ],
+    "md_tier": 0,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 12.30 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.8e-08 (80% interval 1.6e-17 to 5.7e-06)",
+     "P(Pc >= 1e-6) = 81% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -5.222936,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.188197,
+     0.811705,
+     9.8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 935,
+   "n_cdms": 15,
+   "time_to_tca": 2.195894,
+   "miss_distance": 28880.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -28.422667,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -21.653605,
+    "p_pc_elevated": 0.000911,
+    "p_pc_critical": 8.7e-05,
+    "p_tier": [
+     0.999089,
+     0.000824,
+     8.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 28.88 km >= 5 km (rule satisfied)",
+     "Estimated Pc 3.8e-29 (80% interval ~0 to 2.2e-22)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999089,
+     0.000824,
+     8.7e-05
+    ]
+   }
+  },
+  {
+   "event_id": 948,
+   "n_cdms": 15,
+   "time_to_tca": 2.005653,
+   "miss_distance": 10852.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -27.023348,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -10.353217,
+    "p_pc_elevated": 0.000819,
+    "p_pc_critical": 7.7e-05,
+    "p_tier": [
+     0.999181,
+     0.000742,
+     7.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 10.85 km >= 5 km (rule satisfied)",
+     "Estimated Pc 9.5e-28 (80% interval ~0 to 4.4e-11)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -16.212256,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999181,
+     0.000742,
+     7.7e-05
+    ]
+   }
+  },
+  {
+   "event_id": 951,
+   "n_cdms": 14,
+   "time_to_tca": 2.135817,
+   "miss_distance": 1222.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -21.94194,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -11.56709,
+    "p_pc_elevated": 0.001404,
+    "p_pc_critical": 9.1e-05,
+    "p_tier": [
+     0.0,
+     0.999909,
+     9.1e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 1.22 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 1.1e-22 (80% interval ~0 to 2.7e-12)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999909,
+     9.1e-05
+    ]
+   }
+  },
+  {
+   "event_id": 953,
+   "n_cdms": 10,
+   "time_to_tca": 2.272953,
+   "miss_distance": 4396.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -29.178208,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -22.586111,
+    "p_pc_elevated": 0.000922,
+    "p_pc_critical": 9e-05,
+    "p_tier": [
+     0.0,
+     0.99991,
+     9e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 4.40 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 6.6e-30 (80% interval ~0 to 2.6e-23)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.99991,
+     9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 987,
+   "n_cdms": 9,
+   "time_to_tca": 2.022475,
+   "miss_distance": 33030.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -29.659116,
+    "p_pc_elevated": 0.000739,
+    "p_pc_critical": 7.9e-05,
+    "p_tier": [
+     0.999261,
+     0.00066,
+     7.9e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 33.03 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 2.2e-30)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999261,
+     0.00066,
+     7.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 989,
+   "n_cdms": 15,
+   "time_to_tca": 2.184677,
+   "miss_distance": 157.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -5.808219,
+    "log_pc_lo": -13.036802,
+    "log_pc_hi": -4.374906,
+    "p_pc_elevated": 0.769001,
+    "p_pc_critical": 0.396333,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.16 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.6e-06 (80% interval 9.2e-14 to 4.2e-05)",
+     "P(Pc >= 1e-4) = 40% >= decision threshold 6% -> Critical",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -3.985479,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1011,
+   "n_cdms": 11,
+   "time_to_tca": 2.069721,
+   "miss_distance": 63466.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -23.244991,
+    "log_pc_lo": -29.883778,
+    "log_pc_hi": -14.592412,
+    "p_pc_elevated": 0.000799,
+    "p_pc_critical": 7.7e-05,
+    "p_tier": [
+     0.999201,
+     0.000722,
+     7.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 63.47 km >= 5 km (rule satisfied)",
+     "Estimated Pc 5.7e-24 (80% interval 1.3e-30 to 2.6e-15)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999201,
+     0.000722,
+     7.7e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1038,
+   "n_cdms": 5,
+   "time_to_tca": 2.059312,
+   "miss_distance": 947.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -14.606387,
+    "log_pc_lo": -27.277557,
+    "log_pc_hi": -14.014439,
+    "p_pc_elevated": 0.002902,
+    "p_pc_critical": 8.3e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.95 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 2.5e-15 (80% interval 5.3e-28 to 9.7e-15)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -15.020042,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1045,
+   "n_cdms": 13,
+   "time_to_tca": 2.66894,
+   "miss_distance": 2178.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -16.997704,
+    "log_pc_lo": -26.315624,
+    "log_pc_hi": -13.038238,
+    "p_pc_elevated": 0.004899,
+    "p_pc_critical": 0.000103,
+    "p_tier": [
+     0.0,
+     0.999897,
+     0.000103
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.18 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 1.0e-17 (80% interval 4.8e-27 to 9.2e-14)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -14.051294,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999897,
+     0.000103
+    ]
+   }
+  },
+  {
+   "event_id": 1077,
+   "n_cdms": 15,
+   "time_to_tca": 2.192842,
+   "miss_distance": 1135.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -27.47742,
+    "p_pc_elevated": 0.001946,
+    "p_pc_critical": 8.6e-05,
+    "p_tier": [
+     0.0,
+     0.999914,
+     8.6e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 1.14 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc ~0 (80% interval ~0 to 3.3e-28)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999914,
+     8.6e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1085,
+   "n_cdms": 15,
+   "time_to_tca": 2.011252,
+   "miss_distance": 39.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -5.952083,
+    "log_pc_lo": -9.347846,
+    "log_pc_hi": -4.355195,
+    "p_pc_elevated": 0.810096,
+    "p_pc_critical": 0.109258,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.04 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.1e-06 (80% interval 4.5e-10 to 4.4e-05)",
+     "P(Pc >= 1e-4) = 11% >= decision threshold 6% -> Critical",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -4.216311,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1099,
+   "n_cdms": 12,
+   "time_to_tca": 2.146167,
+   "miss_distance": 735.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -21.614805,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -13.49067,
+    "p_pc_elevated": 0.002095,
+    "p_pc_critical": 8.6e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.73 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 2.4e-22 (80% interval ~0 to 3.2e-14)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -11.938548,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1100,
+   "n_cdms": 15,
+   "time_to_tca": 2.092961,
+   "miss_distance": 515.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -13.100238,
+    "log_pc_lo": -25.437314,
+    "log_pc_hi": -10.334179,
+    "p_pc_elevated": 0.003818,
+    "p_pc_critical": 8.4e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.52 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 7.9e-14 (80% interval 3.7e-26 to 4.6e-11)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -10.112664,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1130,
+   "n_cdms": 15,
+   "time_to_tca": 2.130786,
+   "miss_distance": 8144.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -14.947283,
+    "log_pc_lo": -29.399598,
+    "log_pc_hi": -8.535197,
+    "p_pc_elevated": 0.00102,
+    "p_pc_critical": 8.7e-05,
+    "p_tier": [
+     0.99898,
+     0.000932,
+     8.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 8.14 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.1e-15 (80% interval 4.0e-30 to 2.9e-09)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -7.781464,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.99898,
+     0.000932,
+     8.7e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1161,
+   "n_cdms": 14,
+   "time_to_tca": 2.348693,
+   "miss_distance": 2978.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -4.977037,
+    "log_pc_lo": -10.082232,
+    "log_pc_hi": -4.771117,
+    "p_pc_elevated": 0.877105,
+    "p_pc_critical": 0.000145,
+    "p_tier": [
+     0.0,
+     0.999855,
+     0.000145
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.98 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 1.1e-05 (80% interval 8.3e-11 to 1.7e-05)",
+     "P(Pc >= 1e-6) = 88% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -5.102263,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999855,
+     0.000145
+    ]
+   }
+  },
+  {
+   "event_id": 1163,
+   "n_cdms": 14,
+   "time_to_tca": 2.248519,
+   "miss_distance": 55371.0,
+   "c_object_type": "PAYLOAD",
+   "assessment": {
+    "log_pc": -29.9996,
+    "log_pc_lo": -29.9996,
+    "log_pc_hi": -29.933995,
+    "p_pc_elevated": 0.000739,
+    "p_pc_critical": 8e-05,
+    "p_tier": [
+     0.999261,
+     0.000659,
+     8e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 55.37 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to ~0)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999261,
+     0.000659,
+     8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1167,
+   "n_cdms": 15,
+   "time_to_tca": 2.089026,
+   "miss_distance": 345.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -5.425864,
+    "log_pc_lo": -7.568989,
+    "log_pc_hi": -4.999326,
+    "p_pc_elevated": 0.950569,
+    "p_pc_critical": 0.000158,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.34 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 3.8e-06 (80% interval 2.7e-08 to 1.0e-05)",
+     "P(Pc >= 1e-6) = 95% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -5.00727,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1194,
+   "n_cdms": 15,
+   "time_to_tca": 2.252676,
+   "miss_distance": 1933.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -12.042424,
+    "log_pc_lo": -26.847509,
+    "log_pc_hi": -6.691242,
+    "p_pc_elevated": 0.251816,
+    "p_pc_critical": 0.000137,
+    "p_tier": [
+     0.0,
+     0.999863,
+     0.000137
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 1.93 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 9.1e-13 (80% interval 1.4e-27 to 2.0e-07)",
+     "P(Pc >= 1e-6) = 25% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -5.099196,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999863,
+     0.000137
+    ]
+   }
+  },
+  {
+   "event_id": 1202,
+   "n_cdms": 14,
+   "time_to_tca": 2.306645,
+   "miss_distance": 149.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -6.119933,
+    "log_pc_lo": -10.220186,
+    "log_pc_hi": -4.538469,
+    "p_pc_elevated": 0.928528,
+    "p_pc_critical": 0.000148,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.15 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 7.6e-07 (80% interval 6.0e-11 to 2.9e-05)",
+     "P(Pc >= 1e-6) = 93% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -4.624519,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1204,
+   "n_cdms": 10,
+   "time_to_tca": 2.349801,
+   "miss_distance": 35757.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -26.653727,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -15.791268,
+    "p_pc_elevated": 0.000839,
+    "p_pc_critical": 9.4e-05,
+    "p_tier": [
+     0.999161,
+     0.000745,
+     9.4e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 35.76 km >= 5 km (rule satisfied)",
+     "Estimated Pc 2.2e-27 (80% interval ~0 to 1.6e-16)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -25.522156,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999161,
+     0.000745,
+     9.4e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1206,
+   "n_cdms": 16,
+   "time_to_tca": 2.103737,
+   "miss_distance": 4604.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -29.256111,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -11.759843,
+    "p_pc_elevated": 0.00378,
+    "p_pc_critical": 8.9e-05,
+    "p_tier": [
+     0.0,
+     0.999911,
+     8.9e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 4.60 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 5.5e-30 (80% interval ~0 to 1.7e-12)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999911,
+     8.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1211,
+   "n_cdms": 15,
+   "time_to_tca": 2.193801,
+   "miss_distance": 11537.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -28.50552,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -14.055514,
+    "p_pc_elevated": 0.000974,
+    "p_pc_critical": 8.9e-05,
+    "p_tier": [
+     0.999026,
+     0.000886,
+     8.9e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 11.54 km >= 5 km (rule satisfied)",
+     "Estimated Pc 3.1e-29 (80% interval ~0 to 8.8e-15)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999026,
+     0.000886,
+     8.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1213,
+   "n_cdms": 15,
+   "time_to_tca": 2.168017,
+   "miss_distance": 4960.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -7.402882,
+    "log_pc_lo": -22.515373,
+    "log_pc_hi": -6.210664,
+    "p_pc_elevated": 0.001123,
+    "p_pc_critical": 8.9e-05,
+    "p_tier": [
+     0.0,
+     0.999911,
+     8.9e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 4.96 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 4.0e-08 (80% interval 3.1e-23 to 6.2e-07)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -6.540306,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999911,
+     8.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1216,
+   "n_cdms": 5,
+   "time_to_tca": 2.310981,
+   "miss_distance": 1774.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -19.120919,
+    "log_pc_lo": -29.555407,
+    "log_pc_hi": -10.206347,
+    "p_pc_elevated": 0.060386,
+    "p_pc_critical": 0.000147,
+    "p_tier": [
+     0.0,
+     0.999853,
+     0.000147
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 1.77 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 7.6e-20 (80% interval 2.8e-30 to 6.2e-11)",
+     "P(Pc >= 1e-6) = 6% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -22.425969,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999853,
+     0.000147
+    ]
+   }
+  },
+  {
+   "event_id": 1219,
+   "n_cdms": 7,
+   "time_to_tca": 2.036704,
+   "miss_distance": 2679.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -15.137702,
+    "log_pc_lo": -27.860508,
+    "log_pc_hi": -6.724491,
+    "p_pc_elevated": 0.137613,
+    "p_pc_critical": 0.000112,
+    "p_tier": [
+     0.0,
+     0.999888,
+     0.000112
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.68 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 7.3e-16 (80% interval 1.4e-28 to 1.9e-07)",
+     "P(Pc >= 1e-6) = 14% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -6.553463,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999888,
+     0.000112
+    ]
+   }
+  },
+  {
+   "event_id": 1223,
+   "n_cdms": 15,
+   "time_to_tca": 2.239365,
+   "miss_distance": 132.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -27.735986,
+    "log_pc_lo": -29.926158,
+    "log_pc_hi": -26.595057,
+    "p_pc_elevated": 0.00203,
+    "p_pc_critical": 0.000412,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.13 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.8e-28 (80% interval ~0 to 2.5e-27)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1237,
+   "n_cdms": 15,
+   "time_to_tca": 2.149953,
+   "miss_distance": 30407.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -22.359106,
+    "log_pc_lo": -27.933334,
+    "log_pc_hi": -9.811424,
+    "p_pc_elevated": 0.000955,
+    "p_pc_critical": 8e-05,
+    "p_tier": [
+     0.999045,
+     0.000875,
+     8e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 30.41 km >= 5 km (rule satisfied)",
+     "Estimated Pc 4.4e-23 (80% interval 1.2e-28 to 1.5e-10)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999045,
+     0.000875,
+     8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1247,
+   "n_cdms": 15,
+   "time_to_tca": 2.069411,
+   "miss_distance": 3441.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -8.547811,
+    "log_pc_lo": -23.299661,
+    "log_pc_hi": -6.27317,
+    "p_pc_elevated": 0.176497,
+    "p_pc_critical": 0.000155,
+    "p_tier": [
+     0.0,
+     0.999845,
+     0.000155
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 3.44 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.8e-09 (80% interval 5.0e-24 to 5.3e-07)",
+     "P(Pc >= 1e-6) = 18% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -6.073092,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999845,
+     0.000155
+    ]
+   }
+  },
+  {
+   "event_id": 1277,
+   "n_cdms": 14,
+   "time_to_tca": 2.228965,
+   "miss_distance": 2002.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -18.632269,
+    "log_pc_lo": -29.688447,
+    "log_pc_hi": -7.973223,
+    "p_pc_elevated": 0.005603,
+    "p_pc_critical": 9e-05,
+    "p_tier": [
+     0.0,
+     0.99991,
+     9e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.00 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 2.3e-19 (80% interval 2.0e-30 to 1.1e-08)",
+     "P(Pc >= 1e-6) = 1% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -22.773142,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.99991,
+     9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1282,
+   "n_cdms": 12,
+   "time_to_tca": 2.259089,
+   "miss_distance": 973.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -8.462312,
+    "log_pc_lo": -19.924569,
+    "log_pc_hi": -6.994302,
+    "p_pc_elevated": 0.001548,
+    "p_pc_critical": 0.000107,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.97 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 3.4e-09 (80% interval 1.2e-20 to 1.0e-07)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -6.90309,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1309,
+   "n_cdms": 14,
+   "time_to_tca": 2.632449,
+   "miss_distance": 3115.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -27.77087,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -17.425285,
+    "p_pc_elevated": 0.001369,
+    "p_pc_critical": 8.7e-05,
+    "p_tier": [
+     0.0,
+     0.999913,
+     8.7e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 3.12 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 1.7e-28 (80% interval ~0 to 3.8e-18)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -26.357338,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999913,
+     8.7e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1345,
+   "n_cdms": 14,
+   "time_to_tca": 2.42068,
+   "miss_distance": 536.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -24.352848,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -19.985718,
+    "p_pc_elevated": 0.001669,
+    "p_pc_critical": 8.3e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.54 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 4.4e-25 (80% interval ~0 to 1.0e-20)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1352,
+   "n_cdms": 14,
+   "time_to_tca": 2.300377,
+   "miss_distance": 12487.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -18.910148,
+    "p_pc_elevated": 0.000887,
+    "p_pc_critical": 9.5e-05,
+    "p_tier": [
+     0.999113,
+     0.000792,
+     9.5e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 12.49 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 1.2e-19)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999113,
+     0.000792,
+     9.5e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1369,
+   "n_cdms": 15,
+   "time_to_tca": 2.129921,
+   "miss_distance": 3716.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -24.122694,
+    "p_pc_elevated": 0.000758,
+    "p_pc_critical": 8.9e-05,
+    "p_tier": [
+     0.0,
+     0.999911,
+     8.9e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 3.72 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc ~0 (80% interval ~0 to 7.5e-25)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -22.350373,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999911,
+     8.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1372,
+   "n_cdms": 6,
+   "time_to_tca": 2.169067,
+   "miss_distance": 300.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -6.309861,
+    "log_pc_lo": -12.094662,
+    "log_pc_hi": -5.289864,
+    "p_pc_elevated": 0.841236,
+    "p_pc_critical": 9.9e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.30 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 4.9e-07 (80% interval 8.0e-13 to 5.1e-06)",
+     "P(Pc >= 1e-6) = 84% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -5.332454,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1387,
+   "n_cdms": 14,
+   "time_to_tca": 2.296202,
+   "miss_distance": 1063.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -20.463776,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -12.003018,
+    "p_pc_elevated": 0.003651,
+    "p_pc_critical": 0.003651,
+    "p_tier": [
+     0.0,
+     0.996349,
+     0.003651
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": true,
+    "reasons": [
+     "Miss distance 1.06 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 3.4e-21 (80% interval ~0 to 9.9e-13)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Worst-case Pc bound 1.9e-04 >= 1e-4: Critical cannot be ruled out -> analyst review required",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -10.562884,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.996349,
+     0.003651
+    ]
+   }
+  },
+  {
+   "event_id": 1401,
+   "n_cdms": 10,
+   "time_to_tca": 2.253777,
+   "miss_distance": 927.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -21.473637,
+    "log_pc_lo": -27.667335,
+    "log_pc_hi": -17.668111,
+    "p_pc_elevated": 0.001857,
+    "p_pc_critical": 9.3e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.93 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 3.4e-22 (80% interval 2.2e-28 to 2.1e-18)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -19.478208,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1414,
+   "n_cdms": 14,
+   "time_to_tca": 2.126732,
+   "miss_distance": 737.0,
+   "c_object_type": "ROCKET BODY",
+   "assessment": {
+    "log_pc": -19.67007,
+    "log_pc_lo": -29.176536,
+    "log_pc_hi": -12.522102,
+    "p_pc_elevated": 0.001914,
+    "p_pc_critical": 8.5e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.74 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 2.1e-20 (80% interval 6.7e-30 to 3.0e-13)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -18.93968,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1428,
+   "n_cdms": 15,
+   "time_to_tca": 2.213237,
+   "miss_distance": 9243.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -7.555156,
+    "log_pc_lo": -22.7923,
+    "log_pc_hi": -6.594567,
+    "p_pc_elevated": 0.243377,
+    "p_pc_critical": 9.8e-05,
+    "p_tier": [
+     0.756623,
+     0.243279,
+     9.8e-05
+    ],
+    "md_tier": 0,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 9.24 km >= 5 km (rule satisfied)",
+     "Estimated Pc 2.8e-08 (80% interval 1.6e-23 to 2.5e-07)",
+     "P(Pc >= 1e-6) = 24% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -7.56928,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.756623,
+     0.243279,
+     9.8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1430,
+   "n_cdms": 14,
+   "time_to_tca": 2.350004,
+   "miss_distance": 844.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -29.809265,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -26.17623,
+    "p_pc_elevated": 0.003661,
+    "p_pc_critical": 0.000292,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.84 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.6e-30 (80% interval ~0 to 6.7e-27)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1448,
+   "n_cdms": 14,
+   "time_to_tca": 2.140153,
+   "miss_distance": 104.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -5.98366,
+    "log_pc_lo": -9.596601,
+    "log_pc_hi": -3.929673,
+    "p_pc_elevated": 0.946435,
+    "p_pc_critical": 0.916219,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.10 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.0e-06 (80% interval 2.5e-10 to 1.2e-04)",
+     "P(Pc >= 1e-4) = 92% >= decision threshold 6% -> Critical",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -3.041102,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1457,
+   "n_cdms": 14,
+   "time_to_tca": 2.153402,
+   "miss_distance": 3496.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -24.038648,
+    "log_pc_lo": -29.514098,
+    "log_pc_hi": -9.935692,
+    "p_pc_elevated": 0.001403,
+    "p_pc_critical": 8.4e-05,
+    "p_tier": [
+     0.0,
+     0.999916,
+     8.4e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 3.50 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 9.1e-25 (80% interval 3.1e-30 to 1.2e-10)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999916,
+     8.4e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1464,
+   "n_cdms": 7,
+   "time_to_tca": 2.555828,
+   "miss_distance": 127.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -6.420961,
+    "log_pc_lo": -7.514322,
+    "log_pc_hi": -5.034562,
+    "p_pc_elevated": 0.916794,
+    "p_pc_critical": 0.000389,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.13 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 3.8e-07 (80% interval 3.1e-08 to 9.2e-06)",
+     "P(Pc >= 1e-6) = 92% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -5.121478,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1470,
+   "n_cdms": 15,
+   "time_to_tca": 2.323807,
+   "miss_distance": 391.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -16.230066,
+    "log_pc_lo": -28.886068,
+    "log_pc_hi": -5.143525,
+    "p_pc_elevated": 0.528877,
+    "p_pc_critical": 0.052998,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.39 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 5.9e-17 (80% interval 1.3e-29 to 7.2e-06)",
+     "P(Pc >= 1e-6) = 53% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1475,
+   "n_cdms": 16,
+   "time_to_tca": 2.025432,
+   "miss_distance": 803.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -24.17061,
+    "log_pc_lo": -28.824689,
+    "log_pc_hi": -19.060224,
+    "p_pc_elevated": 0.002854,
+    "p_pc_critical": 8.3e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.80 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 6.8e-25 (80% interval 1.5e-29 to 8.7e-20)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -21.880414,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1480,
+   "n_cdms": 13,
+   "time_to_tca": 2.186889,
+   "miss_distance": 143.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -6.425943,
+    "log_pc_lo": -13.033792,
+    "log_pc_hi": -4.447451,
+    "p_pc_elevated": 0.846702,
+    "p_pc_critical": 0.000282,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.14 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 3.8e-07 (80% interval 9.3e-14 to 3.6e-05)",
+     "P(Pc >= 1e-6) = 85% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -4.691436,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1483,
+   "n_cdms": 15,
+   "time_to_tca": 2.037216,
+   "miss_distance": 3405.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -25.470653,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -8.921975,
+    "p_pc_elevated": 0.0009,
+    "p_pc_critical": 9.4e-05,
+    "p_tier": [
+     0.0,
+     0.999906,
+     9.4e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 3.40 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 3.4e-26 (80% interval ~0 to 1.2e-09)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999906,
+     9.4e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1486,
+   "n_cdms": 2,
+   "time_to_tca": 2.223562,
+   "miss_distance": 19015.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -29.943321,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -28.127042,
+    "p_pc_elevated": 0.001212,
+    "p_pc_critical": 8e-05,
+    "p_tier": [
+     0.998788,
+     0.001132,
+     8e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 19.02 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 7.5e-29)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.998788,
+     0.001132,
+     8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1492,
+   "n_cdms": 4,
+   "time_to_tca": 2.253819,
+   "miss_distance": 14145.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -8.249239,
+    "log_pc_lo": -18.703322,
+    "log_pc_hi": -6.301492,
+    "p_pc_elevated": 0.429896,
+    "p_pc_critical": 8.8e-05,
+    "p_tier": [
+     0.570104,
+     0.429808,
+     8.8e-05
+    ],
+    "md_tier": 0,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 14.14 km >= 5 km (rule satisfied)",
+     "Estimated Pc 5.6e-09 (80% interval 2.0e-19 to 5.0e-07)",
+     "P(Pc >= 1e-6) = 43% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -5.830914,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.570104,
+     0.429808,
+     8.8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1522,
+   "n_cdms": 14,
+   "time_to_tca": 2.342039,
+   "miss_distance": 7347.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -29.48083,
+    "log_pc_lo": -29.98896,
+    "log_pc_hi": -23.285437,
+    "p_pc_elevated": 0.000795,
+    "p_pc_critical": 9.1e-05,
+    "p_tier": [
+     0.999205,
+     0.000704,
+     9.1e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 7.35 km >= 5 km (rule satisfied)",
+     "Estimated Pc 3.3e-30 (80% interval ~0 to 5.2e-24)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999205,
+     0.000704,
+     9.1e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1526,
+   "n_cdms": 14,
+   "time_to_tca": 2.255669,
+   "miss_distance": 474.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -6.003279,
+    "log_pc_lo": -9.317892,
+    "log_pc_hi": -5.566835,
+    "p_pc_elevated": 0.404411,
+    "p_pc_critical": 0.000175,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.47 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 9.9e-07 (80% interval 4.8e-10 to 2.7e-06)",
+     "P(Pc >= 1e-6) = 40% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -5.877456,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1548,
+   "n_cdms": 15,
+   "time_to_tca": 2.213087,
+   "miss_distance": 14844.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -27.094898,
+    "p_pc_elevated": 0.000738,
+    "p_pc_critical": 8.4e-05,
+    "p_tier": [
+     0.999262,
+     0.000654,
+     8.4e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 14.84 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 8.0e-28)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -27.862646,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999262,
+     0.000654,
+     8.4e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1567,
+   "n_cdms": 5,
+   "time_to_tca": 2.06289,
+   "miss_distance": 407.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -14.567368,
+    "log_pc_lo": -27.774555,
+    "log_pc_hi": -9.110795,
+    "p_pc_elevated": 0.008676,
+    "p_pc_critical": 8.4e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.41 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 2.7e-15 (80% interval 1.7e-28 to 7.7e-10)",
+     "P(Pc >= 1e-6) = 1% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -7.932557,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1577,
+   "n_cdms": 15,
+   "time_to_tca": 2.327093,
+   "miss_distance": 21707.0,
+   "c_object_type": "PAYLOAD",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -28.352408,
+    "p_pc_elevated": 0.001047,
+    "p_pc_critical": 8.2e-05,
+    "p_tier": [
+     0.998953,
+     0.000965,
+     8.2e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 21.71 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 4.4e-29)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.998953,
+     0.000965,
+     8.2e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1613,
+   "n_cdms": 8,
+   "time_to_tca": 4.046073,
+   "miss_distance": 31451.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -27.952456,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -24.335731,
+    "p_pc_elevated": 0.000739,
+    "p_pc_critical": 8.1e-05,
+    "p_tier": [
+     0.999261,
+     0.000658,
+     8.1e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 31.45 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.1e-28 (80% interval ~0 to 4.6e-25)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -16.037347,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999261,
+     0.000658,
+     8.1e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1629,
+   "n_cdms": 15,
+   "time_to_tca": 2.135231,
+   "miss_distance": 9220.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -15.833764,
+    "log_pc_lo": -29.834472,
+    "log_pc_hi": -9.621782,
+    "p_pc_elevated": 0.000787,
+    "p_pc_critical": 7.9e-05,
+    "p_tier": [
+     0.999213,
+     0.000707,
+     7.9e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 9.22 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.5e-16 (80% interval 1.5e-30 to 2.4e-10)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999213,
+     0.000707,
+     7.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1723,
+   "n_cdms": 15,
+   "time_to_tca": 2.029413,
+   "miss_distance": 11068.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -22.231011,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -9.427135,
+    "p_pc_elevated": 0.000998,
+    "p_pc_critical": 8.5e-05,
+    "p_tier": [
+     0.999002,
+     0.000913,
+     8.5e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 11.07 km >= 5 km (rule satisfied)",
+     "Estimated Pc 5.9e-23 (80% interval ~0 to 3.7e-10)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -9.700711,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999002,
+     0.000913,
+     8.5e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1744,
+   "n_cdms": 15,
+   "time_to_tca": 2.048956,
+   "miss_distance": 842.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -13.09896,
+    "log_pc_lo": -14.797615,
+    "log_pc_hi": -6.763366,
+    "p_pc_elevated": 0.032762,
+    "p_pc_critical": 0.000122,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.84 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 8.0e-14 (80% interval 1.6e-15 to 1.7e-07)",
+     "P(Pc >= 1e-6) = 3% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1751,
+   "n_cdms": 15,
+   "time_to_tca": 2.097585,
+   "miss_distance": 1524.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -26.201801,
+    "log_pc_lo": -29.635342,
+    "log_pc_hi": -10.84005,
+    "p_pc_elevated": 0.013801,
+    "p_pc_critical": 0.0002,
+    "p_tier": [
+     0.0,
+     0.9998,
+     0.0002
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 1.52 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 6.3e-27 (80% interval 2.3e-30 to 1.4e-11)",
+     "P(Pc >= 1e-6) = 1% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.9998,
+     0.0002
+    ]
+   }
+  },
+  {
+   "event_id": 1791,
+   "n_cdms": 15,
+   "time_to_tca": 2.182205,
+   "miss_distance": 177.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -7.529347,
+    "log_pc_lo": -12.699681,
+    "log_pc_hi": -5.654332,
+    "p_pc_elevated": 0.076219,
+    "p_pc_critical": 0.000138,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.18 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 3.0e-08 (80% interval 2.0e-13 to 2.2e-06)",
+     "P(Pc >= 1e-6) = 8% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -5.679646,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1829,
+   "n_cdms": 2,
+   "time_to_tca": 2.077827,
+   "miss_distance": 2538.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -6.130541,
+    "log_pc_lo": -16.836652,
+    "log_pc_hi": -4.292595,
+    "p_pc_elevated": 0.898643,
+    "p_pc_critical": 0.0001,
+    "p_tier": [
+     0.0,
+     0.9999,
+     0.0001
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.54 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 7.4e-07 (80% interval 1.5e-17 to 5.1e-05)",
+     "P(Pc >= 1e-6) = 90% >= decision threshold 11% -> Elevated",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -4.166534,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.9999,
+     0.0001
+    ]
+   }
+  },
+  {
+   "event_id": 1833,
+   "n_cdms": 8,
+   "time_to_tca": 2.168835,
+   "miss_distance": 262.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -9.461163,
+    "log_pc_lo": -22.596705,
+    "log_pc_hi": -4.472238,
+    "p_pc_elevated": 0.779632,
+    "p_pc_critical": 0.29861,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.26 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 3.5e-10 (80% interval 2.5e-23 to 3.4e-05)",
+     "P(Pc >= 1e-4) = 30% >= decision threshold 6% -> Critical",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -3.855115,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1857,
+   "n_cdms": 5,
+   "time_to_tca": 2.705092,
+   "miss_distance": 10496.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -29.796459,
+    "log_pc_lo": -29.991303,
+    "log_pc_hi": -29.683054,
+    "p_pc_elevated": 0.000739,
+    "p_pc_critical": 8.4e-05,
+    "p_tier": [
+     0.999261,
+     0.000655,
+     8.4e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 10.50 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.6e-30 (80% interval ~0 to 2.1e-30)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999261,
+     0.000655,
+     8.4e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1858,
+   "n_cdms": 15,
+   "time_to_tca": 2.03635,
+   "miss_distance": 13493.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -29.628519,
+    "p_pc_elevated": 0.000739,
+    "p_pc_critical": 7.8e-05,
+    "p_tier": [
+     0.999261,
+     0.000661,
+     7.8e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 13.49 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 2.4e-30)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999261,
+     0.000661,
+     7.8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1859,
+   "n_cdms": 14,
+   "time_to_tca": 2.078646,
+   "miss_distance": 770.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -6.35993,
+    "log_pc_lo": -8.532221,
+    "log_pc_hi": -5.716759,
+    "p_pc_elevated": 0.505341,
+    "p_pc_critical": 0.00011,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.77 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 4.4e-07 (80% interval 2.9e-09 to 1.9e-06)",
+     "P(Pc >= 1e-6) = 51% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -5.579384,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1882,
+   "n_cdms": 14,
+   "time_to_tca": 2.037312,
+   "miss_distance": 17814.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -28.618289,
+    "p_pc_elevated": 0.001298,
+    "p_pc_critical": 7.9e-05,
+    "p_tier": [
+     0.998702,
+     0.00122,
+     7.9e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 17.81 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 2.4e-29)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.998702,
+     0.00122,
+     7.9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1896,
+   "n_cdms": 15,
+   "time_to_tca": 2.087091,
+   "miss_distance": 972.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -22.24359,
+    "log_pc_lo": -29.288047,
+    "log_pc_hi": -18.827538,
+    "p_pc_elevated": 0.001529,
+    "p_pc_critical": 9.4e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.97 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 5.7e-23 (80% interval 5.2e-30 to 1.5e-19)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -22.739929,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1944,
+   "n_cdms": 14,
+   "time_to_tca": 2.278908,
+   "miss_distance": 5950.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -25.743803,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -19.184962,
+    "p_pc_elevated": 0.000745,
+    "p_pc_critical": 7.7e-05,
+    "p_tier": [
+     0.999255,
+     0.000668,
+     7.7e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 5.95 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.8e-26 (80% interval ~0 to 6.5e-20)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999255,
+     0.000668,
+     7.7e-05
+    ]
+   }
+  },
+  {
+   "event_id": 1970,
+   "n_cdms": 14,
+   "time_to_tca": 2.188527,
+   "miss_distance": 202.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -10.698203,
+    "log_pc_lo": -19.631519,
+    "log_pc_hi": -8.280328,
+    "p_pc_elevated": 0.004599,
+    "p_pc_critical": 0.000124,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.20 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 2.0e-11 (80% interval 2.3e-20 to 5.2e-09)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -7.63865,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 1985,
+   "n_cdms": 14,
+   "time_to_tca": 2.250978,
+   "miss_distance": 772.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -24.858772,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -12.294191,
+    "p_pc_elevated": 0.001528,
+    "p_pc_critical": 8.3e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.77 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 1.4e-25 (80% interval ~0 to 5.1e-13)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 2011,
+   "n_cdms": 14,
+   "time_to_tca": 2.24286,
+   "miss_distance": 502.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -12.494412,
+    "log_pc_lo": -23.258001,
+    "log_pc_hi": -5.165415,
+    "p_pc_elevated": 0.667667,
+    "p_pc_critical": 0.000286,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.50 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 3.2e-13 (80% interval 5.5e-24 to 6.8e-06)",
+     "P(Pc >= 1e-6) = 67% >= decision threshold 11% -> Elevated",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -4.675101,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 2044,
+   "n_cdms": 15,
+   "time_to_tca": 2.168126,
+   "miss_distance": 22842.0,
+   "c_object_type": "PAYLOAD",
+   "assessment": {
+    "log_pc": -29.917914,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -29.917914,
+    "p_pc_elevated": 0.000739,
+    "p_pc_critical": 7.8e-05,
+    "p_tier": [
+     0.999261,
+     0.000661,
+     7.8e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 22.84 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to ~0)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.999261,
+     0.000661,
+     7.8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 2046,
+   "n_cdms": 14,
+   "time_to_tca": 2.423837,
+   "miss_distance": 813.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -15.488289,
+    "log_pc_lo": -25.003196,
+    "log_pc_hi": -10.139079,
+    "p_pc_elevated": 0.002166,
+    "p_pc_critical": 9.9e-05,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ],
+    "md_tier": 2,
+    "tier": 2,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 0.81 km < 1 km -> Critical (hard rule)",
+     "Estimated Pc 3.2e-16 (80% interval 9.9e-26 to 7.3e-11)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Critical"
+    ]
+   },
+   "true_tier": 2,
+   "true_log_pc": -11.933674,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 2,
+    "p_tier": [
+     0.0,
+     0.0,
+     1.0
+    ]
+   }
+  },
+  {
+   "event_id": 2063,
+   "n_cdms": 14,
+   "time_to_tca": 2.003787,
+   "miss_distance": 42027.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -27.848814,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -23.439955,
+    "p_pc_elevated": 0.001427,
+    "p_pc_critical": 8e-05,
+    "p_tier": [
+     0.998573,
+     0.001347,
+     8e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 42.03 km >= 5 km (rule satisfied)",
+     "Estimated Pc 1.4e-28 (80% interval ~0 to 3.6e-24)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.998573,
+     0.001347,
+     8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 2078,
+   "n_cdms": 15,
+   "time_to_tca": 2.03753,
+   "miss_distance": 2554.0,
+   "c_object_type": "PAYLOAD",
+   "assessment": {
+    "log_pc": -9.913441,
+    "log_pc_lo": -25.291101,
+    "log_pc_hi": -6.449333,
+    "p_pc_elevated": 0.002816,
+    "p_pc_critical": 0.000102,
+    "p_tier": [
+     0.0,
+     0.999898,
+     0.000102
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.55 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 1.2e-10 (80% interval 5.1e-26 to 3.6e-07)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -7.714893,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999898,
+     0.000102
+    ]
+   }
+  },
+  {
+   "event_id": 2080,
+   "n_cdms": 8,
+   "time_to_tca": 2.188098,
+   "miss_distance": 29486.0,
+   "c_object_type": "UNKNOWN",
+   "assessment": {
+    "log_pc": -27.157275,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -13.37958,
+    "p_pc_elevated": 0.001116,
+    "p_pc_critical": 8.2e-05,
+    "p_tier": [
+     0.998884,
+     0.001034,
+     8.2e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 29.49 km >= 5 km (rule satisfied)",
+     "Estimated Pc 7.0e-28 (80% interval ~0 to 4.2e-14)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.998884,
+     0.001034,
+     8.2e-05
+    ]
+   }
+  },
+  {
+   "event_id": 2081,
+   "n_cdms": 3,
+   "time_to_tca": 2.156539,
+   "miss_distance": 43900.0,
+   "c_object_type": "PAYLOAD",
+   "assessment": {
+    "log_pc": -29.936443,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -24.758628,
+    "p_pc_elevated": 0.001773,
+    "p_pc_critical": 9e-05,
+    "p_tier": [
+     0.998227,
+     0.001683,
+     9e-05
+    ],
+    "md_tier": 0,
+    "tier": 0,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 43.90 km >= 5 km (rule satisfied)",
+     "Estimated Pc ~0 (80% interval ~0 to 1.7e-25)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Safe"
+    ]
+   },
+   "true_tier": 0,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 0,
+    "p_tier": [
+     0.998227,
+     0.001683,
+     9e-05
+    ]
+   }
+  },
+  {
+   "event_id": 2086,
+   "n_cdms": 13,
+   "time_to_tca": 2.232692,
+   "miss_distance": 3027.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -27.207955,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -18.057064,
+    "p_pc_elevated": 0.001271,
+    "p_pc_critical": 8.3e-05,
+    "p_tier": [
+     0.0,
+     0.999917,
+     8.3e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 3.03 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 6.2e-28 (80% interval ~0 to 8.8e-19)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -7.65817,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999917,
+     8.3e-05
+    ]
+   }
+  },
+  {
+   "event_id": 2110,
+   "n_cdms": 15,
+   "time_to_tca": 2.108042,
+   "miss_distance": 2811.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -29.446796,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -25.396553,
+    "p_pc_elevated": 0.001217,
+    "p_pc_critical": 8e-05,
+    "p_tier": [
+     0.0,
+     0.99992,
+     8e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.81 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc 3.6e-30 (80% interval ~0 to 4.0e-26)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.99992,
+     8e-05
+    ]
+   }
+  },
+  {
+   "event_id": 2148,
+   "n_cdms": 14,
+   "time_to_tca": 2.126728,
+   "miss_distance": 2298.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -28.468664,
+    "p_pc_elevated": 0.001396,
+    "p_pc_critical": 8.2e-05,
+    "p_tier": [
+     0.0,
+     0.999918,
+     8.2e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.30 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc ~0 (80% interval ~0 to 3.4e-29)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999918,
+     8.2e-05
+    ]
+   }
+  },
+  {
+   "event_id": 2162,
+   "n_cdms": 7,
+   "time_to_tca": 2.284468,
+   "miss_distance": 2624.0,
+   "c_object_type": "DEBRIS",
+   "assessment": {
+    "log_pc": -30.0,
+    "log_pc_lo": -30.0,
+    "log_pc_hi": -27.507646,
+    "p_pc_elevated": 0.001358,
+    "p_pc_critical": 8.4e-05,
+    "p_tier": [
+     0.0,
+     0.999916,
+     8.4e-05
+    ],
+    "md_tier": 1,
+    "tier": 1,
+    "needs_review": false,
+    "reasons": [
+     "Miss distance 2.62 km within 1-5 km -> at least Elevated (hard rule)",
+     "Estimated Pc ~0 (80% interval ~0 to 3.1e-28)",
+     "P(Pc >= 1e-6) = 0% below decision threshold -> Pc rule says Safe",
+     "Decision: Elevated"
+    ]
+   },
+   "true_tier": 1,
+   "true_log_pc": -30.0,
+   "forecast": {
+    "description": "Event-level forecast of the tier at the final CDM (mock)",
+    "tier": 1,
+    "p_tier": [
+     0.0,
+     0.999916,
+     8.4e-05
+    ]
+   }
+  }
+ ]
+}

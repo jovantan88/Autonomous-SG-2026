@@ -1,0 +1,10 @@
+{
+  "full": {
+    "p_critical": 0.1,
+    "p_elevated": 0.19
+  },
+  "screen": {
+    "p_critical": 0.225,
+    "p_elevated": 0.19
+  }
+}
