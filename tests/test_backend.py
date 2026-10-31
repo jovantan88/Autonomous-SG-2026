@@ -3,6 +3,7 @@
 No network: `live._http_get` is replaced by a fake that serves tests/fixtures/, the cache lives in
 a temp dir and "now" is frozen at 2026-11-05T00:00:00Z.
 """
+import errno
 import json
 import math
 import os
@@ -77,6 +78,51 @@ def net(tmp_path, monkeypatch):
 # ------------------------------------------------------------------------------------------
 # fetch layer
 # ------------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("vercel,override", [(None, None), ("1", None), (None, "custom"), ("1", "custom")])
+def test_cache_directory_configuration(tmp_path, monkeypatch, vercel, override):
+    monkeypatch.delenv("VERCEL", raising=False)
+    monkeypatch.delenv("CARA_CACHE_DIR", raising=False)
+    monkeypatch.setattr(live.tempfile, "gettempdir", lambda: str(tmp_path))
+    if vercel:
+        monkeypatch.setenv("VERCEL", vercel)
+    if override:
+        monkeypatch.setenv("CARA_CACHE_DIR", str(tmp_path / override))
+    expected = (tmp_path / override if override else
+                tmp_path / "cara-live-cache" if vercel else ROOT / "live_cache")
+    assert live._cache_dir() == expected
+
+
+def test_vercel_cache_with_read_only_application(net, tmp_path, monkeypatch):
+    monkeypatch.setenv("VERCEL", "1")
+    monkeypatch.delenv("CARA_CACHE_DIR", raising=False)
+    monkeypatch.setattr(live.tempfile, "gettempdir", lambda: str(tmp_path))
+    monkeypatch.setattr(live, "CACHE_DIR", live._cache_dir())
+    mkdir = Path.mkdir
+
+    def read_only_bundle(path, *args, **kwargs):
+        if path.is_relative_to(ROOT):
+            raise OSError(errno.EROFS, "Read-only file system", str(path))
+        return mkdir(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "mkdir", read_only_bundle)
+    result = live.fetch("satcat", live.SATCAT_URL, ttl_s=3600)
+    cached = live.fetch("satcat", live.SATCAT_URL, ttl_s=3600)
+    assert cached.from_cache and cached.content == result.content
+    assert len(net.calls) == 1
+    assert (live.CACHE_DIR / "satcat.data").is_file()
+
+    net.down = True
+    with pytest.raises(live.LiveSourceError, match="no cached copy"):
+        live.fetch("swpc_kp", live.SWPC_URLS["kp"], ttl_s=60)
+    with pytest.raises(live.LiveSourceError, match="back-off"):
+        live.fetch("swpc_kp", live.SWPC_URLS["kp"], ttl_s=60)
+    assert len(net.calls) == 2
+    live.STORE._spend()
+    live.STORE._save_missing()
+    assert (live.CACHE_DIR / "gp_budget.json").is_file()
+    assert (live.CACHE_DIR / "gp_missing.json").is_file()
+
 
 def test_fetch_caches_then_serves_stale_copy(net, monkeypatch):
     url = live.SATCAT_URL
